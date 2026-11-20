@@ -1,0 +1,24 @@
+{
+  "books": [
+    {
+      "id": 1,
+      "title": "별빛 아래의 서점",
+      "author": "홍길동",
+      "content": "작은 마을 서점의 1년을 담은 에세이입니다.",
+      "passwordHash": "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4",
+      "coverImageUrl": null,
+      "createdAt": "2026-11-20T09:00:00.000Z",
+      "updatedAt": "2026-11-20T09:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "title": "봄날의 기록",
+      "author": "김영희",
+      "content": "봄날의 일상과 소중한 추억을 기록한 이야기입니다.",
+      "passwordHash": "f8638b979b2f4f793ddb6dbd197e0ee25a7a6ea32b0ae22f5e3c5d119d839e75",
+      "coverImageUrl": null,
+      "createdAt": "2026-11-20T10:00:00.000Z",
+      "updatedAt": "2026-11-20T10:00:00.000Z"
+    }
+  ]
+}
