@@ -59,6 +59,8 @@ db.json            json-server 데이터
 | --- | --- |
 | `id` | json-server 가 자동으로 붙이는 번호 |
 | `title`, `author`, `content` | 제목, 작성자, 본문 |
+| `description` | 작품 소개. 없으면 빈 문자열 |
+| `userId` | 작성한 사용자 아이디 (임시, users 가 생기기 전까지 `null` 가능) |
 | `passwordHash` | 비밀번호의 SHA-256 해시. <br/>평문은 저장하지 않고, 훅과 booksApi 가 돌려주는 값에서는 빠짐 |
 | `coverImageUrl` | 표지 Data URL (`data:image/png;base64,...`). 없으면 `null` |
 | `createdAt`, `updatedAt` | 등록, 수정 시각 (booksApi 가 자동으로 채움) |

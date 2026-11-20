@@ -52,7 +52,9 @@ erDiagram
         number id PK "자동 번호"
         string title "제목"
         string author "작성자 (본인 확인에 사용)"
+        string description "작품 소개"
         string content "본문 (프롬프트에 사용)"
+        string userId "사용자 아이디 (임시, null 가능)"
         string passwordHash "비밀번호 SHA-256"
         string coverImageUrl "표지 Data URL 또는 null"
         string createdAt "등록 시각"
@@ -99,7 +101,9 @@ erDiagram
     "id": 2,
     "title": "봄날의 기록",
     "author": "김영희",
+    "description": "봄날의 소소한 일상",
     "content": "봄날의 일상과 소중한 추억을 기록한 이야기입니다.",
+    "userId": "younghee5678",
     "coverImageUrl": null,
     "createdAt": "2026-11-20T10:00:00.000Z",
     "updatedAt": "2026-11-20T10:00:00.000Z"
@@ -119,7 +123,9 @@ erDiagram
 {
   "title": "새벽 4시의 등대지기",
   "author": "홍길동",
+  "description": "외딴섬 등대지기의 하루",
   "content": "안개가 짙은 작은 섬에 등대를 지키는 노인이 있다...",
+  "userId": null,
   "passwordHash": "03ac6742...",
   "coverImageUrl": null,
   "createdAt": "2026-11-20T14:00:00.000Z",
@@ -129,6 +135,7 @@ erDiagram
 
 - 화면에서는 평문 `password` 를 넘기고, booksApi 가 해시로 바꿔 `passwordHash` 로 보냅니다
 - `id` 는 보내지 않습니다. json-server 가 붙입니다
+- `description` 을 안 넘기면 빈 문자열, `userId` 를 안 넘기면 `null` 로 저장됩니다
 
 응답 `201` : `id` 가 붙은 저장본.
 
