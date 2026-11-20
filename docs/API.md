@@ -51,10 +51,10 @@ erDiagram
     BOOKS {
         number id PK "자동 번호"
         string title "제목"
-        string author "작성자 (본인 확인에 사용)"
+        string author "작성자 (화면 표시용)"
         string description "작품 소개"
         string content "본문 (프롬프트에 사용)"
-        string userId "사용자 아이디 (임시, null 가능)"
+        string userId "사용자 아이디 (본인 확인에 사용, 임시라 null 가능)"
         string passwordHash "비밀번호 SHA-256"
         string coverImageUrl "표지 Data URL 또는 null"
         string createdAt "등록 시각"
@@ -162,5 +162,5 @@ erDiagram
 | --- | --- |
 | 응답이 5초 넘게 없음 | `e.name === 'TimeoutError'` (훅은 "서버 응답이 느려요") |
 | 없는 도서 | `e.cause === 404` (훅은 "도서를 찾을 수 없어요") |
-| 작성자 · 비밀번호 불일치 | `e.cause === 'NOT_OWNER'`, `e.message` 를 그대로 보여 줘도 됨 |
+| 사용자 아이디 · 비밀번호 불일치 | `e.cause === 'NOT_OWNER'`, `e.message` 를 그대로 보여 줘도 됨 |
 | json-server 가 꺼져 있음 | `TypeError` (`Failed to fetch`) |

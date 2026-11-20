@@ -90,7 +90,7 @@ function BookListScreen({ books, loading, error, reload, onSelect }) {
  * @param {{ addBook: ReturnType<typeof useBooks>['addBook'] }} props
  */
 function BookCreateScreen({ addBook }) {
-  const [form, setForm] = useState({ title: '', author: '', description: '', content: '', password: '' });
+  const [form, setForm] = useState({ title: '', author: '', userId: '', description: '', content: '', password: '' });
   const [submitting, setSubmitting] = useState(false);
 
   // 입력칸 하나를 바꾸는 공통 핸들러 (name 속성으로 어느 칸인지 구분)
@@ -99,15 +99,15 @@ function BookCreateScreen({ addBook }) {
 
   const handleSubmit = async () => {
     // 유효성 검사 : 공백만 입력한 경우도 막기
-    if (!form.title.trim() || !form.author.trim() || !form.content.trim() || !form.password) {
-      alert('제목, 작성자, 내용, 비밀번호를 모두 입력해 주세요');
+    if (!form.title.trim() || !form.author.trim() || !form.userId.trim() || !form.content.trim() || !form.password) {
+      alert('제목, 작성자, 사용자 아이디, 내용, 비밀번호를 모두 입력해 주세요');
       return;
     }
     setSubmitting(true); // 연타 막기
     try {
-      const saved = await addBook({ ...form, title: form.title.trim(), author: form.author.trim() });
+      const saved = await addBook({ ...form, title: form.title.trim(), author: form.author.trim(), userId: form.userId.trim() });
       alert(`등록했습니다 (id ${saved.id})`);
-      setForm({ title: '', author: '', description: '', content: '', password: '' }); // 성공했을 때만 비우기
+      setForm({ title: '', author: '', userId: '', description: '', content: '', password: '' }); // 성공했을 때만 비우기
     } catch (e) {
       alertError(e, '등록에 실패했어요');
     } finally {
@@ -120,6 +120,7 @@ function BookCreateScreen({ addBook }) {
       <h2>등록 화면</h2>
       <input name="title" value={form.title} onChange={handleChange} placeholder="제목" />
       <input name="author" value={form.author} onChange={handleChange} placeholder="작성자" />
+      <input name="userId" value={form.userId} onChange={handleChange} placeholder="사용자 아이디" />
       <input name="description" value={form.description} onChange={handleChange} placeholder="작품 소개" />
       <input name="content" value={form.content} onChange={handleChange} placeholder="내용" />
       <input name="password" type="password" value={form.password} onChange={handleChange} placeholder="비밀번호" />
@@ -140,14 +141,14 @@ function BookCreateScreen({ addBook }) {
  */
 function BookDetailScreen({ id, editBook, changeCover, removeBook, onDeleted }) {
   const { book, loading, error, setBook } = useBook(id);
-  const [author, setAuthor] = useState('');
+  const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
   const [newTitle, setNewTitle] = useState('');
 
   if (loading || (!book && !error)) return <section><h2>상세 화면</h2><p>불러오는 중입니다.</p></section>;
   if (error || !book) return <section><h2>상세 화면</h2><p>{error}</p></section>;
 
-  const credentials = { author, password };
+  const credentials = { userId, password };
 
   // 수정 : 본인 확인은 editBook 안에서. 받은 값으로 상세 화면도 바로 바꿈
   const handleEdit = async () => {
@@ -192,7 +193,7 @@ function BookDetailScreen({ id, editBook, changeCover, removeBook, onDeleted }) 
       <p>등록 {book.createdAt.slice(0, 10)} · 수정 {book.updatedAt.slice(0, 10)}</p>
 
       <h3>본인 확인 (수정, 삭제에 사용)</h3>
-      <input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="작성자" />
+      <input value={userId} onChange={(e) => setUserId(e.target.value)} placeholder="사용자 아이디" />
       <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="비밀번호" />
 
       <h3>수정 화면</h3>

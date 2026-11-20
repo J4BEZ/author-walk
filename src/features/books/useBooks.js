@@ -30,13 +30,13 @@ function toMessage(e, fallback) {
 }
 
 /**
- * 본인 확인 : 작성자나 비밀번호가 다르면 에러를 던집니다
+ * 본인 확인 : 사용자 아이디나 비밀번호가 다르면 에러를 던집니다
  * @param {number} id
  * @param {Credentials} credentials
  */
-async function assertOwner(id, { author, password }) {
-  if (!(await checkOwner(id, author, password))) {
-    throw new Error('작성자 또는 비밀번호가 맞지 않습니다', { cause: 'NOT_OWNER' });
+async function assertOwner(id, { userId, password }) {
+  if (!(await checkOwner(id, userId, password))) {
+    throw new Error('사용자 아이디 또는 비밀번호가 맞지 않습니다', { cause: 'NOT_OWNER' });
   }
 }
 

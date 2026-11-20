@@ -112,19 +112,19 @@ export async function createBook({
 }
 
 /**
- * 작성자와 비밀번호가 맞는지 확인합니다 (데모 수준 : 해시가 GET 응답에 들어 있음)
+ * 사용자 아이디와 비밀번호가 맞는지 확인합니다 (데모 수준 : 해시가 GET 응답에 들어 있음)
  * @param {number} id
- * @param {string} author
+ * @param {string} userId
  * @param {string} password
  * @returns {Promise<boolean>}
  */
-export async function checkOwner(id, author, password) {
+export async function checkOwner(id, userId, password) {
   // 해시를 비교해야 하므로 toBookView 를 거치지 않은 원본을 받음
   /** @type {Book} */
   const raw = await request(`/books/${id}`);
 
-  // 작성자와 비밀번호 해시가 모두 같아야 통과
-  return raw.author === author && raw.passwordHash === (await hashPassword(password));
+  // 사용자 아이디와 비밀번호 해시가 모두 같아야 통과 (userId 가 null 인 도서는 항상 실패)
+  return raw.userId === userId && raw.passwordHash === (await hashPassword(password));
 }
 
 /**
