@@ -5,7 +5,7 @@
 // 사용할 모듈 import 영역
 import { useState } from 'react';
 import { useBooks, useBook } from './features/books/useBooks.js';
-import BookCoverGenerator from './features/OpenAI Integration/BookCoverGenerator.js';
+import BookCoverGenerator from './features/OpenAI_Integration/BookCoverGenerator.jsx';
 import './App.css';
 
 /** @import { BookView } from './features/books/types.js' */
