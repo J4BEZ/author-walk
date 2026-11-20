@@ -90,7 +90,7 @@ function BookListScreen({ books, loading, error, reload, onSelect }) {
  * @param {{ addBook: ReturnType<typeof useBooks>['addBook'] }} props
  */
 function BookCreateScreen({ addBook }) {
-  const [form, setForm] = useState({ title: '', author: '', content: '', password: '' });
+  const [form, setForm] = useState({ title: '', author: '', description: '', content: '', password: '' });
   const [submitting, setSubmitting] = useState(false);
 
   // 입력칸 하나를 바꾸는 공통 핸들러 (name 속성으로 어느 칸인지 구분)
@@ -107,7 +107,7 @@ function BookCreateScreen({ addBook }) {
     try {
       const saved = await addBook({ ...form, title: form.title.trim(), author: form.author.trim() });
       alert(`등록했습니다 (id ${saved.id})`);
-      setForm({ title: '', author: '', content: '', password: '' }); // 성공했을 때만 비우기
+      setForm({ title: '', author: '', description: '', content: '', password: '' }); // 성공했을 때만 비우기
     } catch (e) {
       alertError(e, '등록에 실패했어요');
     } finally {
@@ -120,6 +120,7 @@ function BookCreateScreen({ addBook }) {
       <h2>등록 화면</h2>
       <input name="title" value={form.title} onChange={handleChange} placeholder="제목" />
       <input name="author" value={form.author} onChange={handleChange} placeholder="작성자" />
+      <input name="description" value={form.description} onChange={handleChange} placeholder="작품 소개" />
       <input name="content" value={form.content} onChange={handleChange} placeholder="내용" />
       <input name="password" type="password" value={form.password} onChange={handleChange} placeholder="비밀번호" />
       <button onClick={handleSubmit} disabled={submitting}>{submitting ? '등록 중...' : '등록'}</button>
@@ -186,6 +187,7 @@ function BookDetailScreen({ id, editBook, changeCover, removeBook, onDeleted }) 
       <h2>상세 화면</h2>
       {book.coverImageUrl && <img src={book.coverImageUrl} alt={`${book.title} 표지`} width={80} />}
       <p>{book.title} · {book.author}</p>
+      {book.description && <p>{book.description}</p>}
       <p>{book.content}</p>
       <p>등록 {book.createdAt.slice(0, 10)} · 수정 {book.updatedAt.slice(0, 10)}</p>
 
