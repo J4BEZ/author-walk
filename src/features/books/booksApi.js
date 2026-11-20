@@ -84,7 +84,10 @@ export async function getBook(id) {
  * @param {NewBookInput} input
  * @returns {Promise<BookView>}
  */
-export async function createBook({ title, author, content, password, coverImageUrl = null }) {
+export async function createBook({
+  title, author, content, password,
+  description = '', userId = null, coverImageUrl = null,
+}) {
   // 등록일과 수정일은 같은 시각으로 시작
   const now = new Date().toISOString();
 
@@ -94,7 +97,9 @@ export async function createBook({ title, author, content, password, coverImageU
     body: {
       title,
       author,
+      description,                                // 작품 소개 (없으면 빈 문자열)
       content,
+      userId,                                     // 임시 사용자 아이디 (없으면 null)
       passwordHash: await hashPassword(password), // 평문은 저장하지 않음
       coverImageUrl,                              // 등록 때 만든 표지가 없으면 null
       createdAt: now,
@@ -107,19 +112,19 @@ export async function createBook({ title, author, content, password, coverImageU
 }
 
 /**
- * 작성자와 비밀번호가 맞는지 확인합니다 (데모 수준 : 해시가 GET 응답에 들어 있음)
+ * 사용자 아이디와 비밀번호가 맞는지 확인합니다 (데모 수준 : 해시가 GET 응답에 들어 있음)
  * @param {number} id
- * @param {string} author
+ * @param {string} userId
  * @param {string} password
  * @returns {Promise<boolean>}
  */
-export async function checkOwner(id, author, password) {
+export async function checkOwner(id, userId, password) {
   // 해시를 비교해야 하므로 toBookView 를 거치지 않은 원본을 받음
   /** @type {Book} */
   const raw = await request(`/books/${id}`);
 
-  // 작성자와 비밀번호 해시가 모두 같아야 통과
-  return raw.author === author && raw.passwordHash === (await hashPassword(password));
+  // 사용자 아이디와 비밀번호 해시가 모두 같아야 통과 (userId 가 null 인 도서는 항상 실패)
+  return raw.userId === userId && raw.passwordHash === (await hashPassword(password));
 }
 
 /**

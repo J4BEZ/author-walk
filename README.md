@@ -59,6 +59,8 @@ db.json            json-server 데이터
 | --- | --- |
 | `id` | json-server 가 자동으로 붙이는 번호 |
 | `title`, `author`, `content` | 제목, 작성자, 본문 |
+| `description` | 작품 소개. 없으면 빈 문자열 |
+| `userId` | 작성한 사용자 아이디. 수정, 삭제 때 본인 확인에 사용 (임시, `null` 이면 수정, 삭제 불가) |
 | `passwordHash` | 비밀번호의 SHA-256 해시. <br/>평문은 저장하지 않고, 훅과 booksApi 가 돌려주는 값에서는 빠짐 |
 | `coverImageUrl` | 표지 Data URL (`data:image/png;base64,...`). 없으면 `null` |
 | `createdAt`, `updatedAt` | 등록, 수정 시각 (booksApi 가 자동으로 채움) |
@@ -78,9 +80,9 @@ const { books, loading, error, reload, addBook, editBook, changeCover, removeBoo
 | `books`, `loading`, `error` | 목록, 불러오는 중인지, 실패 문구 (처음 한 번 자동으로 불러옴) |
 | `reload(query?)` | 다시 불러오기. 검색어를 주면 검색 |
 | `addBook(input)` | 등록 -> 목록 맨 앞에 추가 |
-| `editBook(id, changes, { author, password })` | 본인 확인 -> 수정 -> 목록에서 바꿔 끼움 |
+| `editBook(id, changes, { userId, password })` | 본인 확인 -> 수정 -> 목록에서 바꿔 끼움 |
 | `changeCover(id, dataUrl)` | 표지 저장 (생성, 재생성) |
-| `removeBook(id, { author, password })` | 본인 확인 -> 삭제 -> 목록에서 뺌 |
+| `removeBook(id, { userId, password })` | 본인 확인 -> 삭제 -> 목록에서 뺌 |
 
 - `useBooks()` 는 **App 같은 공통 부모에서 한 번만** 부르고 필요한 화면에 props 로 내려 줍니다. 
 - (화면마다 따로 부르면 목록이 따로 생겨서 서로 반영되지 않습니다
@@ -90,7 +92,7 @@ const { books, loading, error, reload, addBook, editBook, changeCover, removeBoo
 const handleDelete = async () => {
   if (!confirm('삭제할까요?')) return;
   try {
-    await removeBook(book.id, { author, password });
+    await removeBook(book.id, { userId, password });
   } catch (e) {
     alert(e.cause === 'NOT_OWNER' ? e.message : '삭제에 실패했어요');
   }
@@ -118,7 +120,7 @@ const { book, loading, error, setBook } = useBook(id);   // id 가 바뀌면 다
 | `getBooks(query?)` | `GET /books?_sort=createdAt&_order=desc&q=검색어` | 도서 배열 (최신순) |
 | `getBook(id)` | `GET /books/:id` | 도서 한 권 |
 | `createBook(input)` | `POST /books` | 저장된 도서 |
-| `checkOwner(id, author, password)` | `GET /books/:id` 후 비교 | `true` / `false` |
+| `checkOwner(id, userId, password)` | `GET /books/:id` 후 비교 | `true` / `false` |
 | `updateBook(id, changes)` | `PATCH /books/:id` | 수정된 도서 |
 | `saveCover(id, dataUrl)` | `PATCH /books/:id` | 수정된 도서 |
 | `deleteBook(id)` | `DELETE /books/:id` | 없음 |
