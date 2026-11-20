@@ -84,7 +84,10 @@ export async function getBook(id) {
  * @param {NewBookInput} input
  * @returns {Promise<BookView>}
  */
-export async function createBook({ title, author, content, password, coverImageUrl = null }) {
+export async function createBook({
+  title, author, content, password,
+  description = '', userId = null, coverImageUrl = null,
+}) {
   // 등록일과 수정일은 같은 시각으로 시작
   const now = new Date().toISOString();
 
@@ -94,7 +97,9 @@ export async function createBook({ title, author, content, password, coverImageU
     body: {
       title,
       author,
+      description,                                // 작품 소개 (없으면 빈 문자열)
       content,
+      userId,                                     // 임시 사용자 아이디 (없으면 null)
       passwordHash: await hashPassword(password), // 평문은 저장하지 않음
       coverImageUrl,                              // 등록 때 만든 표지가 없으면 null
       createdAt: now,
