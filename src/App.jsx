@@ -33,7 +33,19 @@ function App() {
   return (
     <>
       <Header />
-      <main>{/* 페이지 내용 */}</main>
+      <main>
+        <BookListScreen {...booksState} onSelect={setSelectedId} />
+        <BookCreateScreen addBook={booksState.addBook} />
+        {selectedId !== null && (
+          <BookDetailScreen
+            id={selectedId}
+            editBook={booksState.editBook}
+            changeCover={booksState.changeCover}
+            removeBook={booksState.removeBook}
+            onDeleted={() => setSelectedId(null)}
+          />
+        )}
+      </main>
       <Footer />
     </>
   );
