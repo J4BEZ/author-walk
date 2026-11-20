@@ -3,7 +3,7 @@
   align-items: center;
   width: calc(100% - 80px);
   height: 100px;
-  margin: 0 40px;
+  margin: 0 auto;
   padding: 0 30px;
   border: 2px solid #809a78;
   border-radius: 16px;

@@ -40,11 +40,8 @@ function App() {
           <h1>당신도 작가가 될 수 있어요</h1>
           <a href="/login">로그인하고 글쓰기 →</a>
         </section>
-
         <SearchBar onSearch={booksState.reload} />
-
         <NewBooks books={booksState.books} onSelect={setSelectedId} />
-        <BookListScreen {...booksState} onSelect={setSelectedId} />
         <BookCreateScreen addBook={booksState.addBook} />
         {selectedId !== null && (
           <BookDetailScreen

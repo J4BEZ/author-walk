@@ -1,6 +1,6 @@
 import "../styles/Header.css";
 
-function Header() {
+function Header({isLoggedIn = false}) {
   return (
     <header className="header">
       <div className="header-logo">
@@ -11,9 +11,16 @@ function Header() {
       <nav className="header-nav">
         <a href="/main">홈</a>
         <a href="/books">작품 둘러보기</a>
-        <a href="/login" className="header-login">
-          로그인
-        </a>
+
+        {isLoggedIn ? (
+          <button type="button" className="hamburger-button" aria-label="메뉴">
+            ☰
+          </button>
+        ) : (
+          <a href="/logged-in" className="header-login">
+            로그인
+          </a>
+        )}
       </nav>
     </header>
   );
