@@ -53,7 +53,7 @@ function App() {
  * 목록 화면 (/books) : 목록, 검색
  * @param {ReturnType<typeof useBooks> & { onSelect: (id: number) => void }} props
  */
-function BookListScreen({ books, loading, error, reload, onSelect }) {
+function BookListScreen({ books, loading, error, reload, likeBook, onSelect }) {
   const [query, setQuery] = useState('');
 
   return (
@@ -77,11 +77,36 @@ function BookListScreen({ books, loading, error, reload, onSelect }) {
               <button onClick={() => onSelect(book.id)}>
                 {book.title} · {book.author} · {book.createdAt.slice(0, 10)}
               </button>
+              <BookLikeButton book={book} likeBook={likeBook} />
             </li>
           ))}
         </ul>
       )}
     </section>
+  );
+}
+
+/** @param {{ book: BookView, likeBook: ReturnType<typeof useBooks>['likeBook'] }} props */
+function BookLikeButton({ book, likeBook }) {
+  const [submitting, setSubmitting] = useState(false);
+  const likes = book.likes ?? 0;
+
+  const handleLike = async () => {
+    setSubmitting(true);
+    try {
+      await likeBook(book.id);
+    } catch (error) {
+      alertError(error, '좋아요를 저장하지 못했어요');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <button type="button" disabled={submitting} onClick={handleLike}
+      aria-label={`${book.title} 좋아요 ${likes}개`}>
+      ♡ {likes}
+    </button>
   );
 }
 

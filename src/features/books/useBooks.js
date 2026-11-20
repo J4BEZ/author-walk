@@ -12,7 +12,7 @@
 
 import { useState, useEffect } from 'react';
 import {
-  getBooks, getBook, createBook, checkOwner, updateBook, saveCover, deleteBook,
+  getBooks, getBook, createBook, checkOwner, updateBook, saveCover, deleteBook, incrementBookLikes,
 } from './booksApi.js';
 
 /** @import { BookView, NewBookInput, BookChanges, Credentials } from './types.js' */
@@ -46,7 +46,7 @@ async function assertOwner(id, { userId, password }) {
  * 등록, 수정, 삭제 함수는 성공하면 목록 State 까지 고치고, 실패하면 에러를 던집니다.
  * (화면에서는 try / catch 로 감싸 실패 문구를 보여 줍니다.)
  * 
- * @returns {{ books: BookView[], loading: boolean, error: string | null, reload: (query?: string) => Promise<void>, addBook: (input: NewBookInput) => Promise<BookView>, editBook: (id: number, changes: BookChanges, credentials: Credentials) => Promise<BookView>, changeCover: (id: number, dataUrl: string) => Promise<BookView>, removeBook: (id: number, credentials: Credentials) => Promise<void> }} 훅에서 제공하는 값들 (목록, 로딩, 에러 상태와 CRUD 함수)
+ * @returns {{ books: BookView[], loading: boolean, error: string | null, reload: (query?: string) => Promise<void>, addBook: (input: NewBookInput) => Promise<BookView>, likeBook: (id: number) => Promise<void>, editBook: (id: number, changes: BookChanges, credentials: Credentials) => Promise<BookView>, changeCover: (id: number, dataUrl: string) => Promise<BookView>, removeBook: (id: number, credentials: Credentials) => Promise<void> }} 훅에서 제공하는 값들 (목록, 로딩, 에러 상태와 CRUD 함수)
  */
 export function useBooks() {
   const [books, setBooks] = useState(/** @type {BookView[]} */ ([]));
@@ -103,6 +103,12 @@ export function useBooks() {
     return saved;
   };
 
+  /** @param {number} id */
+  const likeBook = async (id) => {
+    const likes = await incrementBookLikes(id);
+    setBooks((prev) => prev.map((book) => (book.id === id ? { ...book, likes } : book)));
+  };
+
   /**
    * 수정 : 본인 확인 -> PATCH -> 목록에서 그 도서만 바꿔 끼우기
    * @param {number} id
@@ -141,7 +147,7 @@ export function useBooks() {
     setBooks((prev) => prev.filter((b) => b.id !== id));
   };
 
-  return { books, loading, error, reload, addBook, editBook, changeCover, removeBook };
+  return { books, loading, error, reload, addBook, likeBook, editBook, changeCover, removeBook };
 }
 
 /**

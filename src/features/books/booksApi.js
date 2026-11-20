@@ -102,6 +102,7 @@ export async function createBook({
       userId,                                     // 임시 사용자 아이디 (없으면 null)
       passwordHash: await hashPassword(password), // 평문은 저장하지 않음
       coverImageUrl,                              // 등록 때 만든 표지가 없으면 null
+      likes: 0,
       createdAt: now,
       updatedAt: now,
     },
@@ -109,6 +110,20 @@ export async function createBook({
 
   // 서버가 돌려준 저장본 (id 포함) 을 화면용으로
   return toBookView(saved);
+}
+
+/**
+ * 도서의 좋아요 수를 1 올리고 저장된 값을 받습니다.
+ * @param {number} id
+ * @returns {Promise<number>}
+ */
+export async function incrementBookLikes(id) {
+  const book = await getBook(id);
+  const saved = await request(`/books/${id}`, {
+    method: 'PATCH',
+    body: { likes: (book.likes ?? 0) + 1 },
+  });
+  return saved.likes;
 }
 
 /**

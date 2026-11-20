@@ -9,6 +9,7 @@
       "userId": "gildong1234",
       "passwordHash": "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4",
       "coverImageUrl": null,
+      "likes": 0,
       "createdAt": "2026-11-20T09:00:00.000Z",
       "updatedAt": "2026-11-20T09:00:00.000Z"
     },
@@ -21,6 +22,7 @@
       "userId": "younghee5678",
       "passwordHash": "f8638b979b2f4f793ddb6dbd197e0ee25a7a6ea32b0ae22f5e3c5d119d839e75",
       "coverImageUrl": null,
+      "likes": 0,
       "createdAt": "2026-11-20T10:00:00.000Z",
       "updatedAt": "2026-11-20T10:00:00.000Z"
     }
