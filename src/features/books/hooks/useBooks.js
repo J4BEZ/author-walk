@@ -13,9 +13,9 @@
 import { useState, useEffect } from 'react';
 import {
   getBooks, getBook, createBook, checkOwner, updateBook, saveCover, deleteBook,
-} from './booksApi.js';
+} from '../api/booksApi.js';
 
-/** @import { BookView, NewBookInput, BookChanges, Credentials } from './types.js' */
+/** @import { BookView, NewBookInput, BookChanges, Credentials } from '../types.js' */
 
 /**
  * 에러를 화면에 보여 줄 문구로 바꿉니다

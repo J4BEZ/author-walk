@@ -4,10 +4,10 @@
 
 // 사용할 모듈 import 영역
 import { useState } from 'react';
-import { useBooks, useBook } from './features/books/useBooks.js';
+import { useBooks, useBook } from './features/books/hooks/useBooks.js';
 
 // (임시) 작품 등록/수정 시 유효성 검사를 한 번에 처리하는 함수
-import { normalizeBookInput, validateNewBook, validateBookChanges } from './features/books/bookValidation.js';
+import { normalizeBookInput, validateNewBook, validateBookChanges } from './features/books/utils/bookValidation.js';
 import BookCoverGenerator from './features/OpenAI_Integration/BookCoverGenerator.jsx';
 import './App.css';
 

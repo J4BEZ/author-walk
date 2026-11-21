@@ -5,7 +5,7 @@
  */
 
 
-/** @import { NewBookInput, BookChanges } from './types.js' */
+/** @import { NewBookInput, BookChanges } from '../types.js' */
 import { isBlank, isLengthBetween, matchesPattern } from '#src/utils/validation/text.js';
 import { hasInvalidChars } from '#src/utils/validation/text.js';
 
