@@ -12,6 +12,6 @@
 //
 // (shared 는 내부에서 features 를 역으로 import 하지 않아야 합니다.)
 
-export { isBlank, checkLength } from './text.js';
-export { validatePassword, PASSWORD_MIN_LENGTH, PASSWORD_RULE_MESSAGE } from './password.js';
+export { isBlank, countChars, isLengthBetween, matchesPattern } from './text.js';
+export { hasTagChars, hasDirectionControls, hasStackedMarks, hasInvalidChars } from './text.js';
 export { isImageDataUrl } from './image.js';

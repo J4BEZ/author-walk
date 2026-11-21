@@ -5,7 +5,9 @@
 // 사용할 모듈 import 영역
 import { useState } from 'react';
 import { useBooks, useBook } from './features/books/useBooks.js';
-import { isBlank, validatePassword } from './shared/validation/index.js';
+
+// (임시) 작품 등록/수정 시 유효성 검사를 한 번에 처리하는 함수
+import { normalizeBookInput, validateNewBook, validateBookChanges } from './features/books/bookValidation.js';
 import BookCoverGenerator from './features/OpenAI_Integration/BookCoverGenerator.jsx';
 import './App.css';
 
@@ -17,7 +19,9 @@ import './App.css';
 //   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
 
 /**
- * 에러를 alert 문구로 (본인 확인 실패는 그 메시지 그대로)
+ * 에러를 alert 문구로 (본인 확인 실패는 그 메시지 그대로)   
+ * - 향후 정책상 브라우저 알림인 alert 대신, UI 내 알림 모달 또는 텍스트 필드 아래 빨간 설명으로 대체될 수 있습니다.   
+ * - 아래 함수는 임시로 만든 예시 처리 함수 입니다.
  * @param {unknown} e
  * @param {string} fallback
  */
@@ -25,6 +29,19 @@ function alertError(e, fallback) {
   console.error(e);
   alert(e instanceof Error && e.cause === 'NOT_OWNER' ? e.message : fallback);
 }
+
+/**
+ * 검사 결과의 error들을 하나로 합쳐서 반환합니다 (없으면 빈 문자열)
+ * 
+ * - 향후 정책상 브라우저 알림인 alert 대신, UI 내 알림 모달 또는 텍스트 필드 아래 빨간 설명으로 대체될 수 있습니다.   
+ * - 아래 함수는 임시로 만든 예시 처리 함수 입니다.
+ * @param {Record<string, string>} errors
+ * @returns {string | null}
+ */
+function joinErrors(errors) {
+  return Object.values(errors).join('\n');
+}
+
 
 function App() {
   // useBooks 는 앱에서 한 번만 부르고, 필요한 화면에 props 로 내려 줍니다
@@ -100,20 +117,22 @@ function BookCreateScreen({ addBook }) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
   const handleSubmit = async () => {
-    // 유효성 검사 : 공백만 입력한 경우도 막기
-    if ([form.title, form.author, form.userId, form.content].some(isBlank)) {
-      alert('제목, 작성자, 사용자 아이디, 내용을 모두 입력해 주세요');
+
+    // 입력 전체에 대한 유효성 검사
+    const clean = normalizeBookInput(form);            // 다듬기
+    const message = joinErrors(validateNewBook(clean)); // 다듬은 값으로 검사
+
+    if (message) {
+      alert(message);
       return;
     }
-    // 비밀번호 형식 : 통과하면 null, 아니면 안내 문구
-    const passwordError = validatePassword(form.password);
-    if (passwordError) {
-      alert(passwordError);
-      return;
-    }
+
     setSubmitting(true); // 연타 막기
     try {
-      const saved = await addBook({ ...form, title: form.title.trim(), author: form.author.trim(), userId: form.userId.trim() });
+      const saved = await addBook({
+        title: clean.title, author: clean.author, userId: clean.userId, 
+        description: clean.description, content: clean.content, password: clean.password });
+      
       alert(`등록했습니다 (id ${saved.id})`);
       setForm({ title: '', author: '', userId: '', description: '', content: '', password: '' }); // 성공했을 때만 비우기
     } catch (e) {
@@ -159,11 +178,16 @@ function BookDetailScreen({ id, editBook, changeCover, removeBook, onDeleted }) 
   const credentials = { userId, password };
 
   // 수정 : 본인 확인은 editBook 안에서. 받은 값으로 상세 화면도 바로 바꿈
+  // TODO:: 향후, Figma 디자인에 맞추어 먼저 본인 확인 modal 이후, 기존 내용으로 텍스트 필드 들이 채워진 상태에서 수정 가능하도록 개선 필요
+  
   const handleEdit = async () => {
-    if (!newTitle.trim()) return alert('새 제목을 입력해 주세요');
+  const clean = normalizeBookInput({ title: newTitle });
+  const message = joinErrors(validateBookChanges(clean));
+  if (message) return alert(message);
+
     try {
       /** @type {BookView} */
-      const updated = await editBook(book.id, { title: newTitle.trim() }, credentials);
+      const updated = await editBook(book.id, clean, credentials);
       setBook(updated);
       setNewTitle('');
     } catch (e) {
