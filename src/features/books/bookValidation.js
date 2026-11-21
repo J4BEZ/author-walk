@@ -6,10 +6,10 @@
 
 
 /** @import { NewBookInput, BookChanges } from './types.js' */
-import { isBlank, isLengthBetween, matchesPattern } from '../../shared/validation/index.js';
-import { hasInvalidChars } from '../../shared/validation/index.js';
+import { isBlank, isLengthBetween, matchesPattern } from '#src/utils/validation/text.js';
+import { hasInvalidChars } from '#src/utils/validation/text.js';
 
-import { removeZeroWidthChars } from '../../shared/processing/text.js';
+import { removeZeroWidthChars } from '#src/utils/processing/text.js';
 
 
 /**

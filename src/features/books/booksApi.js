@@ -1,6 +1,6 @@
 // json-server 와 대화하는 모듈 입니다.
 /** @import { Book, BookView, NewBookInput, BookChanges } from './types.js' */
-import { isImageDataUrl } from '../../shared/validation/index.js';
+import { isImageDataUrl } from '#src/utils/validation/image.js';
 
 // 서버 주소 : .env 의 VITE_API_URL, 없으면 로컬 json-server
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
