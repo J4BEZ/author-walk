@@ -1,5 +1,6 @@
 // json-server 와 대화하는 모듈 입니다.
 /** @import { Book, BookView, NewBookInput, BookChanges } from './types.js' */
+import { isImageDataUrl } from '../../shared/validation/index.js';
 
 // 서버 주소 : .env 의 VITE_API_URL, 없으면 로컬 json-server
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
@@ -151,6 +152,10 @@ export async function updateBook(id, changes) {
  * @returns {Promise<BookView>}
  */
 export async function saveCover(id, coverImageUrl) {
+  // 이미지 Data URL 이 아니면 서버에 보내지 않음
+  if (!isImageDataUrl(coverImageUrl)) {
+    throw new Error('표지 이미지 형식이 올바르지 않습니다', { cause: 'INVALID_IMAGE' });
+  }
   // 표지 재생성도 같은 PATCH (coverImageUrl + updatedAt)
   return updateBook(id, { coverImageUrl });
 }

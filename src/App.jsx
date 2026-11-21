@@ -5,6 +5,7 @@
 // 사용할 모듈 import 영역
 import { useState } from 'react';
 import { useBooks, useBook } from './features/books/useBooks.js';
+import { isBlank, validatePassword } from './shared/validation/index.js';
 import BookCoverGenerator from './features/OpenAI_Integration/BookCoverGenerator.jsx';
 import './App.css';
 
@@ -100,8 +101,14 @@ function BookCreateScreen({ addBook }) {
 
   const handleSubmit = async () => {
     // 유효성 검사 : 공백만 입력한 경우도 막기
-    if (!form.title.trim() || !form.author.trim() || !form.userId.trim() || !form.content.trim() || !form.password) {
-      alert('제목, 작성자, 사용자 아이디, 내용, 비밀번호를 모두 입력해 주세요');
+    if ([form.title, form.author, form.userId, form.content].some(isBlank)) {
+      alert('제목, 작성자, 사용자 아이디, 내용을 모두 입력해 주세요');
+      return;
+    }
+    // 비밀번호 형식 : 통과하면 null, 아니면 안내 문구
+    const passwordError = validatePassword(form.password);
+    if (passwordError) {
+      alert(passwordError);
       return;
     }
     setSubmitting(true); // 연타 막기
