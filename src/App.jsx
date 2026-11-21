@@ -6,15 +6,15 @@
 import { useState } from 'react';
 import { useBooks, useBook } from './features/books/useBooks.js';
 import { isBlank, validatePassword } from './shared/validation/index.js';
+import BookCoverGenerator from './features/OpenAI_Integration/BookCoverGenerator.jsx';
 import './App.css';
 
 /** @import { BookView } from './features/books/types.js' */
 //
 
-
-// 1x1 픽셀 PNG Data URL (표지 저장 예시용, 실제로는 OpenAI 응답으로 만든 더미 이미지 입니다)
-const SAMPLE_COVER =
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+// // 1x1 픽셀 PNG Data URL (표지 저장 예시용, 실제로는 OpenAI 응답으로 만든 더미 이미지 입니다)
+// const SAMPLE_COVER =
+//   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
 
 /**
  * 에러를 alert 문구로 (본인 확인 실패는 그 메시지 그대로)
@@ -39,6 +39,7 @@ function App() {
       <BookCreateScreen addBook={booksState.addBook} />
       {selectedId !== null && (
         <BookDetailScreen
+          key={selectedId}
           id={selectedId}
           editBook={booksState.editBook}
           changeCover={booksState.changeCover}
@@ -170,13 +171,9 @@ function BookDetailScreen({ id, editBook, changeCover, removeBook, onDeleted }) 
     }
   };
 
-  // 표지 저장 : 실제로는 OpenAI 응답의 b64_json 으로 만든 Data URL 을 넘김
-  const handleCover = async () => {
-    try {
-      setBook(await changeCover(book.id, SAMPLE_COVER));
-    } catch (e) {
-      alertError(e, '표지 저장에 실패했어요');
-    }
+  // 생성된 PNG Data URL을 저장하고 목록과 상세 화면에 반영합니다.
+  const handleCover = async (dataUrl) => {
+    setBook(await changeCover(book.id, dataUrl));
   };
 
   // 삭제 : 확인창 -> removeBook (본인 확인 포함) -> 목록으로
@@ -206,8 +203,8 @@ function BookDetailScreen({ id, editBook, changeCover, removeBook, onDeleted }) 
       <h3>수정 화면</h3>
       <input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="새 제목" />
       <button onClick={handleEdit}>제목 수정</button>
-      <button onClick={handleCover}>표지 저장 (예시 이미지)</button>
       <button onClick={handleDelete}>삭제</button>
+      <BookCoverGenerator key={JSON.stringify([book.id, book.title, book.author, book.content])} book={book} onSave={handleCover} />
     </section>
   );
 }
