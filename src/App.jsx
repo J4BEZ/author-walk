@@ -4,10 +4,10 @@
 
 // 사용할 모듈 import 영역
 import { useState } from 'react';
-import { useBooks, useBook } from './features/books/useBooks.js';
+import { useBookList, useBookDetail } from './features/books/hooks/useBooks.js';
 
 // (임시) 작품 등록/수정 시 유효성 검사를 한 번에 처리하는 함수
-import { normalizeBookInput, validateNewBook, validateBookChanges } from './features/books/bookValidation.js';
+import { normalizeBookInput, validateNewBook, validateBookChanges } from './features/books/utils/bookValidation.js';
 import BookCoverGenerator from './features/OpenAI_Integration/BookCoverGenerator.jsx';
 import './App.css';
 
@@ -44,9 +44,9 @@ function joinErrors(errors) {
 
 
 function App() {
-  // useBooks 는 앱에서 한 번만 부르고, 필요한 화면에 props 로 내려 줍니다
+  // useBookList 는 앱에서 한 번만 부르고, 필요한 화면에 props 로 내려 줍니다
   // (화면마다 따로 부르면 목록 State 가 따로 생겨서 서로 반영되지 않음)
-  const booksState = useBooks();
+  const booksState = useBookList();
   const [selectedId, setSelectedId] = useState(/** @type {number | null} */ (null));
 
   return (
@@ -70,7 +70,7 @@ function App() {
 
 /**
  * 목록 화면 (/books) : 목록, 검색
- * @param {ReturnType<typeof useBooks> & { onSelect: (id: number) => void }} props
+ * @param {ReturnType<typeof useBookList> & { onSelect: (id: number) => void }} props
  */
 function BookListScreen({ books, loading, error, reload, onSelect }) {
   const [query, setQuery] = useState('');
@@ -106,7 +106,7 @@ function BookListScreen({ books, loading, error, reload, onSelect }) {
 
 /**
  * 등록 화면 (/books/new) : 유효성 검사 -> addBook
- * @param {{ addBook: ReturnType<typeof useBooks>['addBook'] }} props
+ * @param {{ addBook: ReturnType<typeof useBookList>['addBook'] }} props
  */
 function BookCreateScreen({ addBook }) {
   const [form, setForm] = useState({ title: '', author: '', userId: '', description: '', content: '', password: '' });
@@ -157,17 +157,17 @@ function BookCreateScreen({ addBook }) {
 }
 
 /**
- * 상세 + 수정 화면 (/books/:id, /books/:id/edit) : useBook 으로 한 권 불러오기, 수정, 표지 저장, 삭제
+ * 상세 + 수정 화면 (/books/:id, /books/:id/edit) : useBookDetail 으로 한 권 불러오기, 수정, 표지 저장, 삭제
  * @param {{
  *   id: number,
- *   editBook: ReturnType<typeof useBooks>['editBook'],
- *   changeCover: ReturnType<typeof useBooks>['changeCover'],
- *   removeBook: ReturnType<typeof useBooks>['removeBook'],
+ *   editBook: ReturnType<typeof useBookList>['editBook'],
+ *   changeCover: ReturnType<typeof useBookList>['changeCover'],
+ *   removeBook: ReturnType<typeof useBookList>['removeBook'],
  *   onDeleted: () => void,
  * }} props
  */
 function BookDetailScreen({ id, editBook, changeCover, removeBook, onDeleted }) {
-  const { book, loading, error, setBook } = useBook(id);
+  const { book, loading, error, setBook } = useBookDetail(id);
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
   const [newTitle, setNewTitle] = useState('');

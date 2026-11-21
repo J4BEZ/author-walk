@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import {
   getBooks, getBook, createBook, checkOwner, updateBook, saveCover, deleteBook,
-} from '../features/books/booksApi.js';
+} from '../features/books/api/booksApi.js';
 
 // 1x1 픽셀 PNG Data URL (saveCover 시험용, 실제로는 OpenAI 응답으로 만든 값)
 const SAMPLE_COVER =
