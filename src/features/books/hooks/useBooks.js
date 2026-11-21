@@ -48,7 +48,7 @@ async function assertOwner(id, { userId, password }) {
  * 
  * @returns {{ books: BookView[], loading: boolean, error: string | null, reload: (query?: string) => Promise<void>, addBook: (input: NewBookInput) => Promise<BookView>, editBook: (id: number, changes: BookChanges, credentials: Credentials) => Promise<BookView>, changeCover: (id: number, dataUrl: string) => Promise<BookView>, removeBook: (id: number, credentials: Credentials) => Promise<void> }} 훅에서 제공하는 값들 (목록, 로딩, 에러 상태와 CRUD 함수)
  */
-export function useBooks() {
+export function useBookList() {
   const [books, setBooks] = useState(/** @type {BookView[]} */ ([]));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(/** @type {string | null} */ (null));
@@ -148,7 +148,7 @@ export function useBooks() {
  * 도서 한 권 화면용 훅 (상세, 수정 화면) : id 가 바뀌면 다시 불러옵니다
  * @param {number | null} id  아직 고른 도서가 없으면 null
  */
-export function useBook(id) {
+export function useBookDetail(id) {
   const [book, setBook] = useState(/** @type {BookView | null} */ (null));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(/** @type {string | null} */ (null));
@@ -180,3 +180,11 @@ export function useBook(id) {
   // setBook 도 돌려줘서, 수정이나 표지 저장 후 받은 값으로 바로 바꿀 수 있게
   return { book, loading, error, setBook };
 }
+
+
+// 옛 경로 (다음 정리 때 삭제 예정)
+/** @deprecated useBookList 를 써 주세요 */
+export const useBooks = useBookList;
+
+/** @deprecated useBookDetail 을 써 주세요 */
+export const useBook = useBookDetail;
