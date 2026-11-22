@@ -10,7 +10,7 @@
 //
 // 규칙 : 컴포넌트 맨 위에서만 부르고 (if, 반복문 안 X), useBooks() 는 공통 부모에서 한 번만 부릅니다
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   getBooks, getBook, createBook, checkOwner, updateBook, saveCover, deleteBook,
 } from '../api/booksApi.js';
@@ -46,26 +46,38 @@ async function assertOwner(id, { userId, password }) {
  * 등록, 수정, 삭제 함수는 성공하면 목록 State 까지 고치고, 실패하면 에러를 던집니다.
  * (화면에서는 try / catch 로 감싸 실패 문구를 보여 줍니다.)
  * 
- * @returns {{ books: BookView[], loading: boolean, error: string | null, reload: (query?: string) => Promise<void>, addBook: (input: NewBookInput) => Promise<BookView>, editBook: (id: number, changes: BookChanges, credentials: Credentials) => Promise<BookView>, changeCover: (id: number, dataUrl: string) => Promise<BookView>, removeBook: (id: number, credentials: Credentials) => Promise<void> }} 훅에서 제공하는 값들 (목록, 로딩, 에러 상태와 CRUD 함수)
+ * @returns {{ books: BookView[], loading: boolean, error: string | null, reload: (query?: string | { q?, field?, sort? }) => Promise<void>, addBook: (input: NewBookInput) => Promise<BookView>, editBook: (id: number, changes: BookChanges, credentials: Credentials) => Promise<BookView>, changeCover: (id: number, dataUrl: string) => Promise<BookView>, removeBook: (id: number, credentials: Credentials) => Promise<void> }} 훅에서 제공하는 값들 (목록, 로딩, 에러 상태와 CRUD 함수)
  */
 export function useBookList() {
   const [books, setBooks] = useState(/** @type {BookView[]} */ ([]));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(/** @type {string | null} */ (null));
+  
+  // useRef : 값이 바뀌어도 화면을 다시 그리지 않는 상자 (.current 로 읽고 씀)
+  // 비동기 함수 안에서도 항상 최신 값이 보여서, 번호표처럼 화면에 안 보이는 값에 씁니다
+
+  const latestRequest = useRef(0); // 마지막으로 보낸 요청의 번호 (응답 순서가 뒤바뀌는 경우 무시하기 위함)
+
 
   // 처음 한 번 불러오기 (loading 은 처음부터 true 라 여기서 켤 필요 없음)
   useEffect(() => {
     let ignore = false; // StrictMode 로 두 번 돌 때 버려진 쪽 결과는 무시
 
+    // 마지막으로 보낸 요청과 호출하는 타이밍에서 일치하는지 확인하는 함수
+    const requestId = ++latestRequest.current; // 요청 번호 증가 시킨 이후 기록
+    const isLatest = () => { return requestId === latestRequest.current; };
+
+    // 처음 불러오는 결과가 늦게 도착해서
+    // 검색 요청 결과를 덮어써버리지 않도록 isLatest() 체크도 함께 진행
     async function load() {
       try {
         const data = await getBooks();
-        if (!ignore) setBooks(data);
+        if (!ignore && isLatest()) setBooks(data);
       } catch (e) {
         console.error(e);
-        if (!ignore) setError(toMessage(e, '도서 목록을 불러오지 못했어요'));
+        if (!ignore && isLatest()) setError(toMessage(e, '도서 목록을 불러오지 못했어요'));
       } finally {
-        if (!ignore) setLoading(false);
+        if (!ignore && isLatest()) setLoading(false);
       }
     }
     load();
@@ -77,18 +89,35 @@ export function useBookList() {
 
   /**
    * 목록 다시 불러오기 (검색 버튼, 새로고침 버튼에서 부름)
-   * @param {string} [query]  검색어. 비우면 전체
+   * @param {string | { q?, field?, sort? }} [query]  검색어. 비우면 전체
    */
   const reload = async (query = '') => {
+
+    // 요청 번호 증가 시킨 이후 기록
+    const requestId = ++latestRequest.current;
+    // 마지막으로 보낸 요청과 호출하는 타이밍에서 일치하는지 확인하는 함수
+    const isLatest = () => { return requestId === latestRequest.current; };
+
     setLoading(true);
     setError(null);
     try {
-      setBooks(await getBooks(query));
+      const data = await getBooks(query);
+
+      // 마지막으로 보낸 요청과 일치할 때만 상태 갱신
+      // (이전 검색어의 응답이 화면에 뿌려지는 경쟁상태 방지를 위함입니다.)
+      if (isLatest()) setBooks(data);
+
     } catch (e) {
-      console.error(e);
-      setError(toMessage(e, '도서 목록을 불러오지 못했어요'));
+      // 마지막으로 보낸 요청과 일치할 때만 에러 상태 갱신
+      if (isLatest()) {
+        console.error(e);
+        setError(toMessage(e, '도서 목록을 불러오지 못했어요'));
+      }
     } finally {
-      setLoading(false);
+      // 마지막으로 보낸 요청과 일치할 때만 로딩 상태 갱신
+      if (isLatest()) {
+        setLoading(false);
+      }
     }
   };
 
