@@ -8,10 +8,6 @@ import NewBooks from "./components/NewBooks.jsx";
 import "./App.css";
 import "./styles/font.css";
 
-// 사용할 모듈 import 영역
-import {useState} from "react";
-import {useBookList, useBookDetail} from "./features/books/hooks/useBooks.js";
-
 // (임시) 작품 등록/수정 시 유효성 검사를 한 번에 처리하는 함수
 import {
   normalizeBookInput,
