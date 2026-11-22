@@ -4,7 +4,7 @@
 
 import { fileURLToPath } from 'node:url';
 import jsonServer from 'json-server';
-import fs from 'node:fs';
+import watchDB from './utils/watchDB.js';
 
 
 const PORT = 3000;
@@ -31,16 +31,4 @@ server.listen(PORT, () => {
 
 
 // db.json 을 손으로 고쳐도 반영되도록 감시 (json-server 의 --watch 대신)
-let reloadTimer;
-fs.watch(DB_FILE, () => {
-  // 한 번 저장에 이벤트가 여러 번 올 수 있어서 100ms 모아서 한 번만 읽기
-  clearTimeout(reloadTimer);
-  reloadTimer = setTimeout(() => {
-    try {
-      router.db.read(); // 파일 내용을 메모리로 다시 불러오기
-    } catch (e) {
-      // 고치는 도중이라 JSON 이 깨져 있으면 이전 내용을 유지
-      console.error('db.json 을 다시 읽지 못했어요 :', e.message);
-    }
-  }, 100);
-});
+watchDB(DB_FILE, router);
