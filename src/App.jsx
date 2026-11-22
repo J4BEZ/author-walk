@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {useBooks, useBook} from "./features/books/useBooks.js";
+import {useBookList, useBookDetail} from "./features/books/hooks/useBooks.js";
 import Header from "./components/Header.jsx";
 import Footer from "./components/Footer.jsx";
 import SearchBar from "./components/SearchBar.jsx";
@@ -15,16 +15,14 @@ import {
   validateBookChanges,
 } from "./features/books/utils/bookValidation.js";
 import BookCoverGenerator from "./features/OpenAI_Integration/BookCoverGenerator.jsx";
+
+import {isBlank} from "#src/utils/validation/text.js";
+import {queryBooks, NEW_BOOK_DAYS} from "./features/books/utils/bookQuery.js";
+
 import "./App.css";
 
 /** @import { BookView } from './features/books/types.js' */
 //
-
-const SAMPLE_COVER =
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
-// // 1x1 픽셀 PNG Data URL (표지 저장 예시용, 실제로는 OpenAI 응답으로 만든 더미 이미지 입니다)
-// const SAMPLE_COVER =
-//   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
 
 /**
  * 에러를 alert 문구로 (본인 확인 실패는 그 메시지 그대로)
@@ -50,13 +48,25 @@ function joinErrors(errors) {
   return Object.values(errors).join("\n");
 }
 
+/**
+ * 기본 보기 (이번 주 신작) 함수
+ * @param {BookView[]} books
+ * @returns {BookView[]}
+ */
+const defaultView = (books) => queryBooks(books, { days: NEW_BOOK_DAYS });
+
 function App() {
   // useBookList 는 앱에서 한 번만 부르고, 필요한 화면에 props 로 내려 줍니다
   // (화면마다 따로 부르면 목록 State 가 따로 생겨서 서로 반영되지 않음)
-  const booksState = useBooks();
+  const booksState = useBookList();
   const [selectedId, setSelectedId] = useState(
     /** @type {number | null} */ (null),
   );
+
+  // 검색어가 없으면 기본 보기 (이번 주 신작), 있으면 검색 결과
+  const shownBooks =  isBlank(booksState.query.q)
+    ? defaultView(booksState.books)
+    : booksState.books;
 
   return (
     <>
@@ -67,10 +77,11 @@ function App() {
           <a href="/login">로그인하고 글쓰기 →</a>
         </section>
         <SearchBar onSearch={booksState.reload} />
-        <NewBooks books={booksState.books} onSelect={setSelectedId} />
+        <NewBooks books={shownBooks} onSelect={setSelectedId} />
         <BookCreateScreen addBook={booksState.addBook} />
         {selectedId !== null && (
           <BookDetailScreen
+            key={selectedId}
             id={selectedId}
             editBook={booksState.editBook}
             changeCover={booksState.changeCover}
@@ -81,52 +92,6 @@ function App() {
       </main>
       <Footer />
     </>
-  );
-}
-
-/**
- * 목록 화면 (/books) : 목록, 검색
- * @param {ReturnType<typeof useBookList> & { onSelect: (id: number) => void }} props
- */
-function BookListScreen({books, loading, error, reload, onSelect}) {
-  const [query, setQuery] = useState("");
-
-  return (
-    <section>
-      <h2>목록 화면</h2>
-      <input
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="검색어"
-      />
-      <button onClick={() => reload(query.trim())}>검색</button>
-      <button
-        onClick={() => {
-          setQuery("");
-          reload();
-        }}>
-        전체 보기
-      </button>
-
-      {/* 로딩 -> 에러 -> 빈 목록 -> 정상 순서 */}
-      {loading ? (
-        <p>불러오는 중입니다.</p>
-      ) : error ? (
-        <p>{error}</p>
-      ) : books.length === 0 ? (
-        <p>등록된 도서가 없습니다.</p>
-      ) : (
-        <ul>
-          {books.map((book) => (
-            <li key={book.id}>
-              <button onClick={() => onSelect(book.id)}>
-                {book.title} · {book.author} · {book.createdAt.slice(0, 10)}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
   );
 }
 

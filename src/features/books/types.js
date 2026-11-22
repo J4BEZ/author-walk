@@ -1,6 +1,9 @@
 // 도서 기능에서 쓰는 타입 모음 (JSDoc, 편집기 자동완성용입니다.)
 // Python의 타입 힌팅과 비슷한 기능으로 보시면 됩니다!
 
+
+/** @import { SEARCH_FIELDS, SORT_ORDERS } from './utils/bookQuery.js' */
+
 /**
  * json-server 에 저장되는 도서 한 권
  * @typedef {object} Book
@@ -43,6 +46,16 @@
  * `Partial<...>` 는 그 필드들을 모두 "있어도 되고 없어도 되는" 선택 필드로 바꾼 타입입니다.
  * `{ title }` 만 보내도, `{ coverImageUrl }` 만 보내도 됩니다 (PATCH 는 바뀐 필드만).
  * @typedef {Partial<Pick<Book, 'title' | 'description' | 'content' | 'coverImageUrl'>>} BookChanges
+ */
+
+/**
+ * 목록 검색 조건 (모두 선택, 없으면 각 기본값)
+ * @typedef {object} BookQuery
+ * @property {string} [q]                          검색어 (비우면 전체)
+ * @property {keyof typeof SEARCH_FIELDS} [field]  검색할 필드 ('titleAuthor' 기본)
+ * @property {keyof typeof SORT_ORDERS} [sort]     정렬 ('latest' 기본)
+ * @property {number} [days]                       최근 며칠 안에 등록된 책만 (예: NEW_BOOK_DAYS)
+ * @property {number} [limit]                      최대 몇 권까지 가져올지 (없으면 제한 없음)
  */
 
 /**

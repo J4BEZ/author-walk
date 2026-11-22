@@ -1,6 +1,8 @@
 // json-server 와 대화하는 모듈 입니다.
-/** @import { Book, BookView, NewBookInput, BookChanges } from '../types.js' */
+/** @import { Book, BookView, NewBookInput, BookChanges, BookQuery } from '../types.js' */
 import { isImageDataUrl } from '#src/utils/validation/image.js';
+import { queryBooks, toBookQuery } from '../utils/bookQuery.js';
+
 
 // 서버 주소 : .env 의 VITE_API_URL, 없으면 로컬 json-server
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
@@ -54,21 +56,26 @@ function toBookView({ passwordHash, ...rest }) {
 }
 
 /**
- * 도서 목록 (최신순). 검색어가 있으면 전체 필드에서 검색합니다
- * @param {string} [query]
+ * 도서 목록 : 전체를 받아 화면에 보이는 필드로만 검색, 정렬, 기간, 개수 조건을 적용합니다
+ * @param {string | BookQuery} [query]  목록 검색 조건(검색어(q), 검색 대상(field), 정렬(sort), 기간(days), 최대 개수(limit)) 혹은 "문자열"
  * @returns {Promise<BookView[]>}
  */
-export async function getBooks(query = '') {
-  // 검색어가 있으면 json-server 전체 검색 ?q= 를 붙임 (한글은 인코딩)
-  const qs = query ? `&q=${encodeURIComponent(query)}` : '';
+export async function getBooks(query = {}) {
 
-  // GET /books : 등록일 기준 최신순
+  // GET /books : 전체 목록 (?q= 는 작품과 크게 관련 없는 숨은 필드(e.g. passwordHash 등)까지 검색해서 쓰지 않음)
   /** @type {Book[]} */
-  const books = await request(`/books?_sort=createdAt&_order=desc${qs}`);
+  const books = await request('/books');
 
-  // 화면용으로 변환
-  return books.map(toBookView);
+  // passwordHash를 제거하여 화면에 보이는 필드만 남김
+  const bookViews = books.map(toBookView);
+
+  // 문자열이나 객체 형태의 query를 BookQuery 객체로 변환
+  const bookQuery = toBookQuery(query);
+
+  // BookQuery로 검색된 새로운 책 목록 반환
+  return queryBooks(bookViews, bookQuery);
 }
+
 
 /**
  * 도서 한 권
