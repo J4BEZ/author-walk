@@ -65,6 +65,7 @@ function App() {
         <BookCreateScreen addBook={booksState.addBook} />
         {selectedId !== null && (
           <BookDetailScreen
+            key={selectedId}
             id={selectedId}
             editBook={booksState.editBook}
             changeCover={booksState.changeCover}
