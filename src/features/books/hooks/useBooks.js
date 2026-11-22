@@ -12,7 +12,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import {
-  getBooks, getBook, createBook, checkOwner, updateBook, saveCover, deleteBook,
+  getBooks, getBook, createBook, updateBook, saveCover, deleteBook,
 } from '../api/booksApi.js';
 import { toBookQuery } from '../utils/bookQuery.js';
 
@@ -30,16 +30,6 @@ function toMessage(e, fallback) {
   return fallback;
 }
 
-/**
- * 본인 확인 : 사용자 아이디나 비밀번호가 다르면 에러를 던집니다
- * @param {number} id
- * @param {Credentials} credentials
- */
-async function assertOwner(id, { userId, password }) {
-  if (!(await checkOwner(id, userId, password))) {
-    throw new Error('사용자 아이디 또는 비밀번호가 맞지 않습니다', { cause: 'NOT_OWNER' });
-  }
-}
 
 /**
  * 도서 목록 화면용 훅 : 목록, 검색 조건, 로딩, 에러와 등록, 수정, 삭제, 검색 함수를 반환합니다
@@ -148,40 +138,39 @@ export function useBookList() {
   };
 
   /**
-   * 수정 : 본인 확인 -> PATCH -> 목록에서 그 도서만 바꿔 끼우기
+   * 수정 : PATCH (서버가 본인 확인) -> 목록에서 그 도서만 바꿔 끼우기
    * @param {number} id
    * @param {BookChanges} changes
    * @param {Credentials} credentials
    * @returns {Promise<BookView>}
    */
   const editBook = async (id, changes, credentials) => {
-    await assertOwner(id, credentials);
-    const updated = await updateBook(id, changes);
+    const updated = await updateBook(id, changes, credentials);
     setBooks((prev) => prev.map((b) => (b.id === id ? updated : b)));
     return updated;
   };
 
   /**
-   * 표지 저장 (생성, 재생성) : 목록에서 그 도서만 바꿔 끼우기
+   * 표지 저장 (생성, 재생성) : 서버가 본인 확인 -> 목록에서 그 도서만 바꿔 끼우기
    * @param {number} id
    * @param {string} dataUrl  `data:image/png;base64,...`
+   * @param {Credentials} credentials
    * @returns {Promise<BookView>}
    */
-  const changeCover = async (id, dataUrl) => {
-    const updated = await saveCover(id, dataUrl);
+  const changeCover = async (id, dataUrl, credentials) => {
+    const updated = await saveCover(id, dataUrl, credentials);
     setBooks((prev) => prev.map((b) => (b.id === id ? updated : b)));
     return updated;
   };
 
   /**
-   * 삭제 : 본인 확인 -> DELETE -> 목록에서 빼기
+   * 삭제 : DELETE (서버가 본인 확인) -> 목록에서 빼기
    * @param {number} id
    * @param {Credentials} credentials
    * @returns {Promise<void>}
    */
   const removeBook = async (id, credentials) => {
-    await assertOwner(id, credentials);
-    await deleteBook(id);
+    await deleteBook(id, credentials);
     setBooks((prev) => prev.filter((b) => b.id !== id));
   };
 
