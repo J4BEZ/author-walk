@@ -1,0 +1,36 @@
+.search-bar {
+  display: flex;
+  align-items: center;
+  width: calc(100% - 80px);
+  height: 100px;
+  margin: 0 auto;
+  padding: 0 30px;
+  border: 2px solid #809a78;
+  border-radius: 16px;
+  background-color: #fff;
+  box-sizing: border-box;
+}
+
+.search-bar input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 20px;
+}
+
+.search-bar input::placeholder {
+  color: #aaa;
+}
+
+.search-bar button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  color: #809a78;
+  cursor: pointer;
+}
