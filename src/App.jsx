@@ -15,6 +15,10 @@ import {
   validateBookChanges,
 } from "./features/books/utils/bookValidation.js";
 import BookCoverGenerator from "./features/OpenAI_Integration/BookCoverGenerator.jsx";
+
+import {isBlank} from "#src/utils/validation/text.js";
+import {queryBooks, NEW_BOOK_DAYS} from "./features/books/utils/bookQuery.js";
+
 import "./App.css";
 
 /** @import { BookView } from './features/books/types.js' */
@@ -44,6 +48,13 @@ function joinErrors(errors) {
   return Object.values(errors).join("\n");
 }
 
+/**
+ * 기본 보기 (이번 주 신작) 함수
+ * @param {BookView[]} books
+ * @returns {BookView[]}
+ */
+const defaultView = (books) => queryBooks(books, { days: NEW_BOOK_DAYS });
+
 function App() {
   // useBookList 는 앱에서 한 번만 부르고, 필요한 화면에 props 로 내려 줍니다
   // (화면마다 따로 부르면 목록 State 가 따로 생겨서 서로 반영되지 않음)
@@ -51,6 +62,11 @@ function App() {
   const [selectedId, setSelectedId] = useState(
     /** @type {number | null} */ (null),
   );
+
+  // 검색어가 없으면 기본 보기 (이번 주 신작), 있으면 검색 결과
+  const shownBooks =  isBlank(booksState.query.q)
+    ? defaultView(booksState.books)
+    : booksState.books;
 
   return (
     <>
@@ -61,7 +77,7 @@ function App() {
           <a href="/login">로그인하고 글쓰기 →</a>
         </section>
         <SearchBar onSearch={booksState.reload} />
-        <NewBooks books={booksState.books} onSelect={setSelectedId} />
+        <NewBooks books={shownBooks} onSelect={setSelectedId} />
         <BookCreateScreen addBook={booksState.addBook} />
         {selectedId !== null && (
           <BookDetailScreen
