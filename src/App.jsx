@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {useBooks, useBook} from "./features/books/useBooks.js";
+import {useBookList, useBookDetail} from "./features/books/hooks/useBooks.js";
 import Header from "./components/Header.jsx";
 import Footer from "./components/Footer.jsx";
 import SearchBar from "./components/SearchBar.jsx";
@@ -53,7 +53,7 @@ function joinErrors(errors) {
 function App() {
   // useBookList 는 앱에서 한 번만 부르고, 필요한 화면에 props 로 내려 줍니다
   // (화면마다 따로 부르면 목록 State 가 따로 생겨서 서로 반영되지 않음)
-  const booksState = useBooks();
+  const booksState = useBookList();
   const [selectedId, setSelectedId] = useState(
     /** @type {number | null} */ (null),
   );
