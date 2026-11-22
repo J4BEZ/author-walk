@@ -20,12 +20,6 @@ import "./App.css";
 /** @import { BookView } from './features/books/types.js' */
 //
 
-const SAMPLE_COVER =
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
-// // 1x1 픽셀 PNG Data URL (표지 저장 예시용, 실제로는 OpenAI 응답으로 만든 더미 이미지 입니다)
-// const SAMPLE_COVER =
-//   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
-
 /**
  * 에러를 alert 문구로 (본인 확인 실패는 그 메시지 그대로)
  * - 향후 정책상 브라우저 알림인 alert 대신, UI 내 알림 모달 또는 텍스트 필드 아래 빨간 설명으로 대체될 수 있습니다.
@@ -81,52 +75,6 @@ function App() {
       </main>
       <Footer />
     </>
-  );
-}
-
-/**
- * 목록 화면 (/books) : 목록, 검색
- * @param {ReturnType<typeof useBookList> & { onSelect: (id: number) => void }} props
- */
-function BookListScreen({books, loading, error, reload, onSelect}) {
-  const [query, setQuery] = useState("");
-
-  return (
-    <section>
-      <h2>목록 화면</h2>
-      <input
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="검색어"
-      />
-      <button onClick={() => reload(query.trim())}>검색</button>
-      <button
-        onClick={() => {
-          setQuery("");
-          reload();
-        }}>
-        전체 보기
-      </button>
-
-      {/* 로딩 -> 에러 -> 빈 목록 -> 정상 순서 */}
-      {loading ? (
-        <p>불러오는 중입니다.</p>
-      ) : error ? (
-        <p>{error}</p>
-      ) : books.length === 0 ? (
-        <p>등록된 도서가 없습니다.</p>
-      ) : (
-        <ul>
-          {books.map((book) => (
-            <li key={book.id}>
-              <button onClick={() => onSelect(book.id)}>
-                {book.title} · {book.author} · {book.createdAt.slice(0, 10)}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
   );
 }
 
