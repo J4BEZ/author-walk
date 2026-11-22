@@ -102,35 +102,34 @@ function BooksApiPlayground() {
       {/* 본인 확인 */}
       <ApiSection
         title="checkOwner(id, userId, password)"
-        request="GET /books/:id 후 브라우저에서 해시 비교"
+        request="POST /books/:id/verify  { userId, password } -> { ok }"
         onRun={() => checkOwner(bookId, userId, password)}
       />
 
       {/* 수정 */}
       <ApiSection
-        title="updateBook(id, changes)"
-        request="PATCH /books/:id  { title, content, updatedAt }"
-        onRun={() => updateBook(bookId, { title, content })}
+        title="updateBook(id, changes, credentials)"
+        request="PATCH /books/:id  { title, content, userId, password, updatedAt }"
+        onRun={() => updateBook(bookId, { title, content }, { userId, password })}
       >
         <div>위 등록 상자의 제목과 본문으로 수정합니다</div>
       </ApiSection>
 
       <ApiSection
-        title="saveCover(id, dataUrl)"
-        request="PATCH /books/:id  { coverImageUrl, updatedAt }"
-        onRun={() => saveCover(bookId, SAMPLE_COVER)}
+        title="saveCover(id, dataUrl, credentials)"
+        request="PATCH /books/:id  { coverImageUrl, userId, password, updatedAt }"
+        onRun={() => saveCover(bookId, SAMPLE_COVER, { userId, password })}
       >
         <div>1x1 픽셀 시험용 이미지로 저장합니다</div>
       </ApiSection>
 
       {/* 삭제 */}
       <ApiSection
-        title="deleteBook(id)"
-        request="DELETE /books/:id"
+        title="deleteBook(id, credentials)"
+        request="DELETE /books/:id  { userId, password }"
         onRun={async () => {
           if (!confirm(`${bookId}번 도서를 삭제할까요?`)) return '취소함';
-          if (!(await checkOwner(bookId, userId, password))) return '사용자 아이디 또는 비밀번호가 맞지 않아 삭제하지 않음';
-          return deleteBook(bookId);
+          return deleteBook(bookId, { userId, password });
         }}
       />
     </main>

@@ -252,7 +252,11 @@ function BookDetailScreen({id, editBook, changeCover, removeBook, onDeleted}) {
 
   // 생성된 PNG Data URL을 저장하고 목록과 상세 화면에 반영합니다.
   const handleCover = async (dataUrl) => {
-    setBook(await changeCover(book.id, dataUrl));
+    try {
+      setBook(await changeCover(book.id, dataUrl, credentials));
+    } catch (e) {
+      alertError(e, "표지 저장에 실패했어요");
+    }
   };
 
   // 삭제 : 확인창 -> removeBook (본인 확인 포함) -> 목록으로
