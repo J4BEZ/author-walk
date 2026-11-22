@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import {
   getBooks, getBook, createBook, checkOwner, updateBook, saveCover, deleteBook,
-} from '../features/books/booksApi.js';
+} from '../features/books/api/booksApi.js';
 
 // 1x1 픽셀 PNG Data URL (saveCover 시험용, 실제로는 OpenAI 응답으로 만든 값)
 const SAMPLE_COVER =
@@ -60,6 +60,7 @@ function BooksApiPlayground() {
   const [id, setId] = useState('1');
   const [query, setQuery] = useState('');
   const [author, setAuthor] = useState('홍길동');
+  const [userId, setUserId] = useState('gildong1234');
   const [password, setPassword] = useState('1234');
   const [title, setTitle] = useState('새 책 제목');
   const [content, setContent] = useState('새 책 본문입니다.');
@@ -76,6 +77,7 @@ function BooksApiPlayground() {
         <legend>공통 입력</legend>
         <label>도서 id <input value={id} onChange={(e) => setId(e.target.value)} size={4} /></label>{' '}
         <label>작성자 <input value={author} onChange={(e) => setAuthor(e.target.value)} /></label>{' '}
+        <label>사용자 아이디 <input value={userId} onChange={(e) => setUserId(e.target.value)} /></label>{' '}
         <label>비밀번호 <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} /></label>
       </fieldset>
 
@@ -90,18 +92,18 @@ function BooksApiPlayground() {
       <ApiSection
         title="createBook(input)"
         request="POST /books"
-        onRun={() => createBook({ title, author, content, password })}
+        onRun={() => createBook({ title, author, userId, content, password })}
       >
         <label>제목 <input value={title} onChange={(e) => setTitle(e.target.value)} /></label>{' '}
         <label>본문 <input value={content} onChange={(e) => setContent(e.target.value)} size={30} /></label>
-        <div>작성자와 비밀번호는 공통 입력 값을 씁니다</div>
+        <div>작성자, 사용자 아이디, 비밀번호는 공통 입력 값을 씁니다</div>
       </ApiSection>
 
       {/* 본인 확인 */}
       <ApiSection
-        title="checkOwner(id, author, password)"
+        title="checkOwner(id, userId, password)"
         request="GET /books/:id 후 브라우저에서 해시 비교"
-        onRun={() => checkOwner(bookId, author, password)}
+        onRun={() => checkOwner(bookId, userId, password)}
       />
 
       {/* 수정 */}
@@ -127,7 +129,7 @@ function BooksApiPlayground() {
         request="DELETE /books/:id"
         onRun={async () => {
           if (!confirm(`${bookId}번 도서를 삭제할까요?`)) return '취소함';
-          if (!(await checkOwner(bookId, author, password))) return '작성자 또는 비밀번호가 맞지 않아 삭제하지 않음';
+          if (!(await checkOwner(bookId, userId, password))) return '사용자 아이디 또는 비밀번호가 맞지 않아 삭제하지 않음';
           return deleteBook(bookId);
         }}
       />
