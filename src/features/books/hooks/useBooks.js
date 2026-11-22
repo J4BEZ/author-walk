@@ -14,8 +14,9 @@ import { useState, useEffect, useRef } from 'react';
 import {
   getBooks, getBook, createBook, checkOwner, updateBook, saveCover, deleteBook,
 } from '../api/booksApi.js';
+import { toBookQuery } from '../utils/bookQuery.js';
 
-/** @import { BookView, NewBookInput, BookChanges, Credentials } from '../types.js' */
+/** @import { BookView, NewBookInput, BookChanges, Credentials, BookQuery } from '../types.js' */
 
 /**
  * 에러를 화면에 보여 줄 문구로 바꿉니다
@@ -41,17 +42,18 @@ async function assertOwner(id, { userId, password }) {
 }
 
 /**
- * 도서 목록 화면용 훅 : 목록, 로딩, 에러와 등록, 수정, 삭제, 검색 함수를 돌려줍니다
+ * 도서 목록 화면용 훅 : 목록, 검색 조건, 로딩, 에러와 등록, 수정, 삭제, 검색 함수를 반환합니다
  *
  * 등록, 수정, 삭제 함수는 성공하면 목록 State 까지 고치고, 실패하면 에러를 던집니다.
  * (화면에서는 try / catch 로 감싸 실패 문구를 보여 줍니다.)
  * 
- * @returns {{ books: BookView[], loading: boolean, error: string | null, reload: (query?: string | { q?, field?, sort? }) => Promise<void>, addBook: (input: NewBookInput) => Promise<BookView>, editBook: (id: number, changes: BookChanges, credentials: Credentials) => Promise<BookView>, changeCover: (id: number, dataUrl: string) => Promise<BookView>, removeBook: (id: number, credentials: Credentials) => Promise<void> }} 훅에서 제공하는 값들 (목록, 로딩, 에러 상태와 CRUD 함수)
+ * @returns 훅에서 제공하는 값들 (목록, 로딩, 에러 상태와 CRUD 함수)
  */
 export function useBookList() {
   const [books, setBooks] = useState(/** @type {BookView[]} */ ([]));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(/** @type {string | null} */ (null));
+  const [query, setQuery] = useState(/** @type {BookQuery} */ ({}));
   
   // useRef : 값이 바뀌어도 화면을 다시 그리지 않는 상자 (.current 로 읽고 씀)
   // 비동기 함수 안에서도 항상 최신 값이 보여서, 번호표처럼 화면에 안 보이는 값에 씁니다
@@ -88,10 +90,18 @@ export function useBookList() {
   }, []);
 
   /**
-   * 목록 다시 불러오기 (검색 버튼, 새로고침 버튼에서 부름)
-   * @param {string | { q?, field?, sort? }} [query]  검색어. 비우면 전체
-   */
-  const reload = async (query = '') => {
+  * 목록 다시 불러오기 (검색 버튼, 새로고침 버튼에서 부름)
+  * @param {string | BookQuery} [nextQuery]  검색어 문자열 또는 검색 조건. 비우면 전체
+  * @returns {Promise<void>}
+  * @example
+  * reload('봄날');                             // 제목+작가에서 '봄날'
+  * reload({ q: '서점', field: 'titleContent' });
+  * reload();                                   // 전체 목록
+  */
+  const reload = async (nextQuery = '') => {
+
+    // 검색용 쿼리 객체로 변환
+    const bookQuery = toBookQuery(nextQuery);
 
     // 요청 번호 증가 시킨 이후 기록
     const requestId = ++latestRequest.current;
@@ -101,12 +111,15 @@ export function useBookList() {
     setLoading(true);
     setError(null);
     try {
-      const data = await getBooks(query);
+      const data = await getBooks(bookQuery);
 
       // 마지막으로 보낸 요청과 일치할 때만 상태 갱신
       // (이전 검색어의 응답이 화면에 뿌려지는 경쟁상태 방지를 위함입니다.)
-      if (isLatest()) setBooks(data);
-
+      if (isLatest()) {
+        setBooks(data);
+        setQuery(bookQuery);
+      }
+      
     } catch (e) {
       // 마지막으로 보낸 요청과 일치할 때만 에러 상태 갱신
       if (isLatest()) {
@@ -128,7 +141,9 @@ export function useBookList() {
    */
   const addBook = async (input) => {
     const saved = await createBook(input);
-    setBooks((prev) => [saved, ...prev]);
+    
+    // 등록하면 검색 조건을 풀고 기본 보기로 (방금 등록한 책이 최신순 맨 앞에 보이도록)
+    await reload();
     return saved;
   };
 
@@ -170,7 +185,7 @@ export function useBookList() {
     setBooks((prev) => prev.filter((b) => b.id !== id));
   };
 
-  return { books, loading, error, reload, addBook, editBook, changeCover, removeBook };
+  return { books, query, loading, error, reload, addBook, editBook, changeCover, removeBook };
 }
 
 /**
