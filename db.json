@@ -30,13 +30,22 @@
       "id": 1,
       "userId": "gildong1234",
       "passwordHash": "argon2id$m=19456,t=2,p=1$8220b101c80364d1caa82dba5202d743$65a979f2f9ea41c71253fdb2c7e62166e1179a75a9c23e7afd5823c897c897d8",
-      "createdAt": "2026-11-20T09:00:00.000Z"
+      "createdAt": "2026-11-20T09:00:00.000Z",
+      "role": "user"
     },
     {
       "id": 2,
       "userId": "younghee5678",
       "passwordHash": "argon2id$m=19456,t=2,p=1$77083285d22b992bac5d06fb2a894417$33f3b0f0ebfaf5abcd48756e88c8963d0835d10eaca591a69ee8ed52d930adb4",
-      "createdAt": "2026-11-20T10:00:00.000Z"
+      "createdAt": "2026-11-20T10:00:00.000Z",
+      "role": "user"
+    },
+    {
+      "userId": "admin",
+      "passwordHash": "argon2id$m=19456,t=2,p=1$e1af73f8c19186cf87543898c3ddabba$fc40dbcb4543298c8efc3b2b08fcfd801c6910aea450ed7cdb3258cecd4d38ce",
+      "role": "admin",
+      "createdAt": "2026-11-23T16:39:47.830Z",
+      "id": 3
     }
   ]
 }
