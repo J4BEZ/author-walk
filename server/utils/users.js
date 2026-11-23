@@ -2,6 +2,7 @@
 // 책 주인 확인 (middlewares/owner.js) 과 로그인 (2단계 routes/auth.js) 이 함께 씁니다
 
 import { hashPassword, verifyPassword } from './password.js';
+import { USER_ROLE } from './roles.js';
 
 
 /**
@@ -18,6 +19,7 @@ export function findUser(router, userId) {
 /**
  * 새 user 를 저장하고 반환합니다 (id 는 json-server 가 붙임)
  * 본문을 통째로 넣지 않고 필드를 골라 담아, 클라이언트가 보낸 다른 필드 (예: role) 는 무시합니다
+ * 역할은 항상 보통 사용자 ('user') 로 시작합니다 (관리자 승격은 npm run set-role)
  * @param {any} router
  * @param {string} userId
  * @param {string} password  평문 (해시로 바꿔 저장하고 평문은 저장하지 않음)
@@ -35,6 +37,7 @@ export async function createUser(router, userId, password) {
   const user = {
     userId,
     passwordHash: passwordHash,
+    role: USER_ROLE,
     createdAt: new Date().toISOString(),
   };
   return router.db.get('users').insert(user).write();
