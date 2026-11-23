@@ -1,6 +1,7 @@
 import {Routes, Route, Navigate} from "react-router-dom";
 
 import Main from "./pages/Main.jsx";
+import Signup from "./pages/SignUp.jsx";
 import Login from "./pages/Login.jsx";
 import Books from "./pages/Books.jsx";
 import BookDetail from "./pages/BookDetail.jsx";
@@ -13,6 +14,7 @@ function App() {
       <Route path="/" element={<Navigate to="/main" replace />} />
       <Route path="/main" element={<Main />} />
       <Route path="/logged-in" element={<Main />} />
+      <Route path="/signup" element={<Signup />} />
       <Route path="/login" element={<Login />} />
       <Route path="/books" element={<Books />} />
       <Route path="/books/new" element={<BookCreate />} />
