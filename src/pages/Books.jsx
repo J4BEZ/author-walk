@@ -1,11 +1,12 @@
 import {useMemo, useState} from "react";
 import {useNavigate} from "react-router-dom";
 
-import {useBookList} from "../features/books/hooks/useBooks.js";
+import {useBookList, useBookLikes} from "../features/books/hooks/useBooks.js";
 
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
 import SearchBar from "../components/SearchBar.jsx";
+import BookLikeButton from "../components/BookLikeButton.jsx";
 
 import "../App.css";
 import "../styles/font.css";
@@ -14,6 +15,7 @@ import "../styles/Books.css";
 function Books() {
   const navigate = useNavigate();
   const {books, loading, error} = useBookList();
+  const likes = useBookLikes();
 
   const [keyword, setKeyword] = useState("");
   const [sortBy, setSortBy] = useState("latest");
@@ -66,32 +68,34 @@ function Books() {
         ) : (
           <div className="books-grid">
             {filteredBooks.map((book) => (
-              <button
-                key={book.id}
-                type="button"
-                className="books-card"
-                onClick={() => navigate(`/books/${book.id}`)}>
-                <div className="books-cover">
-                  {book.coverImageUrl ? (
-                    <img src={book.coverImageUrl} alt={`${book.title} 표지`} />
-                  ) : (
-                    <span>표지 없음</span>
-                  )}
-                </div>
+              <article className="books-card" key={book.id}>
+                <button
+                  type="button"
+                  className="new-book-card"
+                  onClick={() => navigate(`/books/${book.id}`)}>
+                  <div className="books-cover">
+                    {book.coverImageUrl ? (
+                      <img src={book.coverImageUrl} alt={`${book.title} 표지`} />
+                    ) : (
+                      <span>표지 없음</span>
+                    )}
+                  </div>
 
-                <div className="books-info">
-                  <h2>{book.title}</h2>
-                  <p>{book.author}</p>
+                  <div className="books-info">
+                    <h2>{book.title}</h2>
+                    <p>{book.author}</p>
 
-                  {book.description && (
-                    <p className="books-description">{book.description}</p>
-                  )}
+                    {book.description && (
+                      <p className="books-description">{book.description}</p>
+                    )}
 
-                  <span className="books-date">
-                    {book.createdAt?.slice(0, 10)}
-                  </span>
-                </div>
-              </button>
+                    <span className="books-date">
+                      {book.createdAt?.slice(0, 10)}
+                    </span>
+                  </div>
+                </button>
+                <BookLikeButton book={book} likes={likes} />
+              </article>
             ))}
           </div>
         )}

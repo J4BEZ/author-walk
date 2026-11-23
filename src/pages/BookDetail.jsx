@@ -1,6 +1,6 @@
 import {useState} from "react";
 import {useParams, useNavigate} from "react-router-dom";
-import {useBookList, useBookDetail} from "../features/books/hooks/useBooks.js";
+import {useBookList, useBookDetail, useBookLikes} from "../features/books/hooks/useBooks.js";
 
 import {
   normalizeBookInput,
@@ -9,6 +9,7 @@ import {
 
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
+import BookLikeButton from "../components/BookLikeButton.jsx";
 
 import "../styles/BookDetail.css";
 
@@ -25,6 +26,7 @@ function BookDetail() {
   const {id} = useParams();
   const navigate = useNavigate();
   const booksState = useBookList();
+  const likes = useBookLikes();
 
   const {book, loading, error, setBook} = useBookDetail(Number(id));
 
@@ -176,7 +178,7 @@ function BookDetail() {
 
               <div className="book-detail-reactions">
                 <span>구독 +</span>
-                <span>♡ {book.likes ?? 0}</span>
+                <BookLikeButton book={book} likes={likes} />
               </div>
             </div>
 

@@ -1,6 +1,7 @@
 import "../styles/NewBooks.css";
+import BookLikeButton from "./BookLikeButton.jsx";
 
-function NewBooks({books, onSelect}) {
+function NewBooks({books, onSelect, likes}) {
   const newBooks = [...books]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 5);
@@ -17,25 +18,27 @@ function NewBooks({books, onSelect}) {
       ) : (
         <div className="new-books-list">
           {newBooks.map((book) => (
-            <button
-              type="button"
-              className="new-book-card"
-              key={book.id}
-              onClick={() => onSelect(book.id)}>
-              <div className="new-book-cover">
-                {book.coverImageUrl ? (
-                  <img src={book.coverImageUrl} alt={book.title} />
-                ) : (
-                  <span>표지 없음</span>
-                )}
-              </div>
+            <div key={book.id}>
+              <button
+                type="button"
+                className="new-book-card"
+                onClick={() => onSelect(book.id)}>
+                <div className="new-book-cover">
+                  {book.coverImageUrl ? (
+                    <img src={book.coverImageUrl} alt={book.title} />
+                  ) : (
+                    <span>표지 없음</span>
+                  )}
+                </div>
 
-              <h3>{book.title}</h3>
-              <p>{book.author}</p>
-              <span className="new-book-date">
-                {book.createdAt?.slice(0, 10)}
-              </span>
-            </button>
+                <h3>{book.title}</h3>
+                <p>{book.author}</p>
+                <span className="new-book-date">
+                  {book.createdAt?.slice(0, 10)}
+                </span>
+              </button>
+              <BookLikeButton book={book} likes={likes} />
+            </div>
           ))}
         </div>
       )}
