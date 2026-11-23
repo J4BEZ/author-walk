@@ -35,5 +35,5 @@ export async function getMe(token) {
   const { user } = await request('/auth/me', {
     token,
   });
-  return { user };
+  return user; // { userId } (응답의 { user: ... } 껍질은 벗겨서)
 }
