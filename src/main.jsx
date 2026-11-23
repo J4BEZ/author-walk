@@ -4,11 +4,14 @@ import {BrowserRouter} from "react-router-dom";
 
 import "./index.css";
 import App from "./App.jsx";
+import BookLikesProvider from "./components/BookLikesProvider.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
-      <App />
+      <BookLikesProvider>
+        <App />
+      </BookLikesProvider>
     </BrowserRouter>
   </StrictMode>,
 );

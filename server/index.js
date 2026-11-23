@@ -43,7 +43,10 @@ server.use(jsonServer.defaults());   // CORS, 요청 로그, 정적 파일 (기�
 if (DELAY_MS > 0) server.use(delay(DELAY_MS)); // --delay 를 준 경우에만 응답 늦추기
 server.use(jsonServer.bodyParser);   // 요청 본문 JSON -> req.body
 
-server.use('/books', booksRoutes(router)); // 등록, 본인 확인, 수정, 삭제 (routes/books.js)
+server.use('/books', booksRoutes(router)); // 등록, 본인 확인, 좋아요, 수정, 삭제 (routes/books.js)
+// 중첩 경로에서 등록 미들웨어를 건너뛰는 POST를 막습니다.
+// (booksRoutes 뒤에 두어야 /books/:id/verify, /books/:id/likes 가 먼저 처리됨)
+server.post('/:resource/:id/:nested', (_req, res) => res.sendStatus(404));
 
 // 접근 차단
 // json-server 의 /db (db.json 전체) 는 아이디, 해시비번이 포함된 민감 정보이므로, 접근 자체가 안되게 합니다.

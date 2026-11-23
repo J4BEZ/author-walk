@@ -1,5 +1,5 @@
 import {useNavigate, useLocation, Link} from "react-router-dom";
-import {useBookList} from "../features/books/hooks/useBooks.js";
+import {useBookList, useBookLikes} from "../features/books/hooks/useBooks.js";
 
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
@@ -49,6 +49,7 @@ const defaultView = (books) => queryBooks(books, {days: NEW_BOOK_DAYS});
 function Main() {
   const navigate = useNavigate();
   const booksState = useBookList();
+  const likes = useBookLikes();
   const location = useLocation();
   const isLoggedIn = location.pathname === "/logged-in";
 
@@ -79,6 +80,7 @@ function Main() {
         <NewBooks
           books={shownBooks}
           onSelect={(id) => navigate(`/books/${id}`)}
+          likes={likes}
         />
       </main>
       <Footer />

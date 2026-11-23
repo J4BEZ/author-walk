@@ -10,14 +10,63 @@
 //
 // 규칙 : 컴포넌트 맨 위에서만 부르고 (if, 반복문 안 X), useBooks() 는 공통 부모에서 한 번만 부릅니다
 
-import { useState, useEffect, useRef } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import {
-  getBooks, getBook, createBook, updateBook, saveCover, deleteBook,
+  getBooks, getBook, createBook, updateBook, saveCover, deleteBook, incrementBookLikes,
 } from '../api/booksApi.js';
 import { toBookQuery } from '../utils/bookQuery.js';
 import { isBlank } from '#src/utils/validation/text.js';
 
 /** @import { BookView, NewBookInput, BookChanges, Credentials, BookQuery } from '../types.js' */
+
+export const BookLikesContext = createContext(
+  /** @type {ReturnType<typeof useBookLikesState> | null} */ (null),
+);
+
+export function useBookLikes() {
+  const likes = useContext(BookLikesContext);
+  if (!likes) throw new Error('BookLikesProvider가 필요합니다');
+  return likes;
+}
+
+export function useBookLikesState() {
+  const [savedLikes, setSavedLikes] = useState(() => new Map(/** @type {[number, number][]} */ ([])));
+  const [likingIds, setLikingIds] = useState(() => new Set(/** @type {number[]} */ ([])));
+  const pendingLikes = useRef(new Set(/** @type {number[]} */ ([])));
+
+  /** @param {number} id */
+  const likeBook = async (id) => {
+    // 페이지를 이동하거나 다시 렌더링되기 전에도 같은 도서의 요청은 하나만 보냅니다.
+    const pending = pendingLikes.current;
+    if (pending.has(id)) return;
+    pending.add(id);
+    setLikingIds(new Set(pending));
+    try {
+      const likes = await incrementBookLikes(id);
+      if (!Number.isSafeInteger(likes) || likes < 0) {
+        throw new Error('서버가 올바른 좋아요 수를 반환하지 않았어요');
+      }
+      setSavedLikes((prev) => new Map(prev).set(id, likes));
+    } finally {
+      pending.delete(id);
+      setLikingIds(new Set(pending));
+    }
+  };
+
+  /** @param {BookView} book */
+  const getBookLikes = (book) => Math.max(book.likes ?? 0, savedLikes.get(book.id) ?? 0);
+
+  /** @param {number} id */
+  const clearBookLikes = (id) => {
+    setSavedLikes((prev) => {
+      const next = new Map(prev);
+      next.delete(id);
+      return next;
+    });
+  };
+
+  return { likeBook, getBookLikes, likingIds, clearBookLikes };
+}
 
 /**
  * 에러를 화면에 보여 줄 문구로 바꿉니다
@@ -45,6 +94,7 @@ export function useBookList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(/** @type {string | null} */ (null));
   const [query, setQuery] = useState(/** @type {BookQuery} */ ({}));
+  const likes = useContext(BookLikesContext);
   
   // useRef : 값이 바뀌어도 화면을 다시 그리지 않는 상자 (.current 로 읽고 씀)
   // 비동기 함수 안에서도 항상 최신 값이 보여서, 번호표처럼 화면에 안 보이는 값에 씁니다
@@ -178,6 +228,7 @@ export function useBookList() {
   const removeBook = async (id, credentials) => {
     await deleteBook(id, credentials);
     setBooks((prev) => prev.filter((b) => b.id !== id));
+    likes?.clearBookLikes(id);
   };
 
   return { books, query, loading, error, reload, addBook, editBook, changeCover, removeBook };

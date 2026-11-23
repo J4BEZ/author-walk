@@ -26,10 +26,11 @@ export function ownerOnCreate(router) {
       if (!await authenticate(router, { userId, password })) {
         return res.status(403).json({ message: '아이디 또는 비밀번호가 맞지 않습니다.' });
       }
-      
+
       // 본문에서 password, passwordHash 지우고 next() (userId 는 남김)
       delete req.body.password;
       delete req.body.passwordHash;
+      req.body.likes = 0; // 좋아요 수는 서버만 정함 (등록은 항상 0)
       next();
     } catch (err) {
       next(err);
@@ -50,10 +51,12 @@ function canModify(user, book) {
 
 /**
  * 아이디와 비밀번호가 그 책 주인 것과 맞는지 확인
+ * @param {any} router
+ * @param {string} bookId
  * @returns {Promise<boolean>}
  */
 async function isOwner(router, bookId, credentials) {
-  
+
   const book = findBook(router, bookId);
   if (!book) return false; // 책이 없으면 false
 
@@ -70,7 +73,7 @@ async function isOwner(router, bookId, credentials) {
 export function verifyOwnerRoute(router) {
   return async (req, res, next) => {
     try {
-      res.json({ ok: await isOwner(router, Number(req.params.id), req.body) });
+      res.json({ ok: await isOwner(router, req.params.id, req.body) });
     } catch (err) {
       next(err);
     }
@@ -80,11 +83,12 @@ export function verifyOwnerRoute(router) {
 
 /**
  * 책 한 권 원본을 꺼냅니다 (없으면 undefined)
+ * json-server router 와 같은 방식 (id 를 문자열로 비교) 으로 찾아, 검사한 책과 실제로 바뀌는 책이 어긋나지 않게 합니다
  * @param {any} router
- * @param {number} bookId
+ * @param {string} bookId
  */
 function findBook(router, bookId) {
-  return router.db.get('books').find({ id: bookId }).value();
+  return router.db.get('books').getById(bookId).value();
 }
 
 /**
@@ -92,26 +96,33 @@ function findBook(router, bookId) {
  */
 export function requireOwner(router) {
   return async (req, res, next) => {
-
-
-    try{
+    try {
+      // 검사를 마친 뒤 json-server에서 메서드가 바뀌지 않도록 합니다.
+      delete req.headers['x-http-method-override'];
       // GUARDED_METHODS 가 아니면 (GET 등) 바로 next()
       if (!GUARDED_METHODS.includes(req.method)) return next();
 
-      const bookId = Number(req.params.id);
+      const bookId = req.params.id;
 
       // 없는 책 찾으면 router 로 그대로 넘겨 router가 직접 404 반환하도록
-      if (!findBook(router, bookId)) return next();
+      const book = findBook(router, bookId);
+      if (!book) return next();
 
       // isOwner 가 false 면 res.status(403).json({ message: '...' }) 로 끝내기 (next 부르지 않음)
-      if (!await isOwner(router, Number(req.params.id), req.body)) {
+      if (!await isOwner(router, bookId, req.body)) {
         return res.status(403).json({ message: '권한이 없습니다.' });
       }
 
-      // 통과하면 본문에서 userId, password, passwordHash 지우고 next()
+      // 통과하면 본문에서 userId, password, passwordHash, likes 지우고 next()
       delete req.body.userId;
       delete req.body.password;
       delete req.body.passwordHash;
+      delete req.body.likes;
+      if (req.method === 'PUT') {
+        // 전체 교체에서도 기존 좋아요 수와 책 주인 (userId) 을 유지합니다.
+        const { likes = 0, userId } = book;
+        Object.assign(req.body, { likes, userId });
+      }
       next();
     } catch (err) {
       next(err);
