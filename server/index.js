@@ -51,6 +51,8 @@ server.post('/books/:id/likes', (req, res) => {
 });
 server.post('/books', hashOnCreate);                        // 등록 : 평문 -> 해시
 server.use('/books/:id', requireOwner(router));             // 수정, 삭제 : 본인만
+// 중첩 경로에서 등록 미들웨어를 건너뛰는 POST를 막습니다.
+server.post('/:resource/:id/:nested', (_req, res) => res.sendStatus(404));
 
 // json-server 의 /db (db.json 전체) 는 아이디, 해시비번이 포함된 민감 정보이므로, 접근 자체가 안되게 합니다.
 server.get('/db', (req, res) => res.sendStatus(404));
