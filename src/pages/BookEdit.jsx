@@ -3,7 +3,7 @@ import {useNavigate, useParams} from "react-router-dom";
 
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
-import BookCoverGenerator from "../features/OpenAI_Integration/BookCoverGenerator.jsx";
+import BookCoverGenerator from "../features/OpenAI_Integration/components/BookCoverGenerator.jsx";
 import {updateBook} from "../features/books/api/booksApi.js";
 
 import {
