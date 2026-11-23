@@ -6,9 +6,9 @@
 
 
 /** @import { NewBookInput, BookChanges } from '../types.js' */
-import { isBlank, isLengthBetween, matchesPattern } from '#src/utils/validation/text.js';
+import { isBlank, isLengthBetween } from '#src/utils/validation/text.js';
 import { hasInvalidChars } from '#src/utils/validation/text.js';
-
+import { validateAuthor, validatePassword, validateUserId } from '#src/utils/validation/users.js';
 import { removeZeroWidthChars } from '#src/utils/processing/text.js';
 
 
@@ -21,20 +21,6 @@ export const BOOK_STR_LENGTH_LIMIT = {
   title: { min: 1, max: 100 },
   description: { min: 1, max: 500 },
 };
-
-
-/**
- * 사용자 필드별 글자 수 제한 (예시)
- * author: 2 ~ 15자
- * userId: 2 ~ 15자
- * password: 8 ~ 15자
-*/
-export const USER_STR_LENGTH_LIMIT = {
-  author: { min: 2, max: 15 },
-  userId: { min: 2, max: 15 },
-  password: { min: 8, max: 15 },
-};
-
 
 //# region <- 이거 붙여서 쓰면, vscode에서 볼 때 코드 영역 나누기, 접기/펼치기 가능해요
 
@@ -85,59 +71,6 @@ export function validateBookContent(content) {
   if (hasInvalidChars(content)) return '작품 내용에 사용할 수 없는 문자가 포함되어 있습니다.';
   return null;
 }
-//#endregion
-
-
-//#region 본인 확인용
-// 향후 users가 도입될 시 features/users (가명)/userValidation 모듈로 이동 예정입니다.
-// 지금은 작품 등록시 함께 사용되나,
-// 추후 회원 가입, 내 정보 수정 등에 이용될 수 있습니다.
-
-
-/**
- * 작성자 이름을 검사합니다
- * @param {string} author
- * @returns {string | null}
- */
-export function validateAuthor(author) {
-  if (isBlank(author)) return '작성자를 입력해 주세요.';
-  if (!isLengthBetween(author, USER_STR_LENGTH_LIMIT.author.min, USER_STR_LENGTH_LIMIT.author.max)) return `작성자는 ${USER_STR_LENGTH_LIMIT.author.min}~${USER_STR_LENGTH_LIMIT.author.max}자 사이로 입력해 주세요.`;
-  if (hasInvalidChars(author)) return '작성자 이름에 사용할 수 없는 문자가 포함되어 있습니다.';
-  return null;
-}
-
-const USER_ID_CHARS = /^[a-zA-Z0-9_]+$/; // 영문자, 숫자, 밑줄만 허용
-
-/**
- * 사용자 아이디를 검사합니다
- * @param {string} userId
- * @returns {string | null}
- */
-export function validateUserId(userId) {
-  if (isBlank(userId)) return '아이디를 입력해 주세요.';
-  if (!isLengthBetween(userId, USER_STR_LENGTH_LIMIT.userId.min, USER_STR_LENGTH_LIMIT.userId.max)) return `아이디는 ${USER_STR_LENGTH_LIMIT.userId.min}~${USER_STR_LENGTH_LIMIT.userId.max}자 사이로 입력해 주세요.`;
-  if (!matchesPattern(userId, USER_ID_CHARS)) return '아이디는 영문자, 숫자, 밑줄만 사용할 수 있습니다.';
-  return null;
-}
-
-
-/**
- * 사용자 비밀번호를 검사합니다
- * @param {string} password
- * @returns {string | null}
- */
-export function validatePassword(password) {
-  if (isBlank(password)) return '비밀번호를 입력해 주세요.';
-  if (!isLengthBetween(password, USER_STR_LENGTH_LIMIT.password.min, USER_STR_LENGTH_LIMIT.password.max)) return `비밀번호는 ${USER_STR_LENGTH_LIMIT.password.min}~${USER_STR_LENGTH_LIMIT.password.max}자 사이로 입력해 주세요.`;
-
-  if (!matchesPattern(password, /^[\x21-\x7E]+$/)) return '비밀번호는 영문, 숫자, 특수문자만 사용할 수 있습니다.';
-
-  if (!matchesPattern(password, /[A-Za-z]/)) return '비밀번호에는 최소한 하나의 영문자가 포함되어야 합니다.';
-  if (!matchesPattern(password, /[0-9]/)) return '비밀번호에는 최소한 하나의 숫자가 포함되어야 합니다.';
-  if (!matchesPattern(password, /[!-/:-@[-`{-~]/)) return '비밀번호에는 최소한 하나의 특수문자가 포함되어야 합니다.';
-  return null;
-}
-
 //#endregion
 
 
