@@ -9,7 +9,10 @@ import jsonServer from 'json-server';
 import watchDB from './utils/watchDB.js';
 import hideSecrets from './utils/hideSecrets.js';
 import { delay } from './middlewares/delay.js';
+
 import { booksRoutes } from './routes/books.js';
+import { authRoutes } from './routes/auth.js';
+
 
 
 const PORT = 3000;
@@ -51,9 +54,11 @@ server.use((req, res, next) => {
 });
 
 server.use('/books', booksRoutes(router)); // 등록, 본인 확인, 좋아요, 수정, 삭제 (routes/books.js)
-// json-server 중첩 경로 (/:resource/:id/:nested) 는 router 안에서 /:nested 로 바뀌어 검사를 건너뜁니다.
-// POST 는 등록 검사를, GET 은 /users 차단을 건너뛰므로 (예: GET /books/1/users) 모든 메서드를 막습니다.
-// (booksRoutes 뒤에 두어야 /books/:id/verify, /books/:id/likes 가 먼저 처리됨)
+server.use('/auth', authRoutes(router)); // 회원가입, 로그인 (routes/auth.js)
+
+// [순서 중요]
+// 직접 만든 라우트 (/books, /auth) 보다 뒤, json-server router (server.use(router)) 보다 앞에 둡니다.
+// 앞에 두면 /books/:id/likes 같은 직접 만든 세 칸 이상 경로까지 막히고, router 뒤에 두면 아무것도 막지 못합니다.
 server.use('/:resource/:id/:nested', (_req, res) => res.sendStatus(404));
 
 // 접근 차단
