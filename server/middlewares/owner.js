@@ -1,53 +1,61 @@
+// 인가 : 이 사람이 이 책을 고칠 수 있는지 (인증은 utils/users.js)
 
+import { authenticate } from '../utils/users.js';
 
-import { hashPassword, verifyPassword } from '../utils/password.js';
+import { isBlank } from '#src/utils/validation/text.js'
 
 // 보호가 필요한 HTTP 메서드 목록 (PATCH, PUT, DELETE)
 const GUARDED_METHODS = ['PATCH', 'PUT', 'DELETE'];
 
 /**
- * 등록 : 평문 비밀번호를 해시로 바꿔 저장 (평문은 저장하지 않음)
- * @type {import('express').RequestHandler}
+ * POST /books: 책 등록 시 본인 확인 (아이디와 비밀번호)
  */
-export function hashOnCreate(req, res, next) {
-  // 들어온 passwordHash 는 지우기 (클라이언트가 해시를 직접 정하지 못하도록)
-  delete req.body.passwordHash;
+export function ownerOnCreate(router) {
+  return (req, res, next) => {
+    const { userId, password } = req.body;
 
-  // req.body.password 가 있으면 hashPassword 로 passwordHash 만들기
-  if (req.body.password) {
-    req.body.passwordHash = hashPassword(req.body.password);
-  }
+    // userId, password 가 둘 다 비어 있지 않은 문자열이 아니면 400
+    if (isBlank(userId) || isBlank(password)) {
+      return res.status(400).json({ message: '아이디와 비밀번호를 모두 입력해야 합니다.' });
+    }
 
-  // req.body.password 지우기
-  delete req.body.password;
-
-  next(); // 다음 미들웨어 (결국 router 가 저장)
+    // 사용자가 존재하면 수정 가능 여부 확인 (비밀번호 체크)
+    if (!authenticate(router, { userId, password })) {
+      return res.status(403).json({ message: '아이디 또는 비밀번호가 맞지 않습니다.' });
+    }
+    
+    // 본문에서 password, passwordHash 지우고 next() (userId 는 남김)
+    delete req.body.password;
+    delete req.body.passwordHash;
+    next();
+  };
 }
 
-/**
- * 본인 확인에 쓸 기록을 꺼냅니다    
- * (지금은 책 자체, users 도입 후에는 책 주인 user 로 이 함수만 수정)
- * @param {any} router
- * @param {number} bookId
- */
-function findCredentialRecord(router, bookId) {
-  return router.db.get('books').find({ id: bookId }).value();
-}
 
 /**
- * 아이디와 비밀번호가 그 책 주인 것과 맞는지
+ * 인가 : 이 user 가 이 책을 고칠 수 있는지 (role 이 생기면 여기만 수정)
  * @returns {boolean}
  */
-function isOwner(router, bookId, { userId, password } = {}) {
-  const record = findCredentialRecord(router, bookId);
-  // record 가 없으면 false
-  if (!record) return false;
+function canModify(user, book) {
 
-  // record.userId 가 null 이거나 userId 와 다르면 false
-  if (!record.userId || record.userId !== userId) return false;
+  // 책의 userId 와 user 의 userId 비교 (지금은 본인만 가능)
+  return book.userId === user.userId;
+}
 
-  // Password 확인 결과 반환
-  return verifyPassword(password, record.passwordHash);
+/**
+ * 아이디와 비밀번호가 그 책 주인 것과 맞는지 확인
+ * @returns {boolean}
+ */
+function isOwner(router, bookId, credentials) {
+  
+  const book = findBook(router, bookId);
+  if (!book) return false; // 책이 없으면 false
+
+  const user = authenticate(router, credentials);
+  if (!user) return false; // 인증 실패하면 false
+
+  // 책의 userId 와 user 의 userId 비교
+  return canModify(user, book);
 }
 
 /**

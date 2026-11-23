@@ -24,7 +24,12 @@ const DB_FILE = fileURLToPath(new URL('../db.json', import.meta.url));
 const server = jsonServer.create();
 
 // /books 같은 REST 경로를 만들어 주는 부분
-const router = jsonServer.router(DB_FILE);
+// foreignKeySuffix : json-server 는 기본으로 'xxxId' 필드를 'xxxs' 컬렉션의 id 를 가리키는 외래 키로 봅니다.
+// 그래서 DELETE 때마다 가리키는 대상이 없는 문서를 연쇄로 지우는데,
+// 우리 userId 는 'users' : [] 라는 필드의 id (숫자) 가 아니라 로그인 아이디 (문자열) 라서 책과 users 가 전부 지워집니다.
+// 위 사항은 기존 userId에서 users 테이블로 분리되면서 확인된 연쇄 삭제 문제를 방지하기 위한 설정입니다.
+// 아무도 쓰지 않는 '_fk' 로 바꿔 이 기능을 끕니다 (_expand, _embed 도 함께 꺼지지만 쓰지 않음)
+const router = jsonServer.router(DB_FILE, { foreignKeySuffix: '_fk' });
 
 
 // router 가 응답을 보내기 직전에 불리는 함수를 바꿔 끼움
@@ -40,8 +45,14 @@ server.use(jsonServer.bodyParser);   // 요청 본문 JSON -> req.body
 
 server.use('/books', booksRoutes(router)); // 등록, 본인 확인, 수정, 삭제 (routes/books.js)
 
+// 접근 차단
 // json-server 의 /db (db.json 전체) 는 아이디, 해시비번이 포함된 민감 정보이므로, 접근 자체가 안되게 합니다.
 server.get('/db', (req, res) => res.sendStatus(404));
+
+// 유저 전체 정보는 접근 할 수 없도록 막음
+// db.json 내 등록된 'users' 필드가 라우팅되는 걸(주소로 접근할 수 있도록 경로가 만들어지는 걸) 막기 위함입니다.
+// 서버는 router.db.get('users') 처럼 db.json을 직접 읽도록 구현되어 있어서 괜찮아요
+server.use('/users', (req, res) => res.sendStatus(404));
 
 // ** 미들웨어 설정 끝 **
 

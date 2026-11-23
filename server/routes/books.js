@@ -3,7 +3,7 @@
 
 import express from 'express';
 
-import { hashOnCreate, requireOwner, verifyOwnerRoute } from '../middlewares/owner.js';
+import { ownerOnCreate, requireOwner, verifyOwnerRoute } from '../middlewares/owner.js';
 
 
 /**
@@ -13,7 +13,7 @@ import { hashOnCreate, requireOwner, verifyOwnerRoute } from '../middlewares/own
 export function booksRoutes(router) {
   const books = express.Router();
 
-  books.post('/', hashOnCreate);                         // 등록 : 평문 -> 해시
+  books.post('/', ownerOnCreate(router));                // 등록
   books.post('/:id/verify', verifyOwnerRoute(router));   // 본인 확인 전용 경로
   books.use('/:id', requireOwner(router));               // 수정, 삭제 : 본인만
 
