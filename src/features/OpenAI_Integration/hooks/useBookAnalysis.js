@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { analyzeBook } from './openaiBookAnalysisApi.js';
+import { analyzeBook } from '../api/openaiBookAnalysisApi.js';
 
 /**
  * 부모는 작품 id/제목/본문이 바뀌면 key를 바꿔 이전 분석 상태를 초기화합니다.

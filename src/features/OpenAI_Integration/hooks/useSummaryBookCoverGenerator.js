@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { generateSummaryBookCover } from './openaiSummaryImageApi.js';
+import { generateSummaryBookCover } from '../api/openaiSummaryImageApi.js';
 
 /**
  * @param {{ title: string, author: string, genre: string, summary: string, userApiKey: string,

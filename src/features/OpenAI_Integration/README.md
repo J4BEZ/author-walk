@@ -2,11 +2,34 @@
 
 각 컴포넌트를 사용할 화면에서 해당 JSX 파일을 직접 import합니다. 사용자 API 키로 브라우저에서 요청하며 실제 API 요금이 발생합니다.
 
+## 폴더 구조
+
+```text
+OpenAI_Integration/
+├─ README.md
+├─ api/                         OpenAI 요청 및 응답 검증
+│  ├─ openaiImageApi.js          전문 기반 표지, 이미지 품질·API 주소
+│  ├─ openaiSummaryImageApi.js   장르·요약 기반 표지
+│  └─ openaiBookAnalysisApi.js   장르·소개글·표지용 요약 분석, 길이 제한
+├─ hooks/                       상태·요청 흐름·중복 방지·취소·오류 처리
+│  ├─ useBookCoverGenerator.js
+│  ├─ useSummaryBookCoverGenerator.js
+│  └─ useBookAnalysis.js
+└─ components/                  입력·버튼·미리보기 화면
+   ├─ BookCoverGenerator.jsx
+   ├─ SummaryBookCoverGenerator.jsx
+   └─ BookAnalysis.jsx
+```
+
+`App.jsx`의 테스트용 AI 연결은 제거했습니다. 실제 사용할 페이지에서 `components/` 경로로 import하고 아래 예시처럼 연결합니다.
+
 ## 1. 전문 기반 표지 생성 — BookCoverGenerator.jsx
 
 책의 `title`, `author`, `content`를 보내 표지를 생성합니다. 컴포넌트 안에서 API 키·품질 입력 → 생성 → 미리보기 → 저장 순으로 사용합니다.
 
 ```jsx
+import BookCoverGenerator from './features/OpenAI_Integration/components/BookCoverGenerator.jsx';
+
 <BookCoverGenerator
   key={JSON.stringify([book.id, book.title, book.author, book.content])}
   book={book}
@@ -16,7 +39,7 @@
 
 - `book`: 제목·작성자·전문이 있는 작품 객체.
 - `onSave(dataUrl)`: 부모가 제공하는 비동기 저장 함수. 실패하면 오류를 다시 던져야 합니다.
-- 연결 파일: `useBookCoverGenerator.js`, `openaiImageApi.js`.
+- 연결 파일: `hooks/useBookCoverGenerator.js`, `api/openaiImageApi.js`.
 
 ## 2. 장르·소개글·표지용 요약 분석 — BookAnalysis.jsx
 
@@ -30,6 +53,8 @@
 | `warnings` | 악의적인 지시 등 의심 내용에 대한 참고 안내 | 5개, 각 300자 |
 
 ```jsx
+import BookAnalysis from './features/OpenAI_Integration/components/BookAnalysis.jsx';
+
 <BookAnalysis
   key={JSON.stringify([book.id, book.title, book.author, book.content])}
   book={book}
@@ -40,7 +65,7 @@
 - `book`: `id`, `title`, `author`, `content`가 있는 작품 객체.
 - `onSaveCover(dataUrl)`: 선택 사항. 전달하면 내장된 요약 기반 생성기에 저장 버튼이 표시됩니다.
 - 분석 결과는 화면 상태로만 유지하며 DB에 저장하지 않습니다. 결과를 부모로 전달하는 콜백은 아직 없습니다.
-- 연결 파일: `useBookAnalysis.js`, `openaiBookAnalysisApi.js`. 분석 모델은 `gpt-4.1-mini`입니다.
+- 연결 파일: `hooks/useBookAnalysis.js`, `api/openaiBookAnalysisApi.js`. 분석 모델은 `gpt-4.1-mini`입니다.
 
 ## 3. 장르·요약 기반 표지 생성 — SummaryBookCoverGenerator.jsx
 
@@ -49,6 +74,8 @@
 별도 화면에서 사용할 때는 다음처럼 연결합니다.
 
 ```jsx
+import SummaryBookCoverGenerator from './features/OpenAI_Integration/components/SummaryBookCoverGenerator.jsx';
+
 <SummaryBookCoverGenerator
   key={JSON.stringify([book.id, book.title, book.author, genre, summary])}
   title={book.title}
@@ -64,11 +91,11 @@
 - 필수 입력: 제목·작성자·장르·표지용 요약·사용자 API 키. 전문과 독자용 소개글은 보내지 않습니다.
 - `disabled`: 선택 사항. 부모 작업 중 생성·저장 버튼을 잠글 때 사용합니다.
 - `onSave(dataUrl)`: 선택 사항. 생략하면 생성·미리보기만 제공합니다.
-- 연결 파일: `useSummaryBookCoverGenerator.js`, `openaiSummaryImageApi.js`.
+- 연결 파일: `hooks/useSummaryBookCoverGenerator.js`, `api/openaiSummaryImageApi.js`.
 
 ## 공통 연결 시 주의점
 
-- `saveCover`는 부모에서 구현합니다. 예: `async (dataUrl) => setBook(await changeCover(book.id, dataUrl, credentials))`. 현재 App은 기존 도서 API로 본인 확인 후 저장하며 작품 표지가 교체됩니다.
+- `saveCover`는 부모에서 구현합니다. 예: `async (dataUrl) => setBook(await changeCover(book.id, dataUrl, credentials))`. 기존 도서 API에 연결하면 본인 확인 후 저장하며 작품 표지가 교체됩니다. 현재 App에는 연결되어 있지 않습니다.
 - 두 표지 생성 방식은 `gpt-image-2`를 사용하고, Base64 응답을 `data:image/png;base64,...`로 반환합니다. 이 문자열을 이미지 `src`나 기존 `coverImageUrl` 저장에 사용합니다.
 - 작품 정보가 바뀔 때 `key`를 변경해 이전 상태와 생성 요청을 정리합니다. 요약 기반 생성은 장르·요약을 수정해도 초기화되므로 진행 중 수정에 주의합니다. 브라우저 요청 취소가 과금 취소를 보장하지는 않습니다.
 - 키와 분석 결과는 화면 메모리에만 유지합니다. 브라우저 직접 입력이 키 보안을 보장하지는 않습니다.

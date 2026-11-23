@@ -1,5 +1,5 @@
-import { useBookAnalysis } from './useBookAnalysis.js';
-import { BOOK_ANALYSIS_LIMITS } from './openaiBookAnalysisApi.js';
+import { useBookAnalysis } from '../hooks/useBookAnalysis.js';
+import { BOOK_ANALYSIS_LIMITS } from '../api/openaiBookAnalysisApi.js';
 import SummaryBookCoverGenerator from './SummaryBookCoverGenerator.jsx';
 
 /** @param {{ book: { title: string, author: string, content: string }, onSaveCover?: (dataUrl: string) => Promise<void> }} props */

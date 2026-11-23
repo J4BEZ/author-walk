@@ -1,5 +1,5 @@
-import { IMAGE_QUALITIES } from './openaiImageApi.js';
-import { useSummaryBookCoverGenerator } from './useSummaryBookCoverGenerator.js';
+import { IMAGE_QUALITIES } from '../api/openaiImageApi.js';
+import { useSummaryBookCoverGenerator } from '../hooks/useSummaryBookCoverGenerator.js';
 
 /**
  * 부모는 작품·장르·요약이 바뀌면 key를 바꿔 이전 미리보기와 요청을 초기화합니다.

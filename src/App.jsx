@@ -14,8 +14,6 @@ import {
   validateNewBook,
   validateBookChanges,
 } from "./features/books/utils/bookValidation.js";
-import BookCoverGenerator from "./features/OpenAI_Integration/BookCoverGenerator.jsx";
-import BookAnalysis from "./features/OpenAI_Integration/BookAnalysis.jsx";
 
 import {isBlank} from "#src/utils/validation/text.js";
 import {queryBooks, NEW_BOOK_DAYS} from "./features/books/utils/bookQuery.js";
@@ -85,7 +83,6 @@ function App() {
             key={selectedId}
             id={selectedId}
             editBook={booksState.editBook}
-            changeCover={booksState.changeCover}
             removeBook={booksState.removeBook}
             onDeleted={() => setSelectedId(null)}
           />
@@ -201,16 +198,15 @@ function BookCreateScreen({addBook}) {
 }
 
 /**
- * 상세 + 수정 화면 (/books/:id, /books/:id/edit) : useBookDetail 으로 한 권 불러오기, 수정, 표지 저장, 삭제
+ * 상세 + 수정 화면 (/books/:id, /books/:id/edit) : useBookDetail 으로 한 권 불러오기, 수정, 삭제
  * @param {{
  *   id: number,
  *   editBook: ReturnType<typeof useBookList>['editBook'],
- *   changeCover: ReturnType<typeof useBookList>['changeCover'],
  *   removeBook: ReturnType<typeof useBookList>['removeBook'],
  *   onDeleted: () => void,
  * }} props
  */
-function BookDetailScreen({id, editBook, changeCover, removeBook, onDeleted}) {
+function BookDetailScreen({id, editBook, removeBook, onDeleted}) {
   const {book, loading, error, setBook} = useBookDetail(id);
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
@@ -248,15 +244,6 @@ function BookDetailScreen({id, editBook, changeCover, removeBook, onDeleted}) {
       setNewTitle("");
     } catch (e) {
       alertError(e, "수정에 실패했어요");
-    }
-  };
-
-  // 생성된 PNG Data URL을 저장하고 목록과 상세 화면에 반영합니다.
-  const handleCover = async (dataUrl) => {
-    try {
-      setBook(await changeCover(book.id, dataUrl, credentials));
-    } catch (e) {
-      alertError(e, "표지 저장에 실패했어요");
     }
   };
 
@@ -307,18 +294,6 @@ function BookDetailScreen({id, editBook, changeCover, removeBook, onDeleted}) {
       />
       <button onClick={handleEdit}>제목 수정</button>
       <button onClick={handleDelete}>삭제</button>
-      <BookAnalysis
-        key={JSON.stringify([book.id, book.title, book.content])}
-        book={book}
-        onSaveCover={async (dataUrl) => {
-          setBook(await changeCover(book.id, dataUrl, credentials));
-        }}
-      />
-      <BookCoverGenerator
-        key={JSON.stringify([book.id, book.title, book.author, book.content])}
-        book={book}
-        onSave={handleCover}
-      />
     </section>
   );
 }
