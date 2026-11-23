@@ -10,6 +10,7 @@ import {
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
 import BookLikeButton from "../components/BookLikeButton.jsx";
+import BookContentPager from "../components/BookContentPager.jsx";
 
 import "../styles/BookDetail.css";
 
@@ -189,7 +190,7 @@ function BookDetail() {
 
             <div className="book-detail-section">
               <h2>작품 내용</h2>
-              <p>{book.content}</p>
+              <BookContentPager key={book.id} content={book.content} />
             </div>
           </section>
         </div>
