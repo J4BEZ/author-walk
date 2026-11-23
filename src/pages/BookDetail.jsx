@@ -122,7 +122,7 @@ function BookDetail() {
               <button
                 type="button"
                 onClick={() => navigate(`/books/${id}/edit`)}>
-                수정하기
+                수정
               </button>
 
               <button type="button" onClick={handleDelete}>

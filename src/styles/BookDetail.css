@@ -53,21 +53,44 @@
 }
 
 .book-detail-actions {
-  display: flex;
-  justify-content: space-around;
-  gap: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
 .book-detail-actions button {
-  border: none;
-  background: transparent;
-  color: #666;
-  font-size: 24px;
+  height: 44px;
+  border: 1px solid #809a78;
+  border-radius: 10px;
+  background-color: #fff;
+  color: #5f7a57;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
 }
 
 .book-detail-actions button:hover {
-  color: #809a78;
+  background-color: #809a78;
+  color: #fff;
+}
+
+/* 삭제는 붉은 톤으로 구분 */
+.book-detail-actions button:last-child {
+  border-color: #e3c4c1;
+  color: #b4443c;
+}
+
+.book-detail-actions button:last-child:hover {
+  border-color: #c45a52;
+  background-color: #c45a52;
+  color: #fff;
+}
+
+.book-detail-actions button:focus-visible {
+  outline: 3px solid rgba(128, 154, 120, 0.45);
+  outline-offset: 2px;
 }
 
 /* 본인 확인 */
