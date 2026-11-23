@@ -28,7 +28,7 @@ function BookLikeButton({book, likes}) {
       onClick={handleClick}
       aria-label={`${book.title} 좋아요 ${count}개`}
     >
-      ♡ {count}
+      {count} ♡
     </button>
   );
 }
