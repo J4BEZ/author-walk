@@ -3,7 +3,8 @@
 
 import express from 'express';
 
-import { ownerOnCreate, requireOwner, verifyOwnerRoute } from '../middlewares/owner.js';
+import { forGuardedMethods, ownerOnCreate, requireOwner } from '../middlewares/owner.js';
+import { requireAuth } from '../middlewares/auth.js';
 
 
 /**
@@ -13,10 +14,13 @@ import { ownerOnCreate, requireOwner, verifyOwnerRoute } from '../middlewares/ow
 export function booksRoutes(router) {
   const books = express.Router();
 
-  books.post('/', ownerOnCreate(router));                // 등록
-  books.post('/:id/verify', verifyOwnerRoute(router));   // 본인 확인 전용 경로
-  books.post('/:id/likes', likeRoute(router));           // 좋아요 +1
-  books.use('/:id', requireOwner(router));               // 수정, 삭제 : 본인만
+  // 누구인지는 토큰으로 (requireAuth -> req.user), 고칠 수 있는지는 requireOwner
+  // 읽기 (GET) 는 여기서 손대지 않고 지나가 json-server router 가 처리 (로그인 없이 누구나)
+  const auth = requireAuth(router);
+
+  books.post('/', auth, ownerOnCreate());                                  // 등록 : 로그인한 사람이 주인
+  books.post('/:id/likes', likeRoute(router));                             // 좋아요 +1 : 로그인 없이 (토글은 나중에)
+  books.use('/:id', forGuardedMethods(auth), requireOwner(router));        // 수정, 삭제 : 로그인 + 본인만
 
   return books;
 }
