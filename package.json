@@ -14,6 +14,7 @@
     "server": "node --env-file-if-exists=.env server/index.js",
     "server:watch": "node --watch --env-file-if-exists=.env server/index.js",
     "server-with-delay": "node --env-file-if-exists=.env server/index.js --delay 1000",
+    "set-role": "node server/scripts/setRole.js",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
