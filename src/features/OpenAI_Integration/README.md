@@ -57,7 +57,9 @@ const result = await analyzeBook({
 - 분석 결과와 키는 화면 메모리에만 유지합니다. 새로고침하거나 다른 작품으로 이동하면 초기화됩니다.
 - 공통 `types.js`, 도서 API, DB 저장은 연결하지 않았습니다. 필드 정의와 저장·노출 방식은 팀장님 검토 후 통합합니다.
 - 기존 `BookCoverGenerator.jsx` → `useBookCoverGenerator.js` → `openaiImageApi.js`의 **전문 기반 표지 생성**은 유지합니다.
-- **장르·표지용 요약 기반 표지 생성**은 아직 연결하지 않았습니다. 추후 `genre`와 `summary`를 활용하며 독자용 `introduction`과 용도를 구분합니다.
+- **장르·표지용 요약 기반 표지 생성**은 분석 화면 하단에서 별도로 제공합니다. 수정한 `genre`와 `summary`, 제목·작성자만 보내며 전문과 독자용 `introduction`은 보내지 않습니다. 위에서 입력한 API 키를 사용합니다.
+- `SummaryBookCoverGenerator.jsx` → `useSummaryBookCoverGenerator.js` → `openaiSummaryImageApi.js`가 새 생성 흐름입니다. 품질 선택·미리보기·요청 취소를 제공하며, 장르나 요약이 바뀌면 기존 미리보기를 초기화합니다.
+- `BookAnalysis`에 선택 인자 `onSaveCover(dataUrl)`를 전달하면 저장 버튼을 제공합니다. 현재 `App.jsx`에서는 기존 표지 저장 API에 연결되어 있으며, 본인 확인 후 저장하면 작품 표지가 교체됩니다. 분석 결과 자체는 여전히 저장하지 않습니다.
 
 ## 프롬프트 방어
 

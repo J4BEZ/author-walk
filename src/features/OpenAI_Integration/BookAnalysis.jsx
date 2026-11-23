@@ -1,8 +1,9 @@
 import { useBookAnalysis } from './useBookAnalysis.js';
 import { BOOK_ANALYSIS_LIMITS } from './openaiBookAnalysisApi.js';
+import SummaryBookCoverGenerator from './SummaryBookCoverGenerator.jsx';
 
-/** @param {{ book: { title: string, content: string } }} props */
-export default function BookAnalysis({ book }) {
+/** @param {{ book: { title: string, author: string, content: string }, onSaveCover?: (dataUrl: string) => Promise<void> }} props */
+export default function BookAnalysis({ book, onSaveCover }) {
   const { userApiKey, setUserApiKey, genre, setGenre, introduction, setIntroduction, summary, setSummary, warnings,
     analyzing, error, message, analyze } = useBookAnalysis({ book });
   const busy = analyzing;
@@ -61,6 +62,16 @@ export default function BookAnalysis({ book }) {
           </details>
         )}
       </div>
+      <SummaryBookCoverGenerator
+        key={JSON.stringify([book.title, book.author, genre, summary])}
+        title={book.title}
+        author={book.author}
+        genre={genre}
+        summary={summary}
+        userApiKey={userApiKey}
+        disabled={busy}
+        onSave={onSaveCover}
+      />
     </section>
   );
 }

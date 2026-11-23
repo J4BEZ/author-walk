@@ -310,6 +310,9 @@ function BookDetailScreen({id, editBook, changeCover, removeBook, onDeleted}) {
       <BookAnalysis
         key={JSON.stringify([book.id, book.title, book.content])}
         book={book}
+        onSaveCover={async (dataUrl) => {
+          setBook(await changeCover(book.id, dataUrl, credentials));
+        }}
       />
       <BookCoverGenerator
         key={JSON.stringify([book.id, book.title, book.author, book.content])}
