@@ -22,10 +22,10 @@ export function findUser(router, userId) {
  * @param {string} userId
  * @param {string} password  평문 (해시로 바꿔 저장하고 평문은 저장하지 않음)
  */
-export function createUser(router, userId, password) {
+export async function createUser(router, userId, password) {
   const user = {
     userId,
-    passwordHash: hashPassword(password),
+    passwordHash: await hashPassword(password),
     createdAt: new Date().toISOString(),
   };
   return router.db.get('users').insert(user).write();
@@ -34,9 +34,9 @@ export function createUser(router, userId, password) {
 
 /**
  * 인증 : 아이디와 비밀번호가 맞으면 그 user, 아니면 null
- * @returns {object | null}
+ * @returns {Promise<object | null>}
  */
-export function authenticate(router, { userId, password } = {}) {
+export async function authenticate(router, { userId, password } = {}) {
 
   // userId 가 문자열이 아니면 null
   if (typeof userId !== 'string') return null;
@@ -48,10 +48,10 @@ export function authenticate(router, { userId, password } = {}) {
     // 사용자가 존재하지 않는다는 정보(=> 해당 ID는 없다는 정보를 흘리지 않습니다.)
     // 너무 빨리 반환해주면 공격자가 '아 이거 존재하지 않는구나라 판단하지 못하도록' 
     // 더미 해시 계산도 진행합니다.
-    hashPassword((typeof password === 'string' ? password : '')); // 더미 해시 계산 (결과 버림)
+    await hashPassword((typeof password === 'string' ? password : '')); // 더미 해시 계산 (결과 버림)
     return null; // 그런 사용자 없으면 null 반환
   }
 
   // verifyPassword 가 맞으면 user, 아니면 null
-  return verifyPassword(password, user.passwordHash) ? user : null;
+  return await verifyPassword(password, user.passwordHash) ? user : null;
 }

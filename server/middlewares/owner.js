@@ -11,23 +11,29 @@ const GUARDED_METHODS = ['PATCH', 'PUT', 'DELETE'];
  * POST /books: 책 등록 시 본인 확인 (아이디와 비밀번호)
  */
 export function ownerOnCreate(router) {
-  return (req, res, next) => {
-    const { userId, password } = req.body;
+  return async (req, res, next) => {
 
-    // userId, password 가 둘 다 비어 있지 않은 문자열이 아니면 400
-    if (isBlank(userId) || isBlank(password)) {
-      return res.status(400).json({ message: '아이디와 비밀번호를 모두 입력해야 합니다.' });
-    }
+    // async 미들웨어에서 난 에러를 catch할 수 있도록 try-catch 진행
+    try {
+      const { userId, password } = req.body;
 
-    // 사용자가 존재하면 수정 가능 여부 확인 (비밀번호 체크)
-    if (!authenticate(router, { userId, password })) {
-      return res.status(403).json({ message: '아이디 또는 비밀번호가 맞지 않습니다.' });
+      // userId, password 가 둘 다 비어 있지 않은 문자열이 아니면 400
+      if (isBlank(userId) || isBlank(password)) {
+        return res.status(400).json({ message: '아이디와 비밀번호를 모두 입력해야 합니다.' });
+      }
+
+      // 사용자가 존재하면 수정 가능 여부 확인 (비밀번호 체크)
+      if (!await authenticate(router, { userId, password })) {
+        return res.status(403).json({ message: '아이디 또는 비밀번호가 맞지 않습니다.' });
+      }
+      
+      // 본문에서 password, passwordHash 지우고 next() (userId 는 남김)
+      delete req.body.password;
+      delete req.body.passwordHash;
+      next();
+    } catch (err) {
+      next(err);
     }
-    
-    // 본문에서 password, passwordHash 지우고 next() (userId 는 남김)
-    delete req.body.password;
-    delete req.body.passwordHash;
-    next();
   };
 }
 
@@ -44,14 +50,14 @@ function canModify(user, book) {
 
 /**
  * 아이디와 비밀번호가 그 책 주인 것과 맞는지 확인
- * @returns {boolean}
+ * @returns {Promise<boolean>}
  */
-function isOwner(router, bookId, credentials) {
+async function isOwner(router, bookId, credentials) {
   
   const book = findBook(router, bookId);
   if (!book) return false; // 책이 없으면 false
 
-  const user = authenticate(router, credentials);
+  const user = await authenticate(router, credentials);
   if (!user) return false; // 인증 실패하면 false
 
   // 책의 userId 와 user 의 userId 비교
@@ -62,8 +68,12 @@ function isOwner(router, bookId, credentials) {
  * POST /books/:id/verify : 본인인지 { ok } 로 답합니다 (수정 화면을 열기 전 확인용)
  */
 export function verifyOwnerRoute(router) {
-  return (req, res) => {
-    res.json({ ok: isOwner(router, Number(req.params.id), req.body) });
+  return async (req, res, next) => {
+    try {
+      res.json({ ok: await isOwner(router, Number(req.params.id), req.body) });
+    } catch (err) {
+      next(err);
+    }
   };
 }
 
@@ -81,24 +91,30 @@ function findBook(router, bookId) {
  * PATCH, PUT, DELETE /books/:id : 본인이 아니면 403, 맞으면 자격 정보를 지우고 통과
  */
 export function requireOwner(router) {
-  return (req, res, next) => {
-    // GUARDED_METHODS 가 아니면 (GET 등) 바로 next()
-    if (!GUARDED_METHODS.includes(req.method)) return next();
+  return async (req, res, next) => {
 
-    const bookId = Number(req.params.id);
 
-    // 없는 책 찾으면 router 로 그대로 넘겨 router가 직접 404 반환하도록
-    if (!findBook(router, bookId)) return next();
+    try{
+      // GUARDED_METHODS 가 아니면 (GET 등) 바로 next()
+      if (!GUARDED_METHODS.includes(req.method)) return next();
 
-    // isOwner 가 false 면 res.status(403).json({ message: '...' }) 로 끝내기 (next 부르지 않음)
-    if (!isOwner(router, Number(req.params.id), req.body)) {
-      return res.status(403).json({ message: '권한이 없습니다.' });
+      const bookId = Number(req.params.id);
+
+      // 없는 책 찾으면 router 로 그대로 넘겨 router가 직접 404 반환하도록
+      if (!findBook(router, bookId)) return next();
+
+      // isOwner 가 false 면 res.status(403).json({ message: '...' }) 로 끝내기 (next 부르지 않음)
+      if (!await isOwner(router, Number(req.params.id), req.body)) {
+        return res.status(403).json({ message: '권한이 없습니다.' });
+      }
+
+      // 통과하면 본문에서 userId, password, passwordHash 지우고 next()
+      delete req.body.userId;
+      delete req.body.password;
+      delete req.body.passwordHash;
+      next();
+    } catch (err) {
+      next(err);
     }
-
-    // 통과하면 본문에서 userId, password, passwordHash 지우고 next()
-    delete req.body.userId;
-    delete req.body.password;
-    delete req.body.passwordHash;
-    next();
   };
 }
