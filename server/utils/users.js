@@ -23,9 +23,18 @@ export function findUser(router, userId) {
  * @param {string} password  평문 (해시로 바꿔 저장하고 평문은 저장하지 않음)
  */
 export async function createUser(router, userId, password) {
+
+  // 해시 부터 생성 (TOC-TOU 경합을 최대한 방지하기 위해 오래 걸리는 해시를 먼저 진행)
+  const passwordHash = await hashPassword(password);
+
+  // 이미 존재하는 ID인지 확인, 존재하면 null 반환
+  if (findUser(router, userId)) {
+    return null;
+  }
+
   const user = {
     userId,
-    passwordHash: await hashPassword(password),
+    passwordHash: passwordHash,
     createdAt: new Date().toISOString(),
   };
   return router.db.get('users').insert(user).write();
