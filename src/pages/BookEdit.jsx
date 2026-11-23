@@ -4,6 +4,7 @@ import {useNavigate, useParams} from "react-router-dom";
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
 import BookCoverGenerator from "../features/OpenAI_Integration/BookCoverGenerator.jsx";
+import {updateBook} from "../features/books/api/booksApi.js";
 
 import {
   normalizeBookInput,
@@ -92,45 +93,32 @@ function BookEdit() {
     setSubmitting(true);
 
     try {
-      const res = await fetch(`http://localhost:3000/books/${id}`);
-
-      if (!res.ok) {
-        throw new Error("작품 정보를 확인하지 못했습니다.");
-      }
-
-      const originalBook = await res.json();
-
-      // 기존 비밀번호 확인
-      if (originalBook.password !== clean.password) {
-        alert("비밀번호가 일치하지 않습니다.");
-        return;
-      }
-
-      const updated = await fetch(`http://localhost:3000/books/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      // 서버에서 아이디와 비밀번호를 확인한 후 수정
+      await updateBook(
+        Number(id),
+        {
           title: clean.title,
           author: clean.author,
-          userId: clean.userId,
           description: clean.description,
           content: clean.content,
           coverImageUrl,
-          updatedAt: new Date().toISOString(),
-        }),
-      });
-
-      if (!updated.ok) {
-        throw new Error("작품 수정에 실패했습니다.");
-      }
+        },
+        {
+          userId: clean.userId,
+          password: clean.password,
+        },
+      );
 
       alert("작품이 수정되었습니다.");
       navigate(`/books/${id}`);
     } catch (e) {
       console.error(e);
-      alert("작품 수정에 실패했습니다.");
+
+      if (e instanceof Error && e.cause === "NOT_OWNER") {
+        alert(e.message);
+      } else {
+        alert("작품 수정에 실패했습니다.");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -208,6 +196,7 @@ function BookEdit() {
                   type="password"
                   value={form.password}
                   onChange={handleChange}
+                  autoComplete="current-password"
                 />
               </div>
             </form>

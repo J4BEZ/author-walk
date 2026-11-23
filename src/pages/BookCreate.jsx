@@ -4,6 +4,7 @@ import {useBookList} from "../features/books/hooks/useBooks.js";
 
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
+import BookCoverGenerator from "../features/OpenAI_Integration/BookCoverGenerator.jsx";
 
 import {
   normalizeBookInput,
@@ -34,6 +35,7 @@ function BookCreate() {
     password: "",
   });
 
+  const [coverImageUrl, setCoverImageUrl] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
@@ -47,6 +49,8 @@ function BookCreate() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (submitting) return;
 
     const clean = normalizeBookInput(form);
     const message = joinErrors(validateNewBook(clean));
@@ -66,6 +70,7 @@ function BookCreate() {
         description: clean.description,
         content: clean.content,
         password: clean.password,
+        coverImageUrl,
       });
 
       alert(`등록했습니다 (id ${saved.id})`);
@@ -82,7 +87,7 @@ function BookCreate() {
       <Header isLoggedIn={true} />
 
       <main className="book-create-page">
-        <form className="book-create-layout" onSubmit={handleSubmit}>
+        <div className="book-create-layout">
           <section className="book-create-left">
             <h1>작품 등록</h1>
 
@@ -118,7 +123,7 @@ function BookCreate() {
               </div>
             </div>
 
-            <div className="book-create-account">
+            <form className="book-create-account" onSubmit={handleSubmit}>
               <div className="book-create-field">
                 <label htmlFor="userId">ID</label>
                 <input
@@ -137,10 +142,10 @@ function BookCreate() {
                   type="password"
                   value={form.password}
                   onChange={handleChange}
-                  inputMode="numeric"
+                  autoComplete="new-password"
                 />
               </div>
-            </div>
+            </form>
           </section>
 
           <section className="book-create-right">
@@ -155,18 +160,35 @@ function BookCreate() {
 
             <p className="book-create-count">글자수 {form.content.length}자</p>
 
-            <button type="button" className="book-create-ai-button">
-              AI 표지 생성
-            </button>
+            {/* 선택한 AI 표지 */}
+            {coverImageUrl && (
+              <div className="book-create-cover-preview">
+                <h3>현재 적용된 표지</h3>
+                <img
+                  src={coverImageUrl}
+                  alt={`${form.title} 표지`}
+                  className="book-create-cover-image"
+                />
+              </div>
+            )}
+
+            {/* AI 표지 생성 */}
+            <BookCoverGenerator
+              book={{...form, coverImageUrl}}
+              onSave={async (dataUrl) => {
+                setCoverImageUrl(dataUrl);
+              }}
+            />
 
             <button
-              type="submit"
+              type="button"
               className="book-create-submit"
+              onClick={handleSubmit}
               disabled={submitting}>
               {submitting ? "등록 중..." : "작품 등록"}
             </button>
           </section>
-        </form>
+        </div>
       </main>
 
       <Footer />
