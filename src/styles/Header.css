@@ -16,14 +16,14 @@
   margin: 0;
   font-size: 20px;
   font-weight: 600;
-  color: #555;
+  color: #243d32;
 }
 
 .header-logo h1 {
   margin: 0;
   font-size: 40px;
   font-weight: 700;
-  color: #809a78;
+  color: #3c9a70;
 }
 
 .header-nav {
@@ -40,12 +40,12 @@
 }
 
 .header-nav a:hover {
-  color: #809a78;
+  color: #3c9a70;
 }
 
 .header-nav .header-login {
   padding: 8px 14px;
-  background-color: #809a78;
+  background-color: #3c9a70;
   color: white;
   border-radius: 10px;
 }
