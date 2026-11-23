@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useLocation} from "react-router-dom";
 import {useBookList, useBookDetail} from "../features/books/hooks/useBooks.js";
 
 import Header from "../components/Header.jsx";
@@ -59,6 +59,8 @@ const defaultView = (books) => queryBooks(books, {days: NEW_BOOK_DAYS});
 function Main() {
   const navigate = useNavigate();
   const booksState = useBookList();
+  const location = useLocation();
+  const isLoggedIn = location.pathname === "/logged-in";
 
   // 검색어가 없으면 기본 보기 (이번 주 신작), 있으면 검색 결과
   const shownBooks = isBlank(booksState.query.q)
@@ -67,12 +69,20 @@ function Main() {
 
   return (
     <>
-      <Header />
+      <Header isLoggedIn={isLoggedIn} />
+
       <main>
-        <section className="main-intro">
-          <h1>당신도 작가가 될 수 있어요</h1>
-          <a href="/login">로그인하고 글쓰기 →</a>
-        </section>
+        {isLoggedIn ? (
+          <section className="main-intro">
+            <h1>안녕하세요, 주홍님</h1>
+            <p>오늘은 어떤 이야기를 만들어 볼까요?</p>
+          </section>
+        ) : (
+          <section className="main-intro">
+            <h1>당신도 작가가 될 수 있어요</h1>
+            <a href="/login">로그인하고 글쓰기 →</a>
+          </section>
+        )}
         <SearchBar onSearch={booksState.reload} />
         <NewBooks
           books={shownBooks}

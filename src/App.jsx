@@ -11,7 +11,7 @@ function App() {
     <Routes>
       <Route path="/" element={<Navigate to="/main" replace />} />
       <Route path="/main" element={<Main />} />
-      <Route path="/logged-in" element={<LoggedInPage />} />
+      <Route path="/logged-in" element={<Main />} />
       <Route path="/books" element={<Books />} />
       <Route path="/books/new" element={<BookCreate />} />
       <Route path="/books/:id" element={<BookDetail />} />
