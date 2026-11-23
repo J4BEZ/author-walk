@@ -220,6 +220,8 @@ export function useBookList() {
   return { books, loading, error, reload, addBook, editBook, changeCover, removeBook };
 }
 
+/** @typedef {ReturnType<typeof useBookList>} BookListState  useBookList 가 반환하는 값 (페이지 props 타입에 사용) */
+
 /**
  * 도서 한 권 화면용 훅 (상세, 수정 화면) : id 가 바뀌면 다시 불러옵니다
  * @param {number | null} id  아직 고른 도서가 없으면 null

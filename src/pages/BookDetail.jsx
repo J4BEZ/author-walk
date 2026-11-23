@@ -11,6 +11,8 @@ import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
 import BookLikeButton from "../components/BookLikeButton.jsx";
 
+/** @import { BookListState } from '../features/books/hooks/useBooks.js' */
+
 import "../styles/BookDetail.css";
 
 function alertError(e, fallback) {
@@ -26,9 +28,9 @@ function joinErrors(errors) {
  * 작품 상세 페이지 : 한 권은 useBookDetail 로 불러오고, 수정, 표지 저장, 삭제는 App 의 목록 훅 함수를 받아 씁니다
  * (그래야 삭제 결과가 목록 페이지에 바로 반영됨)
  * @param {{
- *   editBook: ReturnType<typeof import('../features/books/hooks/useBooks.js').useBookList>['editBook'],
- *   changeCover: ReturnType<typeof import('../features/books/hooks/useBooks.js').useBookList>['changeCover'],
- *   removeBook: ReturnType<typeof import('../features/books/hooks/useBooks.js').useBookList>['removeBook'],
+ *   editBook: BookListState['editBook'],
+ *   changeCover: BookListState['changeCover'],
+ *   removeBook: BookListState['removeBook'],
  * }} props
  */
 function BookDetail({editBook, changeCover, removeBook}) {

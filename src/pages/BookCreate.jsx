@@ -11,6 +11,8 @@ import {
   validateNewBook,
 } from "../features/books/utils/bookValidation.js";
 
+/** @import { BookListState } from '../features/books/hooks/useBooks.js' */
+
 import "../styles/BookCreate.css";
 
 function alertError(e, fallback) {
@@ -24,7 +26,7 @@ function joinErrors(errors) {
 
 /**
  * 작품 등록 페이지 : 등록은 App 의 목록 훅 addBook 으로 (등록한 책이 목록 페이지에 바로 보이도록)
- * @param {{ addBook: ReturnType<typeof import('../features/books/hooks/useBooks.js').useBookList>['addBook'] }} props
+ * @param {{ addBook: BookListState['addBook'] }} props
  */
 function BookCreate({addBook}) {
   const navigate = useNavigate();

@@ -9,13 +9,15 @@ import Footer from "../components/Footer.jsx";
 import SearchBar from "../components/SearchBar.jsx";
 import BookLikeButton from "../components/BookLikeButton.jsx";
 
+/** @import { BookListState } from '../features/books/hooks/useBooks.js' */
+
 import "../App.css";
 import "../styles/font.css";
 import "../styles/Books.css";
 
 /**
  * 전체 작품 페이지
- * @param {{ booksState: ReturnType<typeof import('../features/books/hooks/useBooks.js').useBookList> }} props
+ * @param {{ booksState: BookListState }} props
  */
 function Books({booksState}) {
   const navigate = useNavigate();

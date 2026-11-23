@@ -13,7 +13,8 @@ import "../styles/font.css";
 import {isBlank} from "#src/utils/validation/text.js";
 import {queryBooks, NEW_BOOK_DAYS} from "../features/books/utils/bookQuery.js";
 
-/** @import { BookView } from './features/books/types.js' */
+/** @import { BookListState } from '../features/books/hooks/useBooks.js' */
+/** @import { BookView } from '../features/books/types.js' */
 //
 
 /**
@@ -49,7 +50,7 @@ const defaultView = (books) => queryBooks(books, {days: NEW_BOOK_DAYS});
 
 /**
  * 메인 페이지
- * @param {{ booksState: ReturnType<typeof import('../features/books/hooks/useBooks.js').useBookList> }} props
+ * @param {{ booksState: BookListState }} props
  */
 function Main({booksState}) {
   const navigate = useNavigate();
