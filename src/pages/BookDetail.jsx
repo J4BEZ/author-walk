@@ -113,12 +113,14 @@ function BookDetail() {
             </div>
 
             <p className="book-detail-notice">
-              수정 및 삭제 시 등록한 4자리 비밀번호가 필요합니다.
+              수정 및 삭제 시 등록한 비밀번호가 필요합니다.
             </p>
 
             <div className="book-detail-actions">
-              <button type="button" onClick={openEdit}>
-                수정
+              <button
+                type="button"
+                onClick={() => navigate(`/books/${id}/edit`)}>
+                수정하기
               </button>
 
               <button type="button" onClick={handleDelete}>

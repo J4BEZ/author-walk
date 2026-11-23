@@ -4,14 +4,12 @@ import "../styles/Header.css";
 function Header({isLoggedIn = false}) {
   return (
     <header className="header">
-      <div className="header-logo">
+      <Link to={isLoggedIn ? "/logged-in" : "/main"} className="header-logo">
         <p className="header-logo-sub">걷기가 서재</p>
         <h1 className="header-logo-title">작가의 산책</h1>
-      </div>
+      </Link>
 
       <nav className="header-nav">
-        <Link to={isLoggedIn ? "/logged-in" : "/main"}>홈</Link>
-
         <Link to="/books">작품 둘러보기</Link>
 
         {isLoggedIn ? (

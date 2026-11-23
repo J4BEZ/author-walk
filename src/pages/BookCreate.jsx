@@ -138,7 +138,6 @@ function BookCreate() {
                   value={form.password}
                   onChange={handleChange}
                   inputMode="numeric"
-                  maxLength={4}
                 />
               </div>
             </div>

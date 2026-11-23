@@ -5,6 +5,7 @@ import Login from "./pages/Login.jsx";
 import Books from "./pages/Books.jsx";
 import BookDetail from "./pages/BookDetail.jsx";
 import BookCreate from "./pages/BookCreate.jsx";
+import BookEdit from "./pages/BookEdit.jsx";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/books" element={<Books />} />
       <Route path="/books/new" element={<BookCreate />} />
+      <Route path="/books/:id/edit" element={<BookEdit />} />
       <Route path="/books/:id" element={<BookDetail />} />
     </Routes>
   );
