@@ -1,10 +1,12 @@
 import {useState} from "react";
+import {useNavigate} from "react-router-dom";
 import {useBookList, useBookDetail} from "../features/books/hooks/useBooks.js";
 
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
 import SearchBar from "../components/SearchBar.jsx";
 import NewBooks from "../components/NewBooks.jsx";
+import BookDetail from "./BookDetail.jsx";
 
 import "../App.css";
 import "../styles/font.css";
@@ -54,13 +56,9 @@ function joinErrors(errors) {
  */
 const defaultView = (books) => queryBooks(books, {days: NEW_BOOK_DAYS});
 
-function App() {
-  // useBookList 는 앱에서 한 번만 부르고, 필요한 화면에 props 로 내려 줍니다
-  // (화면마다 따로 부르면 목록 State 가 따로 생겨서 서로 반영되지 않음)
+function Main() {
+  const navigate = useNavigate();
   const booksState = useBookList();
-  const [selectedId, setSelectedId] = useState(
-    /** @type {number | null} */ (null),
-  );
 
   // 검색어가 없으면 기본 보기 (이번 주 신작), 있으면 검색 결과
   const shownBooks = isBlank(booksState.query.q)
@@ -76,18 +74,11 @@ function App() {
           <a href="/login">로그인하고 글쓰기 →</a>
         </section>
         <SearchBar onSearch={booksState.reload} />
-        <NewBooks books={shownBooks} onSelect={setSelectedId} />
+        <NewBooks
+          books={shownBooks}
+          onSelect={(id) => navigate(`/books/${id}`)}
+        />
         <BookCreateScreen addBook={booksState.addBook} />
-        {selectedId !== null && (
-          <BookDetailScreen
-            key={selectedId}
-            id={selectedId}
-            editBook={booksState.editBook}
-            changeCover={booksState.changeCover}
-            removeBook={booksState.removeBook}
-            onDeleted={() => setSelectedId(null)}
-          />
-        )}
       </main>
       <Footer />
     </>
@@ -314,4 +305,4 @@ function BookDetailScreen({id, editBook, changeCover, removeBook, onDeleted}) {
   );
 }
 
-export default App;
+export default Main;
