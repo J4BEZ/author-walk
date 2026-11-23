@@ -4,6 +4,7 @@ import express from "express";
 import { validatePassword, validateUserId } from "#src/utils/validation/users.js"
 import { findUser, createUser, authenticate } from "../utils/users.js";
 import { signToken } from "../utils/token.js"
+import { requireAuth } from "../middlewares/auth.js"
 
 /**
  * 인증 관련 라우트 설정
@@ -79,6 +80,24 @@ export function authRoutes(router){
       return res.status(200).json({token});
 
     } catch (error){
+      next(error);
+    }
+
+  });
+
+  // GET /me - 사용자 정보 조회
+  auth.get('/me', requireAuth(router), async (req, res, next) => {
+
+    try {
+      // req.user에 인증된 사용자 정보가 있는지 확인
+      if (!req.user) {
+        return res.status(401).json({ message: "로그인이 필요합니다." });
+      }
+
+      // 사용자 정보 반환 (userId 만 담아서 전달)
+      return res.status(200).json({ user: { userId: req.user.userId }});
+
+    } catch (error) {
       next(error);
     }
 
