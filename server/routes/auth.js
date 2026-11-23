@@ -2,7 +2,8 @@
 import express from "express";
 
 import { validatePassword, validateUserId } from "#src/utils/validation/users.js"
-import { findUser, createUser } from "../utils/users.js";
+import { findUser, createUser, authenticate } from "../utils/users.js";
+import { signToken } from "../utils/token.js"
 
 /**
  * 인증 관련 라우트 설정
@@ -12,6 +13,7 @@ export function authRoutes(router){
 
   const auth = express.Router();
 
+  // POST /signup - 사용자 회원가입
   auth.post('/signup', async (req, res, next) => {
 
     try{
@@ -55,7 +57,32 @@ export function authRoutes(router){
 
       next(error);
     }
-  })
+  });
+
+
+  // POST /login - 사용자 로그인
+  auth.post('/login', async (req, res, next) => {
+
+    try{
+
+      // userId, pw 추출
+      const {userId, password} = req.body
+
+      // 사용자 인증이 실패하는 경우
+      const AuthorizedUser = await authenticate(router, {userId, password});
+      if (!AuthorizedUser) {
+        return res.status(401).json({message: '아이디 또는 비밀번호가 맞지 않습니다.'});
+      }
+
+      // 인증 성공 시 토큰 생성
+      const token = await signToken(AuthorizedUser);
+      return res.status(200).json({token});
+
+    } catch (error){
+      next(error);
+    }
+
+  });
 
 
   return auth;
