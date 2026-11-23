@@ -15,6 +15,7 @@
  * @property {string | null} userId         작성한 사용자 아이디 (수정, 삭제 때 본인 확인에 사용, 임시라 null 가능)
  * @property {string} passwordHash          비밀번호 해시 "scrypt$<salt>$<hash>" (서버가 만들고, 응답에는 넘기지 않음)
  * @property {string | null} coverImageUrl  표지 Data URL (`data:image/png;base64,...`), 아직 없으면 null
+ * @property {number} [likes]               좋아요 수 (이전 도서 데이터에는 없을 수 있음)
  * @property {string} createdAt             등록 시각 (ISO 문자열)
  * @property {string} updatedAt             수정 시각 (ISO 문자열)
  */

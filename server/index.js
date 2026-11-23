@@ -39,8 +39,20 @@ if (DELAY_MS > 0) server.use(delay(DELAY_MS)); // --delay 를 준 경우에만 �
 server.use(jsonServer.bodyParser);   // 요청 본문 JSON -> req.body
 
 server.post('/books/:id/verify', verifyOwnerRoute(router)); // 본인 확인 전용 경로
+server.post('/books/:id/likes', (req, res) => {
+  const book = router.db.get('books').find({ id: Number(req.params.id) });
+  const record = book.value();
+  if (!record) return res.sendStatus(404);
+
+  // 동기식 DB 갱신으로 동시에 들어온 요청도 각각 한 번씩 반영합니다.
+  const likes = (record.likes ?? 0) + 1;
+  book.assign({ likes }).write();
+  return res.json({ likes });
+});
 server.post('/books', hashOnCreate);                        // 등록 : 평문 -> 해시
 server.use('/books/:id', requireOwner(router));             // 수정, 삭제 : 본인만
+// 중첩 경로에서 등록 미들웨어를 건너뛰는 POST를 막습니다.
+server.post('/:resource/:id/:nested', (_req, res) => res.sendStatus(404));
 
 // json-server 의 /db (db.json 전체) 는 아이디, 해시비번이 포함된 민감 정보이므로, 접근 자체가 안되게 합니다.
 server.get('/db', (req, res) => res.sendStatus(404));

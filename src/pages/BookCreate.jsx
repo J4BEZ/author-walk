@@ -4,7 +4,8 @@ import {useBookList} from "../features/books/hooks/useBooks.js";
 
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
-import BookCoverGenerator from "../features/OpenAI_Integration/BookCoverGenerator.jsx";
+import BookCoverGenerator from "../features/OpenAI_Integration/components/BookCoverGenerator.jsx";
+import BookAnalysis from "../features/OpenAI_Integration/components/BookAnalysis.jsx";
 
 import {
   normalizeBookInput,
@@ -47,6 +48,10 @@ function BookCreate() {
     }));
   };
 
+  const handleSaveCover = async (dataUrl) => {
+    setCoverImageUrl(dataUrl);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -80,6 +85,12 @@ function BookCreate() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const aiBook = {
+    title: form.title,
+    author: form.author,
+    content: form.content,
   };
 
   return (
@@ -160,13 +171,19 @@ function BookCreate() {
 
             <p className="book-create-count">글자수 {form.content.length}자</p>
 
-            {/* AI 표지 생성 */}
-            <BookCoverGenerator
-              book={{...form, coverImageUrl}}
-              onSave={async (dataUrl) => {
-                setCoverImageUrl(dataUrl);
-              }}
-            />
+{/* 1. 전문 기반 AI 표지 생성 */}
+<section className="book-create-ai-section">
+  <h2>AI 표지 생성</h2>
+
+  <BookCoverGenerator book={aiBook} onSave={handleSaveCover} />
+</section>
+
+{/* 2. AI 작품 분석 + 요약 기반 표지 생성 */}
+<section className="book-create-ai-section">
+  <h2>AI 작품 분석</h2>
+
+  <BookAnalysis book={aiBook} onSaveCover={handleSaveCover} />
+</section>
 
             <button
               type="button"

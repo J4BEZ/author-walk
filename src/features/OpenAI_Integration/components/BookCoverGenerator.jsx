@@ -1,13 +1,13 @@
 // AI 표지 생성 화면 : 입력, 미리보기와 저장
 // OpenAI 요청과 State 관리는 useBookCoverGenerator 에서 처리합니다.
 
-import { IMAGE_QUALITIES } from './openaiImageApi.js';
-import { useBookCoverGenerator } from './useBookCoverGenerator.js';
+import { IMAGE_QUALITIES } from '../api/openaiImageApi.js';
+import { useBookCoverGenerator } from '../hooks/useBookCoverGenerator.js';
 
-import '../../styles/BookCoverGenerator.css';
+import '../../../styles/BookCoverGenerator.css';
 
 /** @import { BookView } from '../books/types.js' */
-/** @import { ImageQuality } from './openaiImageApi.js' */
+/** @import { ImageQuality } from '../api/openaiImageApi.js' */
 
 /**
  * 표지 생성 화면 : API 키, 품질 입력 -> 생성 -> 미리보기 -> 저장
@@ -34,8 +34,6 @@ function BookCoverGenerator({ book, onSave }) {
 
   return (
     <div className="book-cover-generator" aria-busy={busy}>
-      <h3>AI 표지 생성</h3>
-
       {/* 생성에 필요한 입력 */}
       <form className="cover-gen-form" onSubmit={handleSubmit}>
         <label className="cover-gen-field cover-gen-field--key">

@@ -69,6 +69,15 @@ export async function getBook(id) {
 }
 
 /**
+ * @param {number} id
+ * @returns {Promise<number>}
+ */
+export async function incrementBookLikes(id) {
+  const { likes } = await request(`/books/${id}/likes`, { method: 'POST' });
+  return likes;
+}
+
+/**
  * 새 도서 등록. 비밀번호는 서버가 해시해서 저장합니다
  * @param {NewBookInput} input
  * @returns {Promise<BookView>}
@@ -91,6 +100,7 @@ export async function createBook({
       userId,                                     // 임시 사용자 아이디 (없으면 null)
       password,                                   // 서버가 직접 scrypt + salt 로 해시한 뒤 저장 (평문은 저장되지 않음)
       coverImageUrl,                              // 등록 때 만든 표지가 없으면 null
+      likes: 0,
       createdAt: now,
       updatedAt: now,
     },

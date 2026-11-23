@@ -20,6 +20,7 @@ export function hashOnCreate(req, res, next) {
 
   // req.body.password 지우기
   delete req.body.password;
+  req.body.likes = 0;
 
   next(); // 다음 미들웨어 (결국 router 가 저장)
 }
@@ -28,10 +29,10 @@ export function hashOnCreate(req, res, next) {
  * 본인 확인에 쓸 기록을 꺼냅니다    
  * (지금은 책 자체, users 도입 후에는 책 주인 user 로 이 함수만 수정)
  * @param {any} router
- * @param {number} bookId
+ * @param {string} bookId
  */
 function findCredentialRecord(router, bookId) {
-  return router.db.get('books').find({ id: bookId }).value();
+  return findBook(router, bookId);
 }
 
 /**
@@ -55,7 +56,7 @@ function isOwner(router, bookId, { userId, password } = {}) {
  */
 export function verifyOwnerRoute(router) {
   return (req, res) => {
-    res.json({ ok: isOwner(router, Number(req.params.id), req.body) });
+    res.json({ ok: isOwner(router, req.params.id, req.body) });
   };
 }
 
@@ -63,10 +64,10 @@ export function verifyOwnerRoute(router) {
 /**
  * 책 한 권 원본을 꺼냅니다 (없으면 undefined)
  * @param {any} router
- * @param {number} bookId
+ * @param {string} bookId
  */
 function findBook(router, bookId) {
-  return router.db.get('books').find({ id: bookId }).value();
+  return router.db.get('books').getById(bookId).value();
 }
 
 /**
@@ -74,16 +75,19 @@ function findBook(router, bookId) {
  */
 export function requireOwner(router) {
   return (req, res, next) => {
+    // 검사를 마친 뒤 json-server에서 메서드가 바뀌지 않도록 합니다.
+    delete req.headers['x-http-method-override'];
     // GUARDED_METHODS 가 아니면 (GET 등) 바로 next()
     if (!GUARDED_METHODS.includes(req.method)) return next();
 
-    const bookId = Number(req.params.id);
+    const bookId = req.params.id;
 
     // 없는 책 찾으면 router 로 그대로 넘겨 router가 직접 404 반환하도록
-    if (!findBook(router, bookId)) return next();
+    const book = findBook(router, bookId);
+    if (!book) return next();
 
     // isOwner 가 false 면 res.status(403).json({ message: '...' }) 로 끝내기 (next 부르지 않음)
-    if (!isOwner(router, Number(req.params.id), req.body)) {
+    if (!isOwner(router, bookId, req.body)) {
       return res.status(403).json({ message: '권한이 없습니다.' });
     }
 
@@ -91,6 +95,12 @@ export function requireOwner(router) {
     delete req.body.userId;
     delete req.body.password;
     delete req.body.passwordHash;
+    delete req.body.likes;
+    if (req.method === 'PUT') {
+      // 전체 교체에서도 기존 좋아요 수와 본인 확인 정보를 유지합니다.
+      const { likes = 0, userId, passwordHash } = book;
+      Object.assign(req.body, { likes, userId, passwordHash });
+    }
     next();
   };
 }

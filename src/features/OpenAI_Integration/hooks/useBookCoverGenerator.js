@@ -2,10 +2,10 @@
 // 생성, 저장, 로딩, 에러 처리는 여기서 하고 화면에는 필요한 값과 함수를 내려 줍니다.
 
 import { useState, useEffect, useRef } from 'react';
-import { generateBookCover } from './openaiImageApi.js';
+import { generateBookCover } from '../api/openaiImageApi.js';
 
-/** @import { BookView } from '../books/types.js' */
-/** @import { ImageQuality } from './openaiImageApi.js' */
+/** @import { BookView } from '../../books/types.js' */
+/** @import { ImageQuality } from '../api/openaiImageApi.js' */
 
 /**
  * 에러를 화면에 보여 줄 문구로 바꿉니다

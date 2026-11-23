@@ -3,7 +3,8 @@ import {useNavigate, useParams} from "react-router-dom";
 
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
-import BookCoverGenerator from "../features/OpenAI_Integration/BookCoverGenerator.jsx";
+import BookCoverGenerator from "../features/OpenAI_Integration/components/BookCoverGenerator.jsx";
+import BookAnalysis from "../features/OpenAI_Integration/components/BookAnalysis.jsx";
 import {updateBook} from "../features/books/api/booksApi.js";
 
 import {
@@ -76,6 +77,11 @@ function BookEdit() {
     }));
   };
 
+  // AI 생성 표지를 임시로 적용
+  const handleSaveCover = async (dataUrl) => {
+    setCoverImageUrl(dataUrl);
+  };
+
   // 작품 수정
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -93,7 +99,6 @@ function BookEdit() {
     setSubmitting(true);
 
     try {
-      // 서버에서 아이디와 비밀번호를 확인한 후 수정
       await updateBook(
         Number(id),
         {
@@ -122,6 +127,13 @@ function BookEdit() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const aiBook = {
+    id: Number(id),
+    title: form.title,
+    author: form.author,
+    content: form.content,
   };
 
   if (loading) {
@@ -214,7 +226,7 @@ function BookEdit() {
 
             <p className="book-create-count">글자수 {form.content.length}자</p>
 
-            {/* 기존 표지 */}
+            {/* 기존 표지 또는 새로 선택한 AI 표지 */}
             {coverImageUrl && (
               <div className="book-create-cover-preview">
                 <h3>현재 적용된 표지</h3>
@@ -226,13 +238,19 @@ function BookEdit() {
               </div>
             )}
 
-            {/* AI 표지 재생성 */}
-            <BookCoverGenerator
-              book={{...form, coverImageUrl}}
-              onSave={async (dataUrl) => {
-                setCoverImageUrl(dataUrl);
-              }}
-            />
+            {/* 1. 전문 기반 AI 표지 생성 */}
+            <section className="book-create-ai-section">
+              <h2>AI 표지 생성</h2>
+
+              <BookCoverGenerator book={aiBook} onSave={handleSaveCover} />
+            </section>
+
+            {/* 2. AI 작품 분석 + 장르·요약 기반 표지 생성 */}
+            <section className="book-create-ai-section">
+              <h2>AI 작품 분석</h2>
+
+              <BookAnalysis book={aiBook} onSaveCover={handleSaveCover} />
+            </section>
 
             <button
               type="button"
