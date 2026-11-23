@@ -12,6 +12,7 @@ import {
   normalizeBookInput,
   validateBookChanges,
 } from "../features/books/utils/bookValidation.js";
+import {countChars} from "#src/utils/validation/text.js";
 
 /** @import { BookListState } from '../features/books/hooks/useBooks.js' */
 
@@ -232,7 +233,7 @@ function BookEditForm({book, editBook}) {
               onChange={handleChange}
             />
 
-            <p className="book-create-count">글자수 {form.content.length}자</p>
+            <p className="book-create-count">글자수 {countChars(form.content)}자</p>
 
             {/* 기존 표지 또는 새로 선택한 AI 표지 */}
             {coverImageUrl && (

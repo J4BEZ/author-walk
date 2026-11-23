@@ -10,6 +10,7 @@ import {
   normalizeBookInput,
   validateNewBook,
 } from "../features/books/utils/bookValidation.js";
+import {countChars} from "#src/utils/validation/text.js";
 
 /** @import { BookListState } from '../features/books/hooks/useBooks.js' */
 
@@ -173,7 +174,7 @@ function BookCreate({addBook}) {
               onChange={handleChange}
             />
 
-            <p className="book-create-count">글자수 {form.content.length}자</p>
+            <p className="book-create-count">글자수 {countChars(form.content)}자</p>
 
             {coverImageUrl && (
               <div className="book-create-cover-preview">
