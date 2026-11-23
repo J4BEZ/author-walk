@@ -4,7 +4,7 @@ import {useBookList} from "../features/books/hooks/useBooks.js";
 
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
-import BookCoverGenerator from "../features/OpenAI_Integration/BookCoverGenerator.jsx";
+import BookCoverGenerator from "../features/OpenAI_Integration/components/BookCoverGenerator.jsx";
 
 import {
   normalizeBookInput,
