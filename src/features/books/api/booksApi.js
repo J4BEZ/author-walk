@@ -1,41 +1,18 @@
 // json-server 와 대화하는 모듈 입니다.
 /** @import { BookView, NewBookInput, BookChanges, BookQuery, Credentials } from '../types.js' */
 
+import { createRequest } from '#src/api/client.js';
 import { isImageDataUrl } from '#src/utils/validation/image.js';
 import { queryBooks, toBookQuery } from '../utils/bookQuery.js';
 
 
-// 서버 주소 : .env 의 VITE_API_URL, 없으면 로컬 json-server
-const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
-// 도서 API 요청이 30초를 넘으면 TimeoutError로 중단합니다.
-const TIMEOUT_MS = 30_000; // 5초 -> 30초
-
-/**
- * 공통 요청 도우미 : 시간 제한, res.ok 확인, JSON 변환을 담당합니다.
- * @param {string} path  `/books` 처럼 BASE_URL 뒤에 붙는 경로
- * @param {{ method?: string, body?: object }} [options]
- * @returns {Promise<any>}
- */
-async function request(path, { method = 'GET', body } = {}) {
-  // 요청 보내기 : body 가 있을 때만 JSON 헤더와 문자열 변환
-  const res = await fetch(`${BASE_URL}${path}`, {
-    method,
-    headers: body ? { 'Content-Type': 'application/json' } : undefined,
-    body: body ? JSON.stringify(body) : undefined,
-    signal: AbortSignal.timeout(TIMEOUT_MS),
-  });
-
-  // 서버가 본인 확인에 실패 (403) : 화면이 이 문구를 그대로 보여 주도록 NOT_OWNER 로 처리
-  if (res.status === 403) {
-    throw new Error('사용자 아이디 또는 비밀번호가 맞지 않습니다', { cause: 'NOT_OWNER' });
-  }
-
-  // 404, 500 같은 실패는 fetch 가 에러로 안 던지므로 직접 확인
-  if (!res.ok) throw new Error(`요청 실패 (${res.status})`, { cause: res.status });
-
-  // 응답 본문을 객체로 (두 번째 await)
-  return res.json();
-}
+// 책 요청 : 화면이 cause 로 알아보는 두 경우를 예전 모양으로 바꿔 던짐
+// - 403 : NOT_OWNER (BookCreate, BookDetail, BookEdit, Main, useSummaryBookCoverGenerator 가 확인)
+// - 404 : cause 가 숫자 404 (useBooks, BookLikeButton 이 확인)
+const request = createRequest({
+  403: () => new Error('사용자 아이디 또는 비밀번호가 맞지 않습니다', { cause: 'NOT_OWNER' }),
+  404: () => new Error('요청 실패 (404)', { cause: 404 }),
+});
 
 
 /**
