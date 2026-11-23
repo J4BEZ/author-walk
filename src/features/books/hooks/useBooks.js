@@ -15,6 +15,7 @@ import {
   getBooks, getBook, createBook, updateBook, saveCover, deleteBook,
 } from '../api/booksApi.js';
 import { toBookQuery } from '../utils/bookQuery.js';
+import { isBlank } from '#src/utils/validation/text.js';
 
 /** @import { BookView, NewBookInput, BookChanges, Credentials, BookQuery } from '../types.js' */
 
@@ -125,15 +126,20 @@ export function useBookList() {
   };
 
   /**
-   * 등록 : 서버가 돌려준 저장본을 목록 맨 앞에 붙입니다
+   * 등록 : 기본 보기면 서버가 돌려준 저장본을 목록 맨 앞에 붙이고, 검색 중이면 기본 보기로 다시 불러옵니다
    * @param {NewBookInput} input
    * @returns {Promise<BookView>}
    */
   const addBook = async (input) => {
     const saved = await createBook(input);
-    
-    // 등록하면 검색 조건을 풀고 기본 보기로 (방금 등록한 책이 최신순 맨 앞에 보이도록)
-    await reload();
+
+    if (isBlank(query.q)) {
+      // 기본 보기 (최신순 전체) : 새 책을 맨 앞에 붙인 새 배열로 교체 (불변성 : 펼쳐서 복사)
+      setBooks((prev) => [saved, ...prev]);
+    } else {
+      // 검색 중 : 새 책이 검색 조건에 안 맞을 수 있으므로 조건을 풀고 기본 보기로 다시 불러오기
+      await reload();
+    }
     return saved;
   };
 
