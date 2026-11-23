@@ -9,7 +9,10 @@ function NewBooks({books, onSelect, likes}) {
   return (
     <section className="new-books">
       <div className="new-books-header">
-        <h2>이번 주 신작</h2>
+        <div className="new-books-title">
+          <h2>이번 주 신작</h2>
+          <span className="new-books-badge">NEW</span>
+        </div>
         <a href="/books">더 보러가기 →</a>
       </div>
 

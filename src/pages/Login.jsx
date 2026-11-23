@@ -29,13 +29,9 @@ function Login() {
       return;
     }
 
-    // 임시 로그인: 실제 서버 인증이 아님
-    sessionStorage.setItem("userId", form.userId);
-
-    alert("로그인되었습니다.");
-    navigate("/main");
+    // TODO: 로그인 API 연동
+    alert("로그인 기능은 추후 연결 예정입니다.");
   };
-
   return (
     <>
       <Header />
