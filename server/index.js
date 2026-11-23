@@ -3,14 +3,19 @@
 
 
 import { fileURLToPath } from 'node:url';
+import { parseArgs } from 'node:util';
 import jsonServer from 'json-server';
 
 import watchDB from './utils/watchDB.js';
 import hideSecrets from './utils/hideSecrets.js';
 import { hashOnCreate, requireOwner, verifyOwnerRoute } from './middlewares/owner.js';
+import { delay } from './middlewares/delay.js';
 
 
 const PORT = 3000;
+// 실행 옵션 : node server/index.js --delay 1000 이면 모든 응답을 1초 늦춤 (npm run server-with-delay)
+const { values: options } = parseArgs({ options: { delay: { type: 'string', default: '0' } } });
+const DELAY_MS = Number(options.delay);
 // 실행 위치와 상관없이 프로젝트 루트의 db.json 을 가리키도록
 const DB_FILE = fileURLToPath(new URL('../db.json', import.meta.url));
 
@@ -30,6 +35,7 @@ router.render = (req, res) => {
 
 // ** 미들웨어 설정 **
 server.use(jsonServer.defaults());   // CORS, 요청 로그, 정적 파일 (기존 json-server 기본 설정)
+if (DELAY_MS > 0) server.use(delay(DELAY_MS)); // --delay 를 준 경우에만 응답 늦추기
 server.use(jsonServer.bodyParser);   // 요청 본문 JSON -> req.body
 
 server.post('/books/:id/verify', verifyOwnerRoute(router)); // 본인 확인 전용 경로
@@ -47,6 +53,6 @@ server.use(router);
 
 
 server.listen(PORT, () => {
-  console.log(`커스텀 json-server : http://localhost:${PORT}`);
+  console.log(`커스텀 json-server : http://localhost:${PORT}${DELAY_MS > 0 ? ` (응답 ${DELAY_MS}ms 지연)` : ''}`);
 });
 
