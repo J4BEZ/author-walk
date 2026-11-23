@@ -46,6 +46,13 @@ export function useAuthState() {
   // { userId } 또는 null, 현재 로그인된 User 정보
   const [user, setUser] = useState(/** @type {{ userId: string } | null} */ (null));
 
+  // getMe 확인을 마친 토큰 : 지금 token 과 다르면 아직 응답을 기다리는 중
+  const [checkedToken, setCheckedToken] = useState(/** @type {string | null} */ (null));
+
+  // 확인 중 : 토큰은 있는데 getMe 응답이 아직 안 옴 (새로고침 직후, 로그인 직후)
+  // 이때 user 가 null 이라고 "로그아웃 상태" 로 그리면 '로그인' 버튼이 잠깐 보였다 바뀜
+  const checking = token !== null && checkedToken !== token;
+
   // token 이 생기면 (새로고침, 로그인) getMe 로 주인을 확인해 user 를 채움
   useEffect(() => {
     if (!token) return;
@@ -64,6 +71,8 @@ export function useAuthState() {
           setToken(null);
           setUser(null);
         }
+      } finally {
+        if (!ignore) setCheckedToken(token); // 성공이든 실패든 이 토큰은 확인 끝
       }
     };
 
@@ -89,5 +98,5 @@ export function useAuthState() {
     
   };
 
-  return { token, user, login, logout };
+  return { token, user, checking, login, logout };
 }
