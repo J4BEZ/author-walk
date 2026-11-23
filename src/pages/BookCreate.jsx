@@ -160,18 +160,6 @@ function BookCreate() {
 
             <p className="book-create-count">글자수 {form.content.length}자</p>
 
-            {/* 선택한 AI 표지 */}
-            {coverImageUrl && (
-              <div className="book-create-cover-preview">
-                <h3>현재 적용된 표지</h3>
-                <img
-                  src={coverImageUrl}
-                  alt={`${form.title} 표지`}
-                  className="book-create-cover-image"
-                />
-              </div>
-            )}
-
             {/* AI 표지 생성 */}
             <BookCoverGenerator
               book={{...form, coverImageUrl}}
