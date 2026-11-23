@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "vite",
     "server": "node server/index.js",
-    "server-with-delay": "json-server --watch db.json --port 3000 --delay 1000",
+    "server-with-delay": "node server/index.js --delay 1000",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
