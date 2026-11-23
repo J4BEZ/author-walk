@@ -46,12 +46,14 @@ async function assertOwner(id, { userId, password }) {
  * 등록, 수정, 삭제 함수는 성공하면 목록 State 까지 고치고, 실패하면 에러를 던집니다.
  * (화면에서는 try / catch 로 감싸 실패 문구를 보여 줍니다.)
  * 
- * @returns {{ books: BookView[], loading: boolean, error: string | null, reload: (query?: string) => Promise<void>, addBook: (input: NewBookInput) => Promise<BookView>, likeBook: (id: number) => Promise<void>, editBook: (id: number, changes: BookChanges, credentials: Credentials) => Promise<BookView>, changeCover: (id: number, dataUrl: string) => Promise<BookView>, removeBook: (id: number, credentials: Credentials) => Promise<void> }} 훅에서 제공하는 값들 (목록, 로딩, 에러 상태와 CRUD 함수)
+ * @returns {{ books: BookView[], loading: boolean, error: string | null, reload: (query?: string) => Promise<void>, addBook: (input: NewBookInput) => Promise<BookView>, likeBook: (id: number) => Promise<void>, getBookLikes: (book: BookView) => number, likingIds: Set<number>, editBook: (id: number, changes: BookChanges, credentials: Credentials) => Promise<BookView>, changeCover: (id: number, dataUrl: string) => Promise<BookView>, removeBook: (id: number, credentials: Credentials) => Promise<void> }} 훅에서 제공하는 값들 (목록, 로딩, 에러 상태와 CRUD 함수)
  */
 export function useBooks() {
   const [books, setBooks] = useState(/** @type {BookView[]} */ ([]));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(/** @type {string | null} */ (null));
+  const [savedLikes, setSavedLikes] = useState(() => new Map(/** @type {[number, number][]} */ ([])));
+  const [likingIds, setLikingIds] = useState(() => new Set(/** @type {number[]} */ ([])));
 
   // 처음 한 번 불러오기 (loading 은 처음부터 true 라 여기서 켤 필요 없음)
   useEffect(() => {
@@ -105,9 +107,23 @@ export function useBooks() {
 
   /** @param {number} id */
   const likeBook = async (id) => {
-    const likes = await incrementBookLikes(id);
-    setBooks((prev) => prev.map((book) => (book.id === id ? { ...book, likes } : book)));
+    if (likingIds.has(id)) return;
+    setLikingIds((prev) => new Set(prev).add(id));
+    try {
+      const likes = await incrementBookLikes(id);
+      setBooks((prev) => prev.map((book) => (book.id === id ? { ...book, likes } : book)));
+      setSavedLikes((prev) => new Map(prev).set(id, likes));
+    } finally {
+      setLikingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    }
   };
+
+  /** @param {BookView} book */
+  const getBookLikes = (book) => Math.max(book.likes ?? 0, savedLikes.get(book.id) ?? 0);
 
   /**
    * 수정 : 본인 확인 -> PATCH -> 목록에서 그 도서만 바꿔 끼우기
@@ -145,9 +161,14 @@ export function useBooks() {
     await assertOwner(id, credentials);
     await deleteBook(id);
     setBooks((prev) => prev.filter((b) => b.id !== id));
+    setSavedLikes((prev) => {
+      const next = new Map(prev);
+      next.delete(id);
+      return next;
+    });
   };
 
-  return { books, loading, error, reload, addBook, likeBook, editBook, changeCover, removeBook };
+  return { books, loading, error, reload, addBook, likeBook, getBookLikes, likingIds, editBook, changeCover, removeBook };
 }
 
 /**

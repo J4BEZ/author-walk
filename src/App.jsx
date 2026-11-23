@@ -8,7 +8,7 @@ import { useBooks, useBook } from './features/books/useBooks.js';
 import './App.css';
 
 /** @import { BookView } from './features/books/types.js' */
-//
+/** @typedef {Pick<ReturnType<typeof useBooks>, 'likeBook' | 'getBookLikes' | 'likingIds'>} BookLikeProps */
 
 
 // 1x1 픽셀 PNG Data URL (표지 저장 예시용, 실제로는 OpenAI 응답으로 만든 더미 이미지 입니다)
@@ -39,6 +39,9 @@ function App() {
       {selectedId !== null && (
         <BookDetailScreen
           id={selectedId}
+          likeBook={booksState.likeBook}
+          getBookLikes={booksState.getBookLikes}
+          likingIds={booksState.likingIds}
           editBook={booksState.editBook}
           changeCover={booksState.changeCover}
           removeBook={booksState.removeBook}
@@ -53,7 +56,7 @@ function App() {
  * 목록 화면 (/books) : 목록, 검색
  * @param {ReturnType<typeof useBooks> & { onSelect: (id: number) => void }} props
  */
-function BookListScreen({ books, loading, error, reload, likeBook, onSelect }) {
+function BookListScreen({ books, loading, error, reload, likeBook, getBookLikes, likingIds, onSelect }) {
   const [query, setQuery] = useState('');
 
   return (
@@ -77,7 +80,7 @@ function BookListScreen({ books, loading, error, reload, likeBook, onSelect }) {
               <button onClick={() => onSelect(book.id)}>
                 {book.title} · {book.author} · {book.createdAt.slice(0, 10)}
               </button>
-              <BookLikeButton book={book} likeBook={likeBook} />
+              <BookLikeButton book={book} likeBook={likeBook} getBookLikes={getBookLikes} likingIds={likingIds} />
             </li>
           ))}
         </ul>
@@ -86,24 +89,20 @@ function BookListScreen({ books, loading, error, reload, likeBook, onSelect }) {
   );
 }
 
-/** @param {{ book: BookView, likeBook: ReturnType<typeof useBooks>['likeBook'] }} props */
-function BookLikeButton({ book, likeBook }) {
-  const [submitting, setSubmitting] = useState(false);
-  const likes = book.likes ?? 0;
+/** @param {{ book: BookView } & BookLikeProps} props */
+function BookLikeButton({ book, likeBook, getBookLikes, likingIds }) {
+  const likes = getBookLikes(book);
 
   const handleLike = async () => {
-    setSubmitting(true);
     try {
       await likeBook(book.id);
     } catch (error) {
       alertError(error, '좋아요를 저장하지 못했어요');
-    } finally {
-      setSubmitting(false);
     }
   };
 
   return (
-    <button type="button" disabled={submitting} onClick={handleLike}
+    <button type="button" disabled={likingIds.has(book.id)} onClick={handleLike}
       aria-label={`${book.title} 좋아요 ${likes}개`}>
       ♡ {likes}
     </button>
@@ -162,9 +161,9 @@ function BookCreateScreen({ addBook }) {
  *   changeCover: ReturnType<typeof useBooks>['changeCover'],
  *   removeBook: ReturnType<typeof useBooks>['removeBook'],
  *   onDeleted: () => void,
- * }} props
+ * } & BookLikeProps} props
  */
-function BookDetailScreen({ id, editBook, changeCover, removeBook, onDeleted }) {
+function BookDetailScreen({ id, editBook, changeCover, removeBook, onDeleted, likeBook, getBookLikes, likingIds }) {
   const { book, loading, error, setBook } = useBook(id);
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
@@ -213,6 +212,7 @@ function BookDetailScreen({ id, editBook, changeCover, removeBook, onDeleted }) 
       <h2>상세 화면</h2>
       {book.coverImageUrl && <img src={book.coverImageUrl} alt={`${book.title} 표지`} width={80} />}
       <p>{book.title} · {book.author}</p>
+      <BookLikeButton book={book} likeBook={likeBook} getBookLikes={getBookLikes} likingIds={likingIds} />
       {book.description && <p>{book.description}</p>}
       <p>{book.content}</p>
       <p>등록 {book.createdAt.slice(0, 10)} · 수정 {book.updatedAt.slice(0, 10)}</p>
