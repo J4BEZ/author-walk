@@ -201,6 +201,29 @@
   }
 }
 
+/* 현재 적용된 표지 */
+.book-create-cover-preview {
+  margin-top: 32px;
+}
+
+.book-create-cover-preview h3 {
+  margin: 0 0 12px;
+  color: #111;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.book-create-cover-image {
+  display: block;
+  width: 100%;
+  max-width: 220px;   /* 이 값으로 크기 조절 */
+  height: auto;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
 /* AI 섹션 공통 (AI 표지 생성 / AI 작품 분석) */
 .book-create-right .book-create-ai-section {
   margin-top: 32px;
