@@ -180,8 +180,8 @@ export function validateNewBook(input) {
 }
 
 
-/** 수정할 수 있는 필드 (본인 확인 값은 바꾸지 않음) */
-const EDITABLE_FIELDS = ['title', 'description', 'content'];
+/** 수정할 수 있는 필드 (본인 확인 값은 바꾸지 않음, 작가명은 필명이라 수정 가능) */
+export const EDITABLE_FIELDS = ['title', 'author', 'description', 'content'];
 
 /**
  * 수정할 값을 검사합니다. 보낸 필드만 검사
