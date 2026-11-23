@@ -1,30 +1,26 @@
 import {useState} from "react";
 import {useParams, useNavigate} from "react-router-dom";
 import {useBookList, useBookDetail} from "../features/books/hooks/useBooks.js";
+
 import {
   normalizeBookInput,
   validateBookChanges,
 } from "../features/books/utils/bookValidation.js";
-import BookCoverGenerator from "../features/OpenAI_Integration/BookCoverGenerator.jsx";
 
-/**
- * 에러 메시지 표시
- */
+import Header from "../components/Header.jsx";
+import Footer from "../components/Footer.jsx";
+
+import "../styles/BookDetail.css";
+
 function alertError(e, fallback) {
   console.error(e);
   alert(e instanceof Error && e.cause === "NOT_OWNER" ? e.message : fallback);
 }
 
-/**
- * 유효성 검사 에러 합치기
- */
 function joinErrors(errors) {
   return Object.values(errors).join("\n");
 }
 
-/**
- * 작품 상세 페이지
- */
 function BookDetail() {
   const {id} = useParams();
   const navigate = useNavigate();
@@ -39,26 +35,23 @@ function BookDetail() {
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
   const [newTitle, setNewTitle] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
 
   if (loading || (!book && !error)) {
-    return (
-      <section>
-        <h2>상세 화면</h2>
-        <p>불러오는 중입니다.</p>
-      </section>
-    );
+    return <p>작품을 불러오는 중입니다.</p>;
   }
 
   if (error || !book) {
-    return (
-      <section>
-        <h2>상세 화면</h2>
-        <p>{error || "작품을 찾을 수 없습니다."}</p>
-      </section>
-    );
+    return <p>{error || "작품을 찾을 수 없습니다."}</p>;
   }
 
   const credentials = {userId, password};
+
+  // 수정 버튼 클릭
+  const openEdit = () => {
+    setNewTitle(book.title);
+    setIsEditing(true);
+  };
 
   // 작품 수정
   const handleEdit = async () => {
@@ -74,6 +67,8 @@ function BookDetail() {
       const updated = await editBook(book.id, clean, credentials);
       setBook(updated);
       setNewTitle("");
+      setIsEditing(false);
+      alert("작품이 수정되었습니다.");
     } catch (e) {
       alertError(e, "수정에 실패했어요");
     }
@@ -102,55 +97,102 @@ function BookDetail() {
   };
 
   return (
-    <section className="book-detail">
-      <h2>작품 상세</h2>
+    <>
+      <Header isLoggedIn={true} />
 
-      {book.coverImageUrl && (
-        <img src={book.coverImageUrl} alt={`${book.title} 표지`} width={160} />
-      )}
+      <main className="book-detail-page">
+        <div className="book-detail-layout">
+          {/* 왼쪽: 책 표지 */}
+          <section className="book-detail-left">
+            <div className="book-detail-cover">
+              {book.coverImageUrl ? (
+                <img src={book.coverImageUrl} alt={`${book.title} 표지`} />
+              ) : (
+                <div className="book-detail-no-cover">표지 없음</div>
+              )}
+            </div>
 
-      <h3>{book.title}</h3>
-      <p>작성자: {book.author}</p>
+            <p className="book-detail-notice">
+              수정 및 삭제 시 등록한 4자리 비밀번호가 필요합니다.
+            </p>
 
-      {book.description && <p>{book.description}</p>}
+            <div className="book-detail-actions">
+              <button type="button" onClick={openEdit}>
+                수정
+              </button>
 
-      <p>{book.content}</p>
+              <button type="button" onClick={handleDelete}>
+                삭제
+              </button>
+            </div>
 
-      <p>등록일: {book.createdAt?.slice(0, 10)}</p>
-      <p>수정일: {book.updatedAt?.slice(0, 10)}</p>
+            {/* 본인 확인 */}
+            <div className="book-detail-auth">
+              <input
+                value={userId}
+                onChange={(e) => setUserId(e.target.value)}
+                placeholder="사용자 아이디"
+              />
 
-      <h3>본인 확인</h3>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="비밀번호"
+              />
+            </div>
 
-      <input
-        value={userId}
-        onChange={(e) => setUserId(e.target.value)}
-        placeholder="사용자 아이디"
-      />
+            {/* 제목 수정 */}
+            {isEditing && (
+              <div className="book-detail-edit">
+                <input
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  placeholder="새 제목"
+                />
 
-      <input
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="비밀번호"
-      />
+                <button type="button" onClick={handleEdit}>
+                  수정 완료
+                </button>
 
-      <h3>작품 수정</h3>
+                <button type="button" onClick={() => setIsEditing(false)}>
+                  취소
+                </button>
+              </div>
+            )}
+          </section>
 
-      <input
-        value={newTitle}
-        onChange={(e) => setNewTitle(e.target.value)}
-        placeholder="새 제목"
-      />
+          {/* 오른쪽: 작품 상세 정보 */}
+          <section className="book-detail-right">
+            <div className="book-detail-top">
+              <div className="book-detail-meta">
+                <h1>{book.title}</h1>
+                <p>{book.author}</p>
+                <p>{book.createdAt?.slice(0, 10)} 등록</p>
+                <p>{book.updatedAt?.slice(0, 10)} 수정</p>
+              </div>
 
-      <button onClick={handleEdit}>제목 수정</button>
-      <button onClick={handleDelete}>삭제</button>
+              <div className="book-detail-reactions">
+                <span>구독 +</span>
+                <span>♡ {book.likes ?? 0}</span>
+              </div>
+            </div>
 
-      <BookCoverGenerator
-        key={JSON.stringify([book.id, book.title, book.author, book.content])}
-        book={book}
-        onSave={handleCover}
-      />
-    </section>
+            <div className="book-detail-section">
+              <h2>작품 소개</h2>
+              <p>{book.description || "작품 소개가 없습니다."}</p>
+            </div>
+
+            <div className="book-detail-section">
+              <h2>작품 내용</h2>
+              <p>{book.content}</p>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <Footer />
+    </>
   );
 }
 

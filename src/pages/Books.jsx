@@ -48,9 +48,9 @@ function Books() {
       <main className="books-page">
         <h1>전체 작품</h1>
 
-        <div className="books-toolbar">
-          <SearchBar onSearch={setKeyword} />
+        <SearchBar onSearch={setKeyword} />
 
+        <div className="books-toolbar">
           <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
             <option value="latest">최신 등록순</option>
             <option value="title">이름순</option>

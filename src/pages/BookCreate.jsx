@@ -10,6 +10,8 @@ import {
   validateNewBook,
 } from "../features/books/utils/bookValidation.js";
 
+import "../styles/BookCreate.css";
+
 function alertError(e, fallback) {
   console.error(e);
   alert(e instanceof Error && e.cause === "NOT_OWNER" ? e.message : fallback);
@@ -34,15 +36,15 @@ function BookCreate() {
 
   const [submitting, setSubmitting] = useState(false);
 
-  // 입력값 변경
   const handleChange = (e) => {
+    const {name, value} = e.target;
+
     setForm((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }));
   };
 
-  // 작품 등록
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -67,17 +69,6 @@ function BookCreate() {
       });
 
       alert(`등록했습니다 (id ${saved.id})`);
-
-      setForm({
-        title: "",
-        author: "",
-        userId: "",
-        description: "",
-        content: "",
-        password: "",
-      });
-
-      // 등록 성공 후 해당 작품 상세 페이지로 이동
       navigate(`/books/${saved.id}`);
     } catch (e) {
       alertError(e, "등록에 실패했어요");
@@ -90,60 +81,93 @@ function BookCreate() {
     <>
       <Header isLoggedIn={true} />
 
-      <main>
-        <section className="book-create">
-          <h1>작품 등록</h1>
+      <main className="book-create-page">
+        <form className="book-create-layout" onSubmit={handleSubmit}>
+          <section className="book-create-left">
+            <h1>작품 등록</h1>
 
-          <form onSubmit={handleSubmit}>
-            <input
-              name="title"
-              value={form.title}
-              onChange={handleChange}
-              placeholder="제목"
-            />
+            <div className="book-create-info">
+              <div className="book-create-field">
+                <label htmlFor="title">작품 제목</label>
+                <input
+                  id="title"
+                  name="title"
+                  value={form.title}
+                  onChange={handleChange}
+                />
+              </div>
 
-            <input
-              name="author"
-              value={form.author}
-              onChange={handleChange}
-              placeholder="작성자"
-            />
+              <div className="book-create-field">
+                <label htmlFor="author">작가명</label>
+                <input
+                  id="author"
+                  name="author"
+                  value={form.author}
+                  onChange={handleChange}
+                />
+              </div>
 
-            <input
-              name="userId"
-              value={form.userId}
-              onChange={handleChange}
-              placeholder="사용자 아이디"
-            />
+              <div className="book-create-field book-create-description">
+                <label htmlFor="description">작품 소개</label>
+                <textarea
+                  id="description"
+                  name="description"
+                  value={form.description}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
 
-            <input
-              name="description"
-              value={form.description}
-              onChange={handleChange}
-              placeholder="작품 소개"
-            />
+            <div className="book-create-account">
+              <div className="book-create-field">
+                <label htmlFor="userId">ID</label>
+                <input
+                  id="userId"
+                  name="userId"
+                  value={form.userId}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="book-create-field">
+                <label htmlFor="password">비밀번호</label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  inputMode="numeric"
+                  maxLength={4}
+                />
+              </div>
+            </div>
+          </section>
+
+          <section className="book-create-right">
+            <h2>작품 내용</h2>
 
             <textarea
+              className="book-create-content"
               name="content"
               value={form.content}
               onChange={handleChange}
-              placeholder="내용"
-              rows={8}
             />
 
-            <input
-              name="password"
-              type="password"
-              value={form.password}
-              onChange={handleChange}
-              placeholder="비밀번호"
-            />
+            <p className="book-create-count">글자수 {form.content.length}자</p>
 
-            <button type="submit" disabled={submitting}>
-              {submitting ? "등록 중..." : "등록"}
+            <button type="button" className="book-create-ai-button">
+              AI 표지 생성
             </button>
-          </form>
-        </section>
+
+            <button
+              type="submit"
+              className="book-create-submit"
+              disabled={submitting}>
+              {submitting ? "등록 중..." : "작품 등록"}
+            </button>
+          </section>
+        </form>
       </main>
 
       <Footer />

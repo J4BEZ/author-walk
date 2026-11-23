@@ -1,24 +1,26 @@
 .books-page {
-  max-width: 1200px;
+  max-width: auto;
   min-height: 70vh;
   margin: 0 auto;
-  padding: 40px 24px 80px;
+  padding: 0px 0px 80px;
 }
 
 .books-page h1 {
   margin-bottom: 32px;
   font-size: 32px;
+  margin: 40px;
 }
 
 .books-toolbar {
   display: flex;
-  justify-content: space-between;
-  gap: 16px;
+  justify-content: flex-end;
+  margin-top: 24px;
   margin-bottom: 32px;
 }
 
 .books-toolbar select {
   padding: 14px 18px;
+  margin: 0 40px;
   border: 1px solid #ddd;
   border-radius: 10px;
   background: #fff;
@@ -29,6 +31,7 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 24px;
+  padding: 40px;
 }
 
 .books-card {
