@@ -1,6 +1,7 @@
 import {Routes, Route, Navigate} from "react-router-dom";
 
 import {useBookList} from "./features/books/hooks/useBooks.js";
+import {useAuth} from "./features/auth/hooks/useAuth.js";
 
 import Main from "./pages/Main.jsx";
 import Signup from "./pages/SignUp.jsx";
@@ -13,7 +14,9 @@ import BookEdit from "./pages/BookEdit.jsx";
 function App() {
   // 전체 도서 목록은 여기서 한 번만 불러오고, 페이지에는 쓰는 값만 props 로 내려 줍니다
   // (페이지마다 부르면 페이지를 열 때마다 목록을 다시 받고, 등록, 수정, 삭제 결과가 다른 페이지에 바로 반영되지 않음)
-  const booksState = useBookList();
+  // 책 쓰기 (등록, 수정, 삭제) 에 쓸 로그인 토큰 : books 와 auth 두 feature 는 여기 (App) 에서 이어 줌
+  const {token} = useAuth();
+  const booksState = useBookList(token);
 
   return (
     <Routes>

@@ -1,8 +1,9 @@
 // booksApi 함수 확인용 한 페이지 (화면 디자인 아님, 팀원이 API 동작을 눈으로 확인하는 용도)
 // 쓰는 법 : src/App.jsx 에서 이 컴포넌트를 임시로 import 해 보여 주면 됩니다.
+// 주의 : 등록, 수정, 표지, 삭제는 이제 로그인 토큰이 필요해서 이 예제 그대로는 401 이 납니다 (토큰 입력 칸 추가 필요)
 import { useState } from 'react';
 import {
-  getBooks, getBook, createBook, checkOwner, updateBook, saveCover, deleteBook,
+  getBooks, getBook, createBook, updateBook, saveCover, deleteBook,
 } from '../features/books/api/booksApi.js';
 
 // 1x1 픽셀 PNG Data URL (saveCover 시험용, 실제로는 OpenAI 응답으로 만든 값)
@@ -98,13 +99,6 @@ function BooksApiPlayground() {
         <label>본문 <input value={content} onChange={(e) => setContent(e.target.value)} size={30} /></label>
         <div>작성자, 사용자 아이디, 비밀번호는 공통 입력 값을 씁니다</div>
       </ApiSection>
-
-      {/* 본인 확인 */}
-      <ApiSection
-        title="checkOwner(id, userId, password)"
-        request="POST /books/:id/verify  { userId, password } -> { ok }"
-        onRun={() => checkOwner(bookId, userId, password)}
-      />
 
       {/* 수정 */}
       <ApiSection

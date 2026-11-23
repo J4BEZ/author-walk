@@ -16,7 +16,7 @@ import {
   getBooks, getBook, createBook, updateBook, saveCover, deleteBook, incrementBookLikes,
 } from '../api/booksApi.js';
 
-/** @import { BookView, NewBookInput, BookChanges, Credentials } from '../types.js' */
+/** @import { BookView, NewBookInput, BookChanges } from '../types.js' */
 
 export const BookLikesContext = createContext(
   /** @type {ReturnType<typeof useBookLikesState> | null} */ (null),
@@ -87,9 +87,10 @@ function toMessage(e, fallback) {
  * 등록, 수정, 삭제 함수는 성공하면 목록 State 까지 고치고, 실패하면 에러를 던집니다.
  * (화면에서는 try / catch 로 감싸 실패 문구를 보여 줍니다.)
  *
+ * @param {string | null} [token]  로그인 토큰 (App 이 useAuth 에서 꺼내 넘김, books 가 auth 를 직접 import 하지 않도록)
  * @returns 훅에서 제공하는 값들 (전체 목록, 로딩, 에러 상태와 CRUD 함수)
  */
-export function useBookList() {
+export function useBookList(token = null) {
   const [books, setBooks] = useState(/** @type {BookView[]} */ ([]));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(/** @type {string | null} */ (null));
@@ -167,52 +168,53 @@ export function useBookList() {
   };
 
   /**
-   * 등록 : 서버가 돌려준 저장본을 목록 맨 앞에 붙입니다
+   * 등록 : 서버가 돌려준 저장본을 목록 맨 앞에 붙입니다   
+   * (주인은 서버가 토큰으로 정함)
    * @param {NewBookInput} input
    * @returns {Promise<BookView>}
    */
   const addBook = async (input) => {
-    const saved = await createBook(input);
+    const saved = await createBook(input, token);
 
     // 훅의 목록은 항상 전체라, 새 책을 맨 앞에 붙인 새 배열로 교체 (불변성 : 펼쳐서 복사)
     setBooks((prev) => [saved, ...prev]);
     return saved;
   };
 
+  // 아래 수정, 표지, 삭제는 페이지가 세 번째 인자로 아이디, 비밀번호 (credentials) 를 아직 넘기지만 받지 않습니다
+  // (누구인지는 token 으로만) -> 페이지에서 그 인자를 지워도 동작이 같음
+
   /**
-   * 수정 : PATCH (서버가 본인 확인) -> 목록에서 그 도서만 바꿔 끼우기
+   * 수정 : PATCH (서버가 토큰으로 주인 확인) -> 목록에서 그 도서만 바꿔 끼우기
    * @param {number} id
    * @param {BookChanges} changes
-   * @param {Credentials} credentials
    * @returns {Promise<BookView>}
    */
-  const editBook = async (id, changes, credentials) => {
-    const updated = await updateBook(id, changes, credentials);
+  const editBook = async (id, changes) => {
+    const updated = await updateBook(id, changes, token);
     setBooks((prev) => prev.map((b) => (b.id === id ? updated : b)));
     return updated;
   };
 
   /**
-   * 표지 저장 (생성, 재생성) : 서버가 본인 확인 -> 목록에서 그 도서만 바꿔 끼우기
+   * 표지 저장 (생성, 재생성) : 서버가 토큰으로 주인 확인 -> 목록에서 그 도서만 바꿔 끼우기
    * @param {number} id
    * @param {string} dataUrl  `data:image/png;base64,...`
-   * @param {Credentials} credentials
    * @returns {Promise<BookView>}
    */
-  const changeCover = async (id, dataUrl, credentials) => {
-    const updated = await saveCover(id, dataUrl, credentials);
+  const changeCover = async (id, dataUrl) => {
+    const updated = await saveCover(id, dataUrl, token);
     setBooks((prev) => prev.map((b) => (b.id === id ? updated : b)));
     return updated;
   };
 
   /**
-   * 삭제 : DELETE (서버가 본인 확인) -> 목록에서 빼기
+   * 삭제 : DELETE (서버가 토큰으로 주인 확인) -> 목록에서 빼기
    * @param {number} id
-   * @param {Credentials} credentials
    * @returns {Promise<void>}
    */
-  const removeBook = async (id, credentials) => {
-    await deleteBook(id, credentials);
+  const removeBook = async (id) => {
+    await deleteBook(id, token);
     setBooks((prev) => prev.filter((b) => b.id !== id));
     likes?.clearBookLikes(id);
   };
