@@ -47,6 +47,7 @@ export function useBookList() {
   const [query, setQuery] = useState(/** @type {BookQuery} */ ({}));
   const [savedLikes, setSavedLikes] = useState(() => new Map(/** @type {[number, number][]} */ ([])));
   const [likingIds, setLikingIds] = useState(() => new Set(/** @type {number[]} */ ([])));
+  const pendingLikes = useRef(new Set(/** @type {number[]} */ ([])));
   
   // useRef : 값이 바뀌어도 화면을 다시 그리지 않는 상자 (.current 로 읽고 씀)
   // 비동기 함수 안에서도 항상 최신 값이 보여서, 번호표처럼 화면에 안 보이는 값에 씁니다
@@ -147,17 +148,20 @@ export function useBookList() {
 
   /** @param {number} id */
   const likeBook = async (id) => {
-    if (likingIds.has(id)) return;
-    setLikingIds((prev) => new Set(prev).add(id));
+    // 목록과 상세에서 다시 렌더링되기 전에 들어온 같은 도서의 요청도 막습니다.
+    const pending = pendingLikes.current;
+    if (pending.has(id)) return;
+    pending.add(id);
+    setLikingIds(new Set(pending));
     try {
       const likes = await incrementBookLikes(id);
+      if (!Number.isSafeInteger(likes) || likes < 0) {
+        throw new Error('서버가 올바른 좋아요 수를 반환하지 않았어요');
+      }
       setSavedLikes((prev) => new Map(prev).set(id, likes));
     } finally {
-      setLikingIds((prev) => {
-        const next = new Set(prev);
-        next.delete(id);
-        return next;
-      });
+      pending.delete(id);
+      setLikingIds(new Set(pending));
     }
   };
 
