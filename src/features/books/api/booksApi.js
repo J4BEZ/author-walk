@@ -7,8 +7,8 @@ import { queryBooks, toBookQuery } from '../utils/bookQuery.js';
 
 // 서버 주소 : .env 의 VITE_API_URL, 없으면 로컬 json-server
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
-// 응답이 이 시간 안에 안 오면 포기 (TimeoutError)
-const TIMEOUT_MS = 5000;
+// 도서 API 요청이 30초를 넘으면 TimeoutError로 중단합니다.
+const TIMEOUT_MS = 30_000; // 5초 -> 30초
 
 /**
  * 공통 요청 도우미 : 시간 제한, res.ok 확인, JSON 변환을 담당합니다.
