@@ -1,7 +1,7 @@
 import {useState} from "react";
 import {useNavigate} from "react-router-dom";
 
-import {useBookList, useBookLikes} from "../features/books/hooks/useBooks.js";
+import {useBookLikes} from "../features/books/hooks/useBooks.js";
 import {queryBooks} from "../features/books/utils/bookQuery.js";
 
 import Header from "../components/Header.jsx";
@@ -13,9 +13,13 @@ import "../App.css";
 import "../styles/font.css";
 import "../styles/Books.css";
 
-function Books() {
+/**
+ * 전체 작품 페이지
+ * @param {{ booksState: ReturnType<typeof import('../features/books/hooks/useBooks.js').useBookList> }} props
+ */
+function Books({booksState}) {
   const navigate = useNavigate();
-  const {books, loading, error} = useBookList();
+  const {books, loading, error} = booksState;
   const likes = useBookLikes();
 
   const [keyword, setKeyword] = useState("");

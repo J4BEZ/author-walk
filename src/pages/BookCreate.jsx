@@ -1,6 +1,5 @@
 import {useState} from "react";
 import {useNavigate} from "react-router-dom";
-import {useBookList} from "../features/books/hooks/useBooks.js";
 
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
@@ -23,9 +22,12 @@ function joinErrors(errors) {
   return Object.values(errors).join("\n");
 }
 
-function BookCreate() {
+/**
+ * 작품 등록 페이지 : 등록은 App 의 목록 훅 addBook 으로 (등록한 책이 목록 페이지에 바로 보이도록)
+ * @param {{ addBook: ReturnType<typeof import('../features/books/hooks/useBooks.js').useBookList>['addBook'] }} props
+ */
+function BookCreate({addBook}) {
   const navigate = useNavigate();
-  const {addBook} = useBookList();
 
   const [form, setForm] = useState({
     title: "",

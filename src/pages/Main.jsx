@@ -1,5 +1,6 @@
+import {useState} from "react";
 import {useNavigate, useLocation, Link} from "react-router-dom";
-import {useBookList, useBookLikes} from "../features/books/hooks/useBooks.js";
+import {useBookLikes} from "../features/books/hooks/useBooks.js";
 
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
@@ -46,17 +47,23 @@ function joinErrors(errors) {
  */
 const defaultView = (books) => queryBooks(books, {days: NEW_BOOK_DAYS});
 
-function Main() {
+/**
+ * 메인 페이지
+ * @param {{ booksState: ReturnType<typeof import('../features/books/hooks/useBooks.js').useBookList> }} props
+ */
+function Main({booksState}) {
   const navigate = useNavigate();
-  const booksState = useBookList();
   const likes = useBookLikes();
   const location = useLocation();
   const isLoggedIn = location.pathname === "/logged-in";
 
-  // 검색어가 없으면 기본 보기 (이번 주 신작), 있으면 검색 결과
-  const shownBooks = isBlank(booksState.query.q)
+  // 이 페이지의 검색어 (다른 페이지의 검색과 서로 영향을 주지 않도록 페이지마다 따로 둠)
+  const [keyword, setKeyword] = useState("");
+
+  // 검색어가 없으면 기본 보기 (이번 주 신작), 있으면 전체 목록에서 검색한 결과
+  const shownBooks = isBlank(keyword)
     ? defaultView(booksState.books)
-    : booksState.books;
+    : queryBooks(booksState.books, {q: keyword});
 
   return (
     <>
@@ -76,7 +83,7 @@ function Main() {
             </a>
           </section>
         )}
-        <SearchBar onSearch={booksState.reload} />
+        <SearchBar onSearch={setKeyword} />
         <NewBooks
           books={shownBooks}
           onSelect={(id) => navigate(`/books/${id}`)}
