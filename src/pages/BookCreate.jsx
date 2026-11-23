@@ -171,19 +171,19 @@ function BookCreate() {
 
             <p className="book-create-count">글자수 {form.content.length}자</p>
 
-{/* 1. 전문 기반 AI 표지 생성 */}
-<section className="book-create-ai-section">
-  <h2>AI 표지 생성</h2>
+            {/* 1. 전문 기반 AI 표지 생성 */}
+            <section className="book-create-ai-section">
+              <h2>AI 표지 생성</h2>
 
-  <BookCoverGenerator book={aiBook} onSave={handleSaveCover} />
-</section>
+              <BookCoverGenerator book={aiBook} onSave={handleSaveCover} />
+            </section>
 
-{/* 2. AI 작품 분석 + 요약 기반 표지 생성 */}
-<section className="book-create-ai-section">
-  <h2>AI 작품 분석</h2>
+            {/* 2. AI 작품 분석 + 요약 기반 표지 생성 */}
+            <section className="book-create-ai-section">
+              <h2>AI 작품 분석</h2>
 
-  <BookAnalysis book={aiBook} onSaveCover={handleSaveCover} />
-</section>
+              <BookAnalysis book={aiBook} onSaveCover={handleSaveCover} />
+            </section>
 
             <button
               type="button"

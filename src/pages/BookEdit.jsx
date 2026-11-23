@@ -226,18 +226,6 @@ function BookEdit() {
 
             <p className="book-create-count">글자수 {form.content.length}자</p>
 
-            {/* 기존 표지 또는 새로 선택한 AI 표지 */}
-            {coverImageUrl && (
-              <div className="book-create-cover-preview">
-                <h3>현재 적용된 표지</h3>
-                <img
-                  src={coverImageUrl}
-                  alt={`${form.title} 표지`}
-                  className="book-create-cover-image"
-                />
-              </div>
-            )}
-
             {/* 1. 전문 기반 AI 표지 생성 */}
             <section className="book-create-ai-section">
               <h2>AI 표지 생성</h2>
