@@ -200,3 +200,19 @@
     font-size: 18px;
   }
 }
+
+/* AI 섹션 공통 (AI 표지 생성 / AI 작품 분석) */
+.book-create-right .book-create-ai-section {
+  margin-top: 32px;
+}
+
+.book-create-right .book-create-ai-section h2 {
+  margin: 0 0 12px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #111;
+}
+
+.book-create-ai-section .book-cover-generator {
+  margin-top: 0;
+}
