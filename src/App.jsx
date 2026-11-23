@@ -15,6 +15,7 @@ import {
   validateBookChanges,
 } from "./features/books/utils/bookValidation.js";
 import BookCoverGenerator from "./features/OpenAI_Integration/BookCoverGenerator.jsx";
+import BookAnalysis from "./features/OpenAI_Integration/BookAnalysis.jsx";
 
 import {isBlank} from "#src/utils/validation/text.js";
 import {queryBooks, NEW_BOOK_DAYS} from "./features/books/utils/bookQuery.js";
@@ -306,6 +307,10 @@ function BookDetailScreen({id, editBook, changeCover, removeBook, onDeleted}) {
       />
       <button onClick={handleEdit}>제목 수정</button>
       <button onClick={handleDelete}>삭제</button>
+      <BookAnalysis
+        key={JSON.stringify([book.id, book.title, book.content])}
+        book={book}
+      />
       <BookCoverGenerator
         key={JSON.stringify([book.id, book.title, book.author, book.content])}
         book={book}
