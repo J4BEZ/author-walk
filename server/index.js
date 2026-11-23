@@ -8,8 +8,8 @@ import jsonServer from 'json-server';
 
 import watchDB from './utils/watchDB.js';
 import hideSecrets from './utils/hideSecrets.js';
-import { hashOnCreate, requireOwner, verifyOwnerRoute } from './middlewares/owner.js';
 import { delay } from './middlewares/delay.js';
+import { booksRoutes } from './routes/books.js';
 
 
 const PORT = 3000;
@@ -38,9 +38,7 @@ server.use(jsonServer.defaults());   // CORS, 요청 로그, 정적 파일 (기�
 if (DELAY_MS > 0) server.use(delay(DELAY_MS)); // --delay 를 준 경우에만 응답 늦추기
 server.use(jsonServer.bodyParser);   // 요청 본문 JSON -> req.body
 
-server.post('/books/:id/verify', verifyOwnerRoute(router)); // 본인 확인 전용 경로
-server.post('/books', hashOnCreate);                        // 등록 : 평문 -> 해시
-server.use('/books/:id', requireOwner(router));             // 수정, 삭제 : 본인만
+server.use('/books', booksRoutes(router)); // 등록, 본인 확인, 수정, 삭제 (routes/books.js)
 
 // json-server 의 /db (db.json 전체) 는 아이디, 해시비번이 포함된 민감 정보이므로, 접근 자체가 안되게 합니다.
 server.get('/db', (req, res) => res.sendStatus(404));
