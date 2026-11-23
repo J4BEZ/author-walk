@@ -1,6 +1,6 @@
 /** @import { BookView } from '../features/books/types.js' */
 
-/** @param {{ book: BookView, likes: ReturnType<typeof import('../features/books/hooks/useBooks.js').useBookList>['likes'] }} props */
+/** @param {{ book: BookView, likes: ReturnType<typeof import('../features/books/hooks/useBooks.js').useBookLikesState> }} props */
 function BookLikeButton({book, likes}) {
   const count = likes.getBookLikes(book);
 

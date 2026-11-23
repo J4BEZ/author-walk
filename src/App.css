@@ -22,7 +22,7 @@ main {
 
 /* 메인 소개 문구 */
 .main-intro {
-  max-width: 1200px;
+  max-width: auto;
   margin: 40px auto 40px;
   padding: 0 40px;
   text-align: left;

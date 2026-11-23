@@ -1,0 +1,180 @@
+.book-detail-page {
+  width: 100%;
+  max-width: 1400px;
+  min-height: 70vh;
+  margin: 0 auto;
+  padding: 60px 48px 80px;
+  box-sizing: border-box;
+}
+
+/* 왼쪽 표지 + 오른쪽 상세 정보 */
+.book-detail-layout {
+  display: grid;
+  grid-template-columns: 400px minmax(0, 1fr);
+  gap: 76px;
+  align-items: start;
+  width: 100%;
+}
+
+/* 왼쪽 */
+.book-detail-left {
+  width: 100%;
+  min-width: 0;
+}
+
+.book-detail-cover {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  background-color: #f2f4f0;
+  overflow: hidden;
+}
+
+.book-detail-cover img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.book-detail-no-cover {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  color: #888;
+  font-size: 18px;
+}
+
+.book-detail-notice {
+  margin: 12px 0;
+  font-size: 13px;
+  color: #555;
+}
+
+.book-detail-actions {
+  display: flex;
+  justify-content: space-around;
+  gap: 16px;
+}
+
+.book-detail-actions button {
+  border: none;
+  background: transparent;
+  color: #666;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.book-detail-actions button:hover {
+  color: #809a78;
+}
+
+/* 본인 확인 */
+.book-detail-auth {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.book-detail-auth input,
+.book-detail-edit input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+/* 제목 수정 */
+.book-detail-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.book-detail-edit button {
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background-color: #809a78;
+  color: white;
+  cursor: pointer;
+}
+
+.book-detail-ai {
+  margin-top: 24px;
+}
+
+/* 오른쪽 */
+.book-detail-right {
+  width: 100%;
+  min-width: 0;
+}
+
+.book-detail-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #666;
+}
+
+.book-detail-meta h1 {
+  margin: 0 0 6px;
+  font-size: 36px;
+  color: #111;
+}
+
+.book-detail-meta p {
+  margin: 6px 0;
+  font-size: 20px;
+  color: #666;
+}
+
+.book-detail-reactions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  white-space: nowrap;
+  font-size: 24px;
+  color: #666;
+}
+
+.book-detail-section {
+  margin-top: 24px;
+}
+
+.book-detail-section h2 {
+  margin: 0 0 16px;
+  font-size: 26px;
+  color: #111;
+}
+
+.book-detail-section p {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* 반응형 */
+@media (max-width: 850px) {
+  .book-detail-layout {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+
+  .book-detail-left {
+    max-width: 400px;
+  }
+
+  .book-detail-top {
+    flex-wrap: wrap;
+  }
+}
