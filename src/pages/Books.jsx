@@ -1,7 +1,8 @@
-import {useMemo, useState} from "react";
+import {useState} from "react";
 import {useNavigate} from "react-router-dom";
 
 import {useBookList, useBookLikes} from "../features/books/hooks/useBooks.js";
+import {queryBooks} from "../features/books/utils/bookQuery.js";
 
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
@@ -20,28 +21,8 @@ function Books() {
   const [keyword, setKeyword] = useState("");
   const [sortBy, setSortBy] = useState("latest");
 
-  // 검색 + 정렬
-  const filteredBooks = useMemo(() => {
-    const search = keyword.trim().toLowerCase();
-
-    const result = books.filter((book) => {
-      const title = (book.title ?? "").toLowerCase();
-      const author = (book.author ?? "").toLowerCase();
-
-      return title.includes(search) || author.includes(search);
-    });
-
-    if (sortBy === "title") {
-      result.sort((a, b) => (a.title ?? "").localeCompare(b.title ?? "", "ko"));
-    } else {
-      result.sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      );
-    }
-
-    return result;
-  }, [books, keyword, sortBy]);
+  // 검색 + 정렬 : 제목, 작가에서 검색 (띄어쓰기 무시) 후 sortBy 순서로 (bookQuery.js)
+  const filteredBooks = queryBooks(books, {q: keyword, sort: sortBy});
 
   return (
     <>
