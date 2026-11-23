@@ -26,7 +26,7 @@ const server = jsonServer.create();
 // /books 같은 REST 경로를 만들어 주는 부분
 // foreignKeySuffix : json-server 는 기본으로 'xxxId' 필드를 'xxxs' 컬렉션의 id 를 가리키는 외래 키로 봅니다.
 // 그래서 DELETE 때마다 가리키는 대상이 없는 문서를 연쇄로 지우는데,
-// 우리 userId 는 'users' : [] 라는 필드의 id (숫자) 가 아니라 로그인 아이디 (문자열) 라서 책과 users 가 전부 지워집니다.
+// userId 는 'users' : [] 라는 필드의 id (숫자) 가 아니라 로그인 아이디 (문자열) 라서 책과 users 가 전부 지워집니다.
 // 위 사항은 기존 userId에서 users 테이블로 분리되면서 확인된 연쇄 삭제 문제를 방지하기 위한 설정입니다.
 // 아무도 쓰지 않는 '_fk' 로 바꿔 이 기능을 끕니다 (_expand, _embed 도 함께 꺼지지만 쓰지 않음)
 const router = jsonServer.router(DB_FILE, { foreignKeySuffix: '_fk' });
@@ -43,14 +43,23 @@ server.use(jsonServer.defaults());   // CORS, 요청 로그, 정적 파일 (기�
 if (DELAY_MS > 0) server.use(delay(DELAY_MS)); // --delay 를 준 경우에만 응답 늦추기
 server.use(jsonServer.bodyParser);   // 요청 본문 JSON -> req.body
 
+// json-server router 안의 methodOverride 가 POST 를 다른 메서드로 바꾸지 못하도록 모든 요청에서 헤더를 지웁니다.
+// (POST 로 통과시키고 router 안에서 DELETE, GET 으로 바뀌어 검사를 건너뛰는 우회를 막기 위함)
+server.use((req, res, next) => {
+  delete req.headers['x-http-method-override'];
+  next();
+});
+
 server.use('/books', booksRoutes(router)); // 등록, 본인 확인, 좋아요, 수정, 삭제 (routes/books.js)
-// 중첩 경로에서 등록 미들웨어를 건너뛰는 POST를 막습니다.
+// json-server 중첩 경로 (/:resource/:id/:nested) 는 router 안에서 /:nested 로 바뀌어 검사를 건너뜁니다.
+// POST 는 등록 검사를, GET 은 /users 차단을 건너뛰므로 (예: GET /books/1/users) 모든 메서드를 막습니다.
 // (booksRoutes 뒤에 두어야 /books/:id/verify, /books/:id/likes 가 먼저 처리됨)
-server.post('/:resource/:id/:nested', (_req, res) => res.sendStatus(404));
+server.use('/:resource/:id/:nested', (_req, res) => res.sendStatus(404));
 
 // 접근 차단
 // json-server 의 /db (db.json 전체) 는 아이디, 해시비번이 포함된 민감 정보이므로, 접근 자체가 안되게 합니다.
-server.get('/db', (req, res) => res.sendStatus(404));
+// GET 만 막으면 다른 메서드로 들어와 router 의 /db 에 닿을 수 있어 모든 메서드를 막습니다.
+server.use('/db', (req, res) => res.sendStatus(404));
 
 // 유저 전체 정보는 접근 할 수 없도록 막음
 // db.json 내 등록된 'users' 필드가 라우팅되는 걸(주소로 접근할 수 있도록 경로가 만들어지는 걸) 막기 위함입니다.
