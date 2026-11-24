@@ -1,5 +1,7 @@
 import {useParams, useNavigate} from "react-router-dom";
 import {useBookDetail, useBookLikes} from "../features/books/hooks/useBooks.js";
+import {useAuth} from "../features/auth/hooks/useAuth.js";
+import {isAdmin} from "../features/auth/utils/roles.js";
 
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
@@ -26,6 +28,7 @@ function BookDetail({removeBook}) {
   const likes = useBookLikes();
 
   const {book, loading, error} = useBookDetail(Number(id));
+  const {user} = useAuth();
 
   if (loading || (!book && !error)) {
     return <p>작품을 불러오는 중입니다.</p>;
@@ -34,6 +37,9 @@ function BookDetail({removeBook}) {
   if (error || !book) {
     return <p>{error || "작품을 찾을 수 없습니다."}</p>;
   }
+
+  // 수정, 삭제 버튼은 관리자이거나 책 주인일 때만 (서버 requireOwner 와 같은 규칙, 실제 막는 건 서버)
+  const canModify = Boolean(user) && (isAdmin(user) || user.userId === book.userId);
 
   // 작품 삭제
   const handleDelete = async () => {
@@ -63,17 +69,19 @@ function BookDetail({removeBook}) {
               )}
             </div>
 
-            <div className="book-detail-actions">
-              <button
-                type="button"
-                onClick={() => navigate(`/books/${id}/edit`)}>
-                수정
-              </button>
+            {canModify && (
+              <div className="book-detail-actions">
+                <button
+                  type="button"
+                  onClick={() => navigate(`/books/${id}/edit`)}>
+                  수정
+                </button>
 
-              <button type="button" onClick={handleDelete}>
-                삭제
-              </button>
-            </div>
+                <button type="button" onClick={handleDelete}>
+                  삭제
+                </button>
+              </div>
+            )}
           </section>
 
           {/* 오른쪽: 작품 상세 정보 */}
