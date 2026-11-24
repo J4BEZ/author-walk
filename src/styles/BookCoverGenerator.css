@@ -1,0 +1,196 @@
+.book-cover-generator {
+  margin-top: 32px;
+  padding: 24px;
+  border: 1px solid #dfe6dc;
+  border-radius: 14px;
+  background-color: #f7f9f6;
+}
+
+.book-cover-generator h3 {
+  margin: 0 0 20px;
+  color: #111;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.cover-gen-form {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: 16px;
+  align-items: end;
+}
+
+.cover-gen-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  color: #333;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.cover-gen-field--key {
+  grid-column: 1 / -1;
+}
+
+.cover-gen-field input,
+.cover-gen-field select {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid #b4c1b2;
+  border-radius: 10px;
+  background-color: #fff;
+  color: #111;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 400;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.cover-gen-field input::placeholder {
+  color: #9aa597;
+}
+
+.cover-gen-field select {
+  appearance: none;
+  padding-right: 38px;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23809a78' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+}
+
+.cover-gen-field input:focus-visible,
+.cover-gen-field select:focus-visible {
+  outline: none;
+  border-color: #809a78;
+  box-shadow: 0 0 0 3px rgba(128, 154, 120, 0.25);
+}
+
+.cover-gen-field input:disabled,
+.cover-gen-field select:disabled {
+  background-color: #eef1ec;
+  color: #8a9488;
+  cursor: not-allowed;
+}
+
+.cover-gen-submit {
+  height: 44px;
+  padding: 0 20px;
+  border: 1px solid #809a78;
+  border-radius: 10px;
+  background-color: #fff;
+  color: #5f7a57;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.cover-gen-submit:hover:not(:disabled) {
+  background-color: #809a78;
+  color: #fff;
+}
+
+.cover-gen-submit:focus-visible,
+.cover-gen-save:focus-visible {
+  outline: 3px solid rgba(128, 154, 120, 0.45);
+  outline-offset: 2px;
+}
+
+.cover-gen-submit:disabled {
+  border-color: #d3dbd0;
+  background-color: #f0f3ef;
+  color: #a3ad9f;
+  cursor: not-allowed;
+}
+
+.cover-gen-status,
+.cover-gen-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.cover-gen-status {
+  background-color: #eaf0e8;
+  color: #46603f;
+}
+
+.cover-gen-error {
+  background-color: #fbeceb;
+  color: #a33a33;
+}
+
+.cover-gen-status--loading::before {
+  content: "";
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #b4c1b2;
+  border-top-color: #809a78;
+  border-radius: 50%;
+  animation: cover-gen-spin 0.8s linear infinite;
+}
+
+@keyframes cover-gen-spin {
+  to { transform: rotate(360deg); }
+}
+
+.cover-gen-result {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 200px;
+  margin: 20px auto 0;      /* 카드 가운데 정렬. 왼쪽 정렬하려면 margin: 20px 0 0 */
+  padding-top: 20px;
+  border-top: 1px dashed #c9d3c6;
+}
+
+.generated-cover {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+.cover-gen-save {
+  width: 100%;
+  height: 44px;
+  border: none;
+  border-radius: 10px;
+  background-color: #809a78;
+  color: #fff;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.cover-gen-save:hover:not(:disabled) {
+  background-color: #6d8765;
+}
+
+.cover-gen-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cover-gen-status--loading::before { animation-duration: 2s; }
+}
+
+@media (max-width: 520px) {
+  .book-cover-generator { padding: 18px; }
+  .cover-gen-form { grid-template-columns: 1fr; }
+}

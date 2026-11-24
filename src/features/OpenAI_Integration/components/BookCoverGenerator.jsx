@@ -4,7 +4,9 @@
 import { IMAGE_QUALITIES } from '../api/openaiImageApi.js';
 import { useBookCoverGenerator } from '../hooks/useBookCoverGenerator.js';
 
-/** @import { BookView } from '../../books/types.js' */
+import '../../../styles/BookCoverGenerator.css';
+
+/** @import { BookView } from '../books/types.js' */
 /** @import { ImageQuality } from '../api/openaiImageApi.js' */
 
 /**
@@ -32,11 +34,9 @@ function BookCoverGenerator({ book, onSave }) {
 
   return (
     <div className="book-cover-generator" aria-busy={busy}>
-      <h3>AI 표지 생성</h3>
-
       {/* 생성에 필요한 입력 */}
-      <form onSubmit={handleSubmit}>
-        <label>
+      <form className="cover-gen-form" onSubmit={handleSubmit}>
+        <label className="cover-gen-field cover-gen-field--key">
           OpenAI API 키
           <input
             type="password"
@@ -50,7 +50,7 @@ function BookCoverGenerator({ book, onSave }) {
           />
         </label>
 
-        <label>
+        <label className="cover-gen-field">
           이미지 품질
           <select
             value={selectedQuality}
@@ -63,24 +63,24 @@ function BookCoverGenerator({ book, onSave }) {
           </select>
         </label>
 
-        <button type="submit" disabled={!canGenerate}>
+        <button type="submit" className="cover-gen-submit" disabled={!canGenerate}>
           {generating ? '표지 생성 중…' : '표지 생성'}
         </button>
       </form>
 
       {/* 로딩 -> 에러 -> 완료 문구 */}
-      {generating && <p role="status">이미지를 생성하고 있습니다. 잠시 기다려 주세요.</p>}
-      {error && <p role="alert">{error}</p>}
-      {message && <p role="status">{message}</p>}
+      {generating && <p className="cover-gen-status cover-gen-status--loading" role="status">이미지를 생성하고 있습니다. 잠시 기다려 주세요.</p>}
+      {error && <p className="cover-gen-error" role="alert">{error}</p>}
+      {message && <p className="cover-gen-status" role="status">{message}</p>}
 
       {cover && (
-        <div>
+        <div className="cover-gen-result">
           <img
             className="generated-cover"
             src={cover}
             alt={`${book.title} AI 생성 표지 미리보기`}
           />
-          <button type="button" onClick={saveCover} disabled={busy}>
+          <button type="button" className="cover-gen-save" onClick={saveCover} disabled={busy}>
             {saving ? '저장 중…' : '이 표지 저장'}
           </button>
         </div>

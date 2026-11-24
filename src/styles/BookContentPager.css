@@ -1,0 +1,125 @@
+/* 책 한 페이지 */
+.book-pager-page {
+  padding: 32px 40px;
+  border: 1px solid #e3e8e0;
+  border-radius: 12px;
+  background-color: #fdfcf8;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+}
+
+/* 높이가 고정된 다단 박스: 넘치는 글은 오른쪽 다음 페이지로 흘러감 */
+.book-pager-view {
+  height: 520px;
+  overflow: hidden;
+  columns: 1;
+  column-gap: 0;
+  column-fill: auto;
+  scroll-behavior: smooth;
+  outline: none;
+}
+
+.book-pager-view:focus-visible {
+  outline: 3px solid rgba(128, 154, 120, 0.45);
+  outline-offset: 8px;
+  border-radius: 4px;
+}
+
+.book-pager-text {
+  color: #222;
+  font-size: 18px;
+  line-height: 1.9;
+  white-space: pre-wrap;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+/* 이전 / 페이지 번호 / 다음 */
+.book-pager-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.book-pager-controls button {
+  height: 40px;
+  padding: 0 18px;
+  border: 1px solid #809a78;
+  border-radius: 999px;
+  background-color: #fff;
+  color: #5f7a57;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.book-pager-controls button:hover:not(:disabled) {
+  background-color: #809a78;
+  color: #fff;
+}
+
+.book-pager-controls button:focus-visible {
+  outline: 3px solid rgba(128, 154, 120, 0.45);
+  outline-offset: 2px;
+}
+
+.book-pager-controls button:disabled {
+  border-color: #d3dbd0;
+  color: #a3ad9f;
+  cursor: not-allowed;
+}
+
+.book-pager-count {
+  color: #6b7668;
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 진행 바 */
+.book-pager-progress {
+  height: 4px;
+  margin-top: 14px;
+  border-radius: 999px;
+  background-color: #e8ede5;
+  overflow: hidden;
+}
+
+.book-pager-progress span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background-color: #809a78;
+  transition: width 0.3s ease;
+}
+
+.book-pager-empty {
+  margin: 0;
+  color: #888;
+}
+
+@media (max-width: 600px) {
+  .book-pager-page {
+    padding: 20px 18px;
+  }
+
+  .book-pager-view {
+    height: 420px;
+  }
+
+  .book-pager-text {
+    font-size: 17px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .book-pager-view {
+    scroll-behavior: auto;
+  }
+
+  .book-pager-progress span {
+    transition: none;
+  }
+}
