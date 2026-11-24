@@ -4,11 +4,13 @@
 
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
+import express from 'express';
 import jsonServer from 'json-server';
 
 import watchDB from './utils/watchDB.js';
 import hideSecrets from './utils/hideSecrets.js';
 import { delay } from './middlewares/delay.js';
+import { COVERS_DIR, COVER_FILE_PATH_RE } from './utils/covers.js';
 
 import { booksRoutes } from './routes/books.js';
 import { authRoutes } from './routes/auth.js';
@@ -44,6 +46,26 @@ router.render = (req, res) => {
 // ** 미들웨어 설정 **
 server.use(jsonServer.defaults());   // CORS, 요청 로그, 정적 파일 (기존 json-server 기본 설정)
 if (DELAY_MS > 0) server.use(delay(DELAY_MS)); // --delay 를 준 경우에만 응답 늦추기
+
+// 표지 이미지 : server/covers 폴더만 /covers 로 내보냄
+// 표지 두 파일 모양 (/<uuid>/original.png, /<uuid>/thumbnail.webp) 의 GET, HEAD 만 통과, 나머지는 모두 404
+// 아래 중첩 경로 차단 (/:resource/:id/:nested) 보다 앞에 있어야 함
+server.use(
+  '/covers',
+  (req, res, next) => ((req.method === 'GET' || req.method === 'HEAD') && COVER_FILE_PATH_RE.test(req.path) ? next() : res.sendStatus(404)),
+  express.static(COVERS_DIR, {
+    dotfiles: 'deny',
+    index: false,
+    redirect: false,
+    setHeaders: (res) => {
+      res.set('X-Content-Type-Options', 'nosniff');
+      // 표지를 바꾸면 폴더 (uuid) 가 바뀌므로 오래 캐시해도 됨
+      // (jsonServer.defaults() 가 먼저 붙인 no-cache 를 덮어씀)
+      res.set('Cache-Control', 'public, max-age=31536000, immutable');
+    },
+  }),
+  (req, res) => res.sendStatus(404), // 모양은 맞지만 파일이 없을 때
+);
 server.use(jsonServer.bodyParser);   // 요청 본문 JSON -> req.body
 
 // json-server router 안의 methodOverride 가 POST 를 다른 메서드로 바꾸지 못하도록 모든 요청에서 헤더를 지웁니다.

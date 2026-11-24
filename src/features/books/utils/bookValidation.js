@@ -8,7 +8,7 @@
 /** @import { NewBookInput, BookChanges } from '../types.js' */
 import { isBlank, isLengthBetween } from '#src/utils/validation/text.js';
 import { hasInvalidChars } from '#src/utils/validation/text.js';
-import { validateAuthor, validatePassword, validateUserId } from '#src/utils/validation/users.js';
+import { validateAuthor } from '#src/utils/validation/users.js';
 import { removeZeroWidthChars } from '#src/utils/processing/text.js';
 
 
@@ -77,14 +77,12 @@ export function validateBookContent(content) {
 //#region 최종 검증
 // 용도: 최종적으로 '등록하기' 버튼을 눌렀을 때 한번 더 검증합니다.
 
-/** 필드 이름: 검사 함수 객체*/
+/** 필드 이름: 검사 함수 객체 (책 주인은 서버가 로그인 토큰으로 정해서 아이디, 비밀번호는 검사하지 않음) */
 export const BOOK_FIELD_VALIDATORS = {
   title: validateBookTitle,
   author: validateAuthor,
   description: validateBookDescription,
   content: validateBookContent,
-  userId: validateUserId,
-  password: validatePassword,
 };
 
 
