@@ -6,6 +6,7 @@ import Footer from "../components/Footer.jsx";
 import BookCoverGenerator from "../features/OpenAI_Integration/components/BookCoverGenerator.jsx";
 import BookAnalysis from "../features/OpenAI_Integration/components/BookAnalysis.jsx";
 import {useBookDetail} from "../features/books/hooks/useBooks.js";
+import CoverImage from "../features/books/components/CoverImage.jsx";
 
 import {
   EDITABLE_FIELDS,
@@ -13,7 +14,6 @@ import {
   validateBookChanges,
 } from "../features/books/utils/bookValidation.js";
 import {countChars} from "#src/utils/validation/text.js";
-import {toApiUrl} from "#src/api/client.js";
 
 /** @import { BookListState } from '../features/books/hooks/useBooks.js' */
 
@@ -211,10 +211,11 @@ function BookEditForm({book, editBook}) {
             {coverImageUrl && (
               <div className="book-create-cover-preview">
                 <h3>현재 적용된 표지</h3>
-                <img
-                  src={toApiUrl(coverImageUrl)}
+                <CoverImage
+                  sources={[coverImageUrl]}
                   alt={`${form.title} 표지`}
                   className="book-create-cover-image"
+                  fallback={<p>표지를 불러오지 못했습니다.</p>}
                 />
               </div>
             )}

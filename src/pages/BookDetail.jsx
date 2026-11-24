@@ -2,12 +2,12 @@ import {useParams, useNavigate} from "react-router-dom";
 import {useBookDetail, useBookLikes} from "../features/books/hooks/useBooks.js";
 import {useAuth} from "../features/auth/hooks/useAuth.js";
 import {canModifyBook} from "#src/utils/roles.js";
-import {toApiUrl} from "#src/api/client.js";
 
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
 import BookLikeButton from "../features/books/components/BookLikeButton.jsx";
 import BookContentPager from "../features/books/components/BookContentPager.jsx";
+import CoverImage from "../features/books/components/CoverImage.jsx";
 
 /** @import { BookListState } from '../features/books/hooks/useBooks.js' */
 
@@ -63,11 +63,11 @@ function BookDetail({removeBook}) {
           {/* 왼쪽: 책 표지 */}
           <section className="book-detail-left">
             <div className="book-detail-cover">
-              {book.coverImageUrl ? (
-                <img src={toApiUrl(book.coverImageUrl)} alt={`${book.title} 표지`} />
-              ) : (
-                <div className="book-detail-no-cover">표지 없음</div>
-              )}
+              <CoverImage
+                sources={[book.coverImageUrl]}
+                alt={`${book.title} 표지`}
+                fallback={<div className="book-detail-no-cover">표지 없음</div>}
+              />
             </div>
 
             {canModify && (

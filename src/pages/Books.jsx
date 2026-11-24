@@ -3,12 +3,12 @@ import {useNavigate} from "react-router-dom";
 
 import {useBookLikes} from "../features/books/hooks/useBooks.js";
 import {queryBooks} from "../features/books/utils/bookQuery.js";
-import {toApiUrl} from "#src/api/client.js";
 
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
 import SearchBar from "../components/SearchBar.jsx";
 import BookLikeButton from "../features/books/components/BookLikeButton.jsx";
+import CoverImage from "../features/books/components/CoverImage.jsx";
 
 /** @import { BookListState } from '../features/books/hooks/useBooks.js' */
 
@@ -62,16 +62,13 @@ function Books({booksState}) {
                   className="new-book-card"
                   onClick={() => navigate(`/books/${book.id}`)}>
                   <div className="books-cover">
-                    {/* 목록은 썸네일 (없으면 원본, 옮기기 전 데이터 대비) */}
-                    {book.coverImageUrl ? (
-                      <img
-                        src={toApiUrl(book.coverThumbnailUrl ?? book.coverImageUrl)}
-                        alt={`${book.title} 표지`}
-                        loading="lazy"
-                      />
-                    ) : (
-                      <span>표지 없음</span>
-                    )}
+                    {/* 목록은 썸네일, 실패하면 원본, 그래도 없으면 "표지 없음" */}
+                    <CoverImage
+                      sources={[book.coverThumbnailUrl, book.coverImageUrl]}
+                      alt={`${book.title} 표지`}
+                      loading="lazy"
+                      fallback={<span>표지 없음</span>}
+                    />
                   </div>
 
                   <div className="books-info">

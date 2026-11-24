@@ -1,6 +1,6 @@
 import "#src/styles/NewBooks.css";
-import {toApiUrl} from "#src/api/client.js";
 import BookLikeButton from "./BookLikeButton.jsx";
+import CoverImage from "./CoverImage.jsx";
 
 function NewBooks({books, onSelect, likes}) {
   const newBooks = [...books]
@@ -28,16 +28,13 @@ function NewBooks({books, onSelect, likes}) {
                 className="new-book-card"
                 onClick={() => onSelect(book.id)}>
                 <div className="new-book-cover">
-                  {/* 목록은 썸네일 (없으면 원본, 옮기기 전 데이터 대비) */}
-                  {book.coverImageUrl ? (
-                    <img
-                      src={toApiUrl(book.coverThumbnailUrl ?? book.coverImageUrl)}
-                      alt={book.title}
-                      loading="lazy"
-                    />
-                  ) : (
-                    <span>표지 없음</span>
-                  )}
+                  {/* 목록은 썸네일, 실패하면 원본, 그래도 없으면 "표지 없음" */}
+                  <CoverImage
+                    sources={[book.coverThumbnailUrl, book.coverImageUrl]}
+                    alt={book.title}
+                    loading="lazy"
+                    fallback={<span>표지 없음</span>}
+                  />
                 </div>
               </button>
 
