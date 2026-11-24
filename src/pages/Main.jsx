@@ -6,7 +6,7 @@ import {useAuth} from "../features/auth/hooks/useAuth.js";
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
 import SearchBar from "../components/SearchBar.jsx";
-import NewBooks from "../components/NewBooks.jsx";
+import NewBooks from "../features/books/components/NewBooks.jsx";
 
 import "../App.css";
 import "../styles/font.css";

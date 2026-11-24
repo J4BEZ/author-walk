@@ -9,8 +9,8 @@ import {
 
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
-import BookLikeButton from "../components/BookLikeButton.jsx";
-import BookContentPager from "../components/BookContentPager.jsx";
+import BookLikeButton from "../features/books/components/BookLikeButton.jsx";
+import BookContentPager from "../features/books/components/BookContentPager.jsx";
 
 /** @import { BookListState } from '../features/books/hooks/useBooks.js' */
 

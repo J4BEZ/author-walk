@@ -7,7 +7,7 @@ import {queryBooks} from "../features/books/utils/bookQuery.js";
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
 import SearchBar from "../components/SearchBar.jsx";
-import BookLikeButton from "../components/BookLikeButton.jsx";
+import BookLikeButton from "../features/books/components/BookLikeButton.jsx";
 
 /** @import { BookListState } from '../features/books/hooks/useBooks.js' */
 

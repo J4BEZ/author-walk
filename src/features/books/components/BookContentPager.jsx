@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useRef, useState} from "react";
-import "../styles/BookContentPager.css";
+import "#src/styles/BookContentPager.css";
 
 const SWIPE_DISTANCE = 50;
 
