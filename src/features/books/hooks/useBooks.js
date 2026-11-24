@@ -8,16 +8,15 @@
 // - 같은 로직을 목록, 메인, 상세 화면이 함께 씁니다 (복사해 붙이지 않음)
 // - 서버가 바뀌어도 (5차 Spring Boot) 화면 코드는 그대로입니다
 //
-// 규칙 : 컴포넌트 맨 위에서만 부르고 (if, 반복문 안 X), useBooks() 는 공통 부모에서 한 번만 부릅니다
+// 규칙 : 컴포넌트 맨 위에서만 부르고 (if, 반복문 안 X), useBookList() 는 공통 부모 (App) 에서 한 번만 부릅니다
+//        검색, 정렬은 각 페이지가 queryBooks 로 계산합니다 (훅은 전체 목록만 들고 있음)
 
 import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import {
   getBooks, getBook, createBook, updateBook, saveCover, deleteBook, incrementBookLikes,
 } from '../api/booksApi.js';
-import { toBookQuery } from '../utils/bookQuery.js';
-import { isBlank } from '#src/utils/validation/text.js';
 
-/** @import { BookView, NewBookInput, BookChanges, Credentials, BookQuery } from '../types.js' */
+/** @import { BookView, NewBookInput, BookChanges } from '../types.js' */
 
 export const BookLikesContext = createContext(
   /** @type {ReturnType<typeof useBookLikesState> | null} */ (null),
@@ -82,18 +81,19 @@ function toMessage(e, fallback) {
 
 
 /**
- * 도서 목록 화면용 훅 : 목록, 검색 조건, 로딩, 에러와 등록, 수정, 삭제, 검색 함수를 반환합니다
+ * 전체 도서 목록 훅 : 전체 목록, 로딩, 에러와 등록, 수정, 표지 저장, 삭제, 새로고침 함수를 반환합니다
  *
+ * App 에서 한 번만 부르고 페이지에는 props 로 내려 줍니다.
  * 등록, 수정, 삭제 함수는 성공하면 목록 State 까지 고치고, 실패하면 에러를 던집니다.
  * (화면에서는 try / catch 로 감싸 실패 문구를 보여 줍니다.)
- * 
- * @returns 훅에서 제공하는 값들 (목록, 로딩, 에러 상태와 CRUD 함수)
+ *
+ * @param {string | null} [token]  로그인 토큰 (App 이 useAuth 에서 꺼내 넘김, books 가 auth 를 직접 import 하지 않도록)
+ * @returns 훅에서 제공하는 값들 (전체 목록, 로딩, 에러 상태와 CRUD 함수)
  */
-export function useBookList() {
+export function useBookList(token = null) {
   const [books, setBooks] = useState(/** @type {BookView[]} */ ([]));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(/** @type {string | null} */ (null));
-  const [query, setQuery] = useState(/** @type {BookQuery} */ ({}));
   const likes = useContext(BookLikesContext);
   
   // useRef : 값이 바뀌어도 화면을 다시 그리지 않는 상자 (.current 로 읽고 씀)
@@ -111,7 +111,7 @@ export function useBookList() {
     const isLatest = () => { return requestId === latestRequest.current; };
 
     // 처음 불러오는 결과가 늦게 도착해서
-    // 검색 요청 결과를 덮어써버리지 않도록 isLatest() 체크도 함께 진행
+    // 새로고침 결과를 덮어써버리지 않도록 isLatest() 체크도 함께 진행
     async function load() {
       try {
         const data = await getBooks();
@@ -131,18 +131,11 @@ export function useBookList() {
   }, []);
 
   /**
-  * 목록 다시 불러오기 (검색 버튼, 새로고침 버튼에서 부름)
-  * @param {string | BookQuery} [nextQuery]  검색어 문자열 또는 검색 조건. 비우면 전체
+  * 전체 목록 다시 불러오기 (새로고침 버튼 등에서 부름)
+  * 검색은 다시 불러오지 않고 각 페이지에서 queryBooks(books, 조건) 으로 계산합니다
   * @returns {Promise<void>}
-  * @example
-  * reload('봄날');                             // 제목+작가에서 '봄날'
-  * reload({ q: '서점', field: 'titleContent' });
-  * reload();                                   // 전체 목록
   */
-  const reload = async (nextQuery = '') => {
-
-    // 검색용 쿼리 객체로 변환
-    const bookQuery = toBookQuery(nextQuery);
+  const reload = async () => {
 
     // 요청 번호 증가 시킨 이후 기록
     const requestId = ++latestRequest.current;
@@ -152,13 +145,12 @@ export function useBookList() {
     setLoading(true);
     setError(null);
     try {
-      const data = await getBooks(bookQuery);
+      const data = await getBooks();
 
       // 마지막으로 보낸 요청과 일치할 때만 상태 갱신
-      // (이전 검색어의 응답이 화면에 뿌려지는 경쟁상태 방지를 위함입니다.)
+      // (늦게 도착한 이전 응답이 화면에 뿌려지는 경쟁상태 방지를 위함입니다.)
       if (isLatest()) {
         setBooks(data);
-        setQuery(bookQuery);
       }
       
     } catch (e) {
@@ -176,63 +168,61 @@ export function useBookList() {
   };
 
   /**
-   * 등록 : 기본 보기면 서버가 돌려준 저장본을 목록 맨 앞에 붙이고, 검색 중이면 기본 보기로 다시 불러옵니다
+   * 등록 : 서버가 돌려준 저장본을 목록 맨 앞에 붙입니다   
+   * (주인은 서버가 토큰으로 정함)
    * @param {NewBookInput} input
    * @returns {Promise<BookView>}
    */
   const addBook = async (input) => {
-    const saved = await createBook(input);
+    const saved = await createBook(input, token);
 
-    if (isBlank(query.q)) {
-      // 기본 보기 (최신순 전체) : 새 책을 맨 앞에 붙인 새 배열로 교체 (불변성 : 펼쳐서 복사)
-      setBooks((prev) => [saved, ...prev]);
-    } else {
-      // 검색 중 : 새 책이 검색 조건에 안 맞을 수 있으므로 조건을 풀고 기본 보기로 다시 불러오기
-      await reload();
-    }
+    // 훅의 목록은 항상 전체라, 새 책을 맨 앞에 붙인 새 배열로 교체 (불변성 : 펼쳐서 복사)
+    setBooks((prev) => [saved, ...prev]);
     return saved;
   };
 
+  // 아래 수정, 표지, 삭제는 페이지가 세 번째 인자로 아이디, 비밀번호 (credentials) 를 아직 넘기지만 받지 않습니다
+  // (누구인지는 token 으로만) -> 페이지에서 그 인자를 지워도 동작이 같음
+
   /**
-   * 수정 : PATCH (서버가 본인 확인) -> 목록에서 그 도서만 바꿔 끼우기
+   * 수정 : PATCH (서버가 토큰으로 주인 확인) -> 목록에서 그 도서만 바꿔 끼우기
    * @param {number} id
    * @param {BookChanges} changes
-   * @param {Credentials} credentials
    * @returns {Promise<BookView>}
    */
-  const editBook = async (id, changes, credentials) => {
-    const updated = await updateBook(id, changes, credentials);
+  const editBook = async (id, changes) => {
+    const updated = await updateBook(id, changes, token);
     setBooks((prev) => prev.map((b) => (b.id === id ? updated : b)));
     return updated;
   };
 
   /**
-   * 표지 저장 (생성, 재생성) : 서버가 본인 확인 -> 목록에서 그 도서만 바꿔 끼우기
+   * 표지 저장 (생성, 재생성) : 서버가 토큰으로 주인 확인 -> 목록에서 그 도서만 바꿔 끼우기
    * @param {number} id
    * @param {string} dataUrl  `data:image/png;base64,...`
-   * @param {Credentials} credentials
    * @returns {Promise<BookView>}
    */
-  const changeCover = async (id, dataUrl, credentials) => {
-    const updated = await saveCover(id, dataUrl, credentials);
+  const changeCover = async (id, dataUrl) => {
+    const updated = await saveCover(id, dataUrl, token);
     setBooks((prev) => prev.map((b) => (b.id === id ? updated : b)));
     return updated;
   };
 
   /**
-   * 삭제 : DELETE (서버가 본인 확인) -> 목록에서 빼기
+   * 삭제 : DELETE (서버가 토큰으로 주인 확인) -> 목록에서 빼기
    * @param {number} id
-   * @param {Credentials} credentials
    * @returns {Promise<void>}
    */
-  const removeBook = async (id, credentials) => {
-    await deleteBook(id, credentials);
+  const removeBook = async (id) => {
+    await deleteBook(id, token);
     setBooks((prev) => prev.filter((b) => b.id !== id));
     likes?.clearBookLikes(id);
   };
 
-  return { books, query, loading, error, reload, addBook, editBook, changeCover, removeBook };
+  return { books, loading, error, reload, addBook, editBook, changeCover, removeBook };
 }
+
+/** @typedef {ReturnType<typeof useBookList>} BookListState  useBookList 가 반환하는 값 (페이지 props 타입에 사용) */
 
 /**
  * 도서 한 권 화면용 훅 (상세, 수정 화면) : id 가 바뀌면 다시 불러옵니다

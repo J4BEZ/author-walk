@@ -1,16 +1,20 @@
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import {useNavigate, useParams} from "react-router-dom";
 
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
 import BookCoverGenerator from "../features/OpenAI_Integration/components/BookCoverGenerator.jsx";
 import BookAnalysis from "../features/OpenAI_Integration/components/BookAnalysis.jsx";
-import {updateBook} from "../features/books/api/booksApi.js";
+import {useBookDetail} from "../features/books/hooks/useBooks.js";
 
 import {
+  EDITABLE_FIELDS,
   normalizeBookInput,
-  validateNewBook,
+  validateBookChanges,
 } from "../features/books/utils/bookValidation.js";
+import {countChars} from "#src/utils/validation/text.js";
+
+/** @import { BookListState } from '../features/books/hooks/useBooks.js' */
 
 import "../styles/BookCreate.css";
 
@@ -18,55 +22,66 @@ function joinErrors(errors) {
   return Object.values(errors).join("\n");
 }
 
-function BookEdit() {
+/**
+ * 작품 수정 페이지 : 기존 값을 useBookDetail 로 불러온 뒤 수정 폼을 보여 줍니다
+ * @param {{ editBook: BookListState['editBook'] }} props
+ */
+function BookEdit({editBook}) {
   const {id} = useParams();
+
+  // 기존 작품 불러오기 (주소, 타임아웃, 404 문구는 booksApi 와 훅이 처리)
+  const {book, loading, error} = useBookDetail(Number(id));
+
+  if (loading || (!book && !error)) {
+    return (
+      <>
+        <Header isLoggedIn={true} />
+        <main className="book-create-page">
+          <p>작품 정보를 불러오는 중...</p>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  if (error || !book) {
+    return (
+      <>
+        <Header isLoggedIn={true} />
+        <main className="book-create-page">
+          <p>{error || "작품을 찾을 수 없습니다."}</p>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  // key : 다른 작품으로 이동하면 폼을 새로 만들어 그 작품 값으로 다시 채움
+  return <BookEditForm key={book.id} book={book} editBook={editBook} />;
+}
+
+/**
+ * 수정 폼 : 불러온 작품으로 처음부터 채운 상태로 시작하고, 저장은 editBook 으로 바뀐 필드만 보냅니다
+ * (Effect 로 나중에 채우지 않고 useState 초기값으로 채워, 빈 폼이 잠깐 보이거나 렌더링이 한 번 더 일어나지 않게)
+ * @param {{
+ *   book: import('../features/books/types.js').BookView,
+ *   editBook: BookListState['editBook'],
+ * }} props
+ */
+function BookEditForm({book, editBook}) {
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({
-    title: "",
-    author: "",
-    userId: "",
-    description: "",
-    content: "",
+  const [form, setForm] = useState(() => ({
+    title: book.title ?? "",
+    author: book.author ?? "",
+    userId: book.userId ?? "",
+    description: book.description ?? "",
+    content: book.content ?? "",
     password: "",
-  });
+  }));
 
-  const [coverImageUrl, setCoverImageUrl] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [coverImageUrl, setCoverImageUrl] = useState(book.coverImageUrl ?? "");
   const [submitting, setSubmitting] = useState(false);
-
-  // 기존 작품 불러오기
-  useEffect(() => {
-    const loadBook = async () => {
-      try {
-        const res = await fetch(`http://localhost:3000/books/${id}`);
-
-        if (!res.ok) {
-          throw new Error("작품을 불러오지 못했습니다.");
-        }
-
-        const book = await res.json();
-
-        setForm({
-          title: book.title ?? "",
-          author: book.author ?? "",
-          userId: book.userId ?? "",
-          description: book.description ?? "",
-          content: book.content ?? "",
-          password: "",
-        });
-
-        setCoverImageUrl(book.coverImageUrl ?? "");
-      } catch (e) {
-        console.error(e);
-        alert("작품을 불러오지 못했습니다.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadBook();
-  }, [id]);
 
   const handleChange = (e) => {
     const {name, value} = e.target;
@@ -89,7 +104,22 @@ function BookEdit() {
     if (submitting) return;
 
     const clean = normalizeBookInput(form);
-    const message = joinErrors(validateNewBook(clean));
+
+    // 불러온 원본과 비교해 바뀐 필드만 고르기 (PATCH 는 바뀐 필드만 보냄)
+    /** @type {import('../features/books/types.js').BookChanges} */
+    const changes = {};
+    for (const field of EDITABLE_FIELDS) {
+      if (clean[field] !== (book[field] ?? "")) changes[field] = clean[field];
+    }
+    if (coverImageUrl !== (book.coverImageUrl ?? "")) changes.coverImageUrl = coverImageUrl;
+
+    if (Object.keys(changes).length === 0) {
+      alert("바뀐 내용이 없습니다.");
+      return;
+    }
+
+    // 바뀐 필드만 검사
+    const message = joinErrors(validateBookChanges(changes));
 
     if (message) {
       alert(message);
@@ -99,23 +129,14 @@ function BookEdit() {
     setSubmitting(true);
 
     try {
-      await updateBook(
-        Number(id),
-        {
-          title: clean.title,
-          author: clean.author,
-          description: clean.description,
-          content: clean.content,
-          coverImageUrl,
-        },
-        {
-          userId: clean.userId,
-          password: clean.password,
-        },
-      );
+      // 서버에서 아이디와 비밀번호를 확인한 후 수정 (성공하면 App 의 목록에도 반영)
+      await editBook(book.id, changes, {
+        userId: clean.userId,
+        password: clean.password,
+      });
 
       alert("작품이 수정되었습니다.");
-      navigate(`/books/${id}`);
+      navigate(`/books/${book.id}`);
     } catch (e) {
       console.error(e);
 
@@ -130,23 +151,11 @@ function BookEdit() {
   };
 
   const aiBook = {
-    id: Number(id),
+    id: book.id,
     title: form.title,
     author: form.author,
     content: form.content,
   };
-
-  if (loading) {
-    return (
-      <>
-        <Header isLoggedIn={true} />
-        <main className="book-create-page">
-          <p>작품 정보를 불러오는 중...</p>
-        </main>
-        <Footer />
-      </>
-    );
-  }
 
   return (
     <>
@@ -224,7 +233,7 @@ function BookEdit() {
               onChange={handleChange}
             />
 
-            <p className="book-create-count">글자수 {form.content.length}자</p>
+            <p className="book-create-count">글자수 {countChars(form.content)}자</p>
 
             {/* 기존 표지 또는 새로 선택한 AI 표지 */}
             {coverImageUrl && (

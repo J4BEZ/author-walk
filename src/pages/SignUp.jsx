@@ -1,62 +1,18 @@
-import {useState} from "react";
 import {useNavigate} from "react-router-dom";
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
-import "../styles/Signup.css";
+import {useSignupForm} from "../features/auth/hooks/useSignupForm.js";
+import "../styles/SignUp.css";
 
+// 입력, 칸별 검사, 제출은 useSignupForm 이 맡고, 이 화면은 성공 후 어디로 갈지만 정합니다
 function Signup() {
   const navigate = useNavigate();
-
-  const [form, setForm] = useState({
-    userId: "",
-    nickname: "",
-    password: "",
-    confirmPassword: "",
+  const {form, fieldErrors, error, submitting, handleChange, handleSubmit} = useSignupForm({
+    onSuccess: () => {
+      alert("회원가입이 완료되었습니다. 로그인해 주세요.");
+      navigate("/login");
+    },
   });
-
-  const [error, setError] = useState("");
-
-  const handleChange = (e) => {
-    const {name, value} = e.target;
-
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    setError("");
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    const {userId, nickname, password, confirmPassword} = form;
-
-    if (!userId.trim() || !nickname.trim() || !password || !confirmPassword) {
-      setError("모든 항목을 입력해 주세요.");
-      return;
-    }
-
-    if (userId.trim().length < 4) {
-      setError("아이디는 4자 이상 입력해 주세요.");
-      return;
-    }
-
-    if (password.length < 8) {
-      setError("비밀번호는 8자 이상 입력해 주세요.");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError("비밀번호가 일치하지 않습니다.");
-      return;
-    }
-
-    // TODO: 실제 회원가입 API 연동
-    alert(
-      "입력값 검증이 완료되었습니다. 실제 회원가입은 API 연결 후 가능합니다.",
-    );
-  };
 
   return (
     <>
@@ -69,7 +25,7 @@ function Signup() {
             <p>당신만의 이야기를 시작해 보세요</p>
           </div>
 
-          <form className="signup-form" onSubmit={handleSubmit}>
+          <form className="signup-form" onSubmit={handleSubmit} noValidate>
             <div className="signup-form-header">
               <h2>회원가입</h2>
               <p>걷기가 서재의 새로운 작가이자 독자가 되어보세요!</p>
@@ -81,24 +37,13 @@ function Signup() {
                 id="userId"
                 name="userId"
                 type="text"
-                placeholder="아이디를 입력하세요"
+                placeholder="영문, 숫자, 밑줄 2~15자"
                 value={form.userId}
                 onChange={handleChange}
                 autoComplete="username"
+                aria-invalid={Boolean(fieldErrors.userId)}
               />
-            </div>
-
-            <div className="signup-field">
-              <label htmlFor="nickname">닉네임</label>
-              <input
-                id="nickname"
-                name="nickname"
-                type="text"
-                placeholder="사용할 닉네임을 입력하세요"
-                value={form.nickname}
-                onChange={handleChange}
-                autoComplete="nickname"
-              />
+              {fieldErrors.userId && <p className="signup-field-error">{fieldErrors.userId}</p>}
             </div>
 
             <div className="signup-field">
@@ -107,11 +52,13 @@ function Signup() {
                 id="password"
                 name="password"
                 type="password"
-                placeholder="8자 이상 입력하세요"
+                placeholder="영문, 숫자, 특수문자 포함 8~15자"
                 value={form.password}
                 onChange={handleChange}
                 autoComplete="new-password"
+                aria-invalid={Boolean(fieldErrors.password)}
               />
+              {fieldErrors.password && <p className="signup-field-error">{fieldErrors.password}</p>}
             </div>
 
             <div className="signup-field">
@@ -124,7 +71,11 @@ function Signup() {
                 value={form.confirmPassword}
                 onChange={handleChange}
                 autoComplete="new-password"
+                aria-invalid={Boolean(fieldErrors.confirmPassword)}
               />
+              {fieldErrors.confirmPassword && (
+                <p className="signup-field-error">{fieldErrors.confirmPassword}</p>
+              )}
             </div>
 
             {error && (
@@ -133,8 +84,8 @@ function Signup() {
               </p>
             )}
 
-            <button type="submit" className="signup-submit">
-              회원가입
+            <button type="submit" className="signup-submit" disabled={submitting}>
+              {submitting ? "가입 중..." : "회원가입"}
             </button>
 
             <div className="signup-login">

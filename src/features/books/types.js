@@ -46,7 +46,7 @@
  * `Pick<Book, '필드' | '필드'>` 는 Book 에서 고른 필드만 남긴 타입,
  * `Partial<...>` 는 그 필드들을 모두 "있어도 되고 없어도 되는" 선택 필드로 바꾼 타입입니다.
  * `{ title }` 만 보내도, `{ coverImageUrl }` 만 보내도 됩니다 (PATCH 는 바뀐 필드만).
- * @typedef {Partial<Pick<Book, 'title' | 'description' | 'content' | 'coverImageUrl'>>} BookChanges
+ * @typedef {Partial<Pick<Book, 'title' | 'author' | 'description' | 'content' | 'coverImageUrl'>>} BookChanges
  */
 
 /**
