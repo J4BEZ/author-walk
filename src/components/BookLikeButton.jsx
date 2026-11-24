@@ -1,4 +1,5 @@
 /** @import { BookView } from '../features/books/types.js' */
+import "../styles/BookLikeButton.css";
 
 /** @param {{ book: BookView, likes: ReturnType<typeof import('../features/books/hooks/useBooks.js').useBookLikesState> }} props */
 function BookLikeButton({book, likes}) {
@@ -23,13 +24,15 @@ function BookLikeButton({book, likes}) {
 
   return (
     <button
-      type="button"
-      disabled={likes.likingIds.has(book.id)}
-      onClick={handleClick}
-      aria-label={`${book.title} 좋아요 ${count}개`}
-    >
-      {count} ♡
-    </button>
+    type="button"
+    className="book-like-button"
+    disabled={likes.likingIds.has(book.id)}
+    onClick={handleClick}
+    aria-label={`${book.title} 좋아요 ${count}개`}>
+    
+    <span className="book-like-heart" aria-hidden="true" />
+    <span className="book-like-count">{count}</span>
+  </button>
   );
 }
 

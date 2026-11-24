@@ -2,8 +2,8 @@ import {useNavigate} from "react-router-dom";
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
 import {useLoginForm} from "../features/auth/hooks/useLoginForm.js";
+import "../styles/Login.css";
 
-// 마크업, class 이름은 feature/components 의 Login.jsx 와 같게 둡니다 (스타일은 그 브랜치의 Login.css)
 // 입력, 제출, 실패 메시지는 useLoginForm 이 맡고, 이 화면은 성공 후 어디로 갈지만 정합니다
 function Login() {
   const navigate = useNavigate();

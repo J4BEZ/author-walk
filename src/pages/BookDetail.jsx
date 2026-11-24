@@ -10,6 +10,7 @@ import {
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
 import BookLikeButton from "../components/BookLikeButton.jsx";
+import BookContentPager from "../components/BookContentPager.jsx";
 
 /** @import { BookListState } from '../features/books/hooks/useBooks.js' */
 
@@ -128,7 +129,7 @@ function BookDetail({editBook, changeCover, removeBook}) {
               <button
                 type="button"
                 onClick={() => navigate(`/books/${id}/edit`)}>
-                수정하기
+                수정
               </button>
 
               <button type="button" onClick={handleDelete}>
@@ -195,7 +196,7 @@ function BookDetail({editBook, changeCover, removeBook}) {
 
             <div className="book-detail-section">
               <h2>작품 내용</h2>
-              <p>{book.content}</p>
+              <BookContentPager key={book.id} content={book.content} />
             </div>
           </section>
         </div>

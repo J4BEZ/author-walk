@@ -1,0 +1,55 @@
+.book-like-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid #dfe6dc;
+  border-radius: 999px;
+  background-color: #fff;
+  color: #6b7668;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s,
+    transform 0.1s;
+}
+
+/* 하트: 평소엔 빈 하트, hover 땐 채운 하트 */
+.book-like-heart::before {
+  content: "♡";
+  font-size: 16px;
+}
+
+.book-like-button:hover:not(:disabled) {
+  border-color: #f0b4b4;
+  background-color: #fdf0f0;
+  color: #d64545;
+}
+
+.book-like-button:hover:not(:disabled) .book-like-heart::before {
+  content: "♥";
+}
+
+.book-like-button:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.book-like-button:focus-visible {
+  outline: 3px solid rgba(128, 154, 120, 0.45);
+  outline-offset: 2px;
+}
+
+/* 요청 중 */
+.book-like-button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+/* 전체 작품 카드: 카드 안쪽 글자 여백(24px)에 맞춤 */
+.books-card .book-like-button {
+  margin: 0 24px 20px;
+}
