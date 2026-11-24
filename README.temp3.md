@@ -62,7 +62,11 @@ npm run dev
 카드를 선택하면 작품 상세(`/books/:id`)가 열립니다. 소개와 본문을 읽고 좋아요를 누를 수 있습니다.<br>
 본문 페이지는 이전 및 다음 버튼, 방향키, 터치 스와이프로 넘깁니다. 작품 소유자와 관리자에게 **수정** 및 **삭제** 버튼이 표시됩니다.
 
-![작품 상세 화면의 소개와 본문 페이지 뷰어](docs/assets/readme-screenshots/book-detail.png)
+같은 작품 **동백꽃**(`/books/2`)을 두 예시 계정으로 열어 비교했습니다. 작품 소유자인 영희 계정에서는 버튼을 사용할 수 있고, 길동 계정에서는 버튼 영역이 숨겨집니다.
+
+| 영희 (`younghee5678`), 동백꽃 소유자 | 길동 (`gildong1234`), 동백꽃 열람 |
+| --- | --- |
+| ![영희 계정에서 동백꽃 상세에 수정과 삭제 버튼이 표시됨](docs/assets/readme-screenshots/book-detail-owner.png) | ![길동 계정에서 동백꽃 상세의 수정과 삭제 버튼 영역이 숨겨짐](docs/assets/readme-screenshots/book-detail-reader.png) |
 
 ### 로그인과 회원가입
 
@@ -84,18 +88,13 @@ npm run dev
 
 ### 작품 등록과 수정
 
-로그인 후 헤더의 **글쓰기**에서 제목, 작가명, 작품 소개, 본문을 입력합니다. <br>
-현재 등록 폼의 ID와 비밀번호 입력란도 형식 검사를 통과해야 합니다. <br>
-ID는 영문, 숫자, 밑줄로 2~15자이고, 비밀번호는 영문, 숫자, 특수문자를 모두 포함해 8~15자입니다. <br>
+아이디와 비밀번호는 로그인 화면에서 입력합니다. 로그인 후 헤더의 **글쓰기**에서 제목, 작가명, 작품 소개, 본문을 입력합니다.
 
-상세 화면의 **수정**으로 기존 내용을 불러옵니다. 수정 폼에 남아 있는 ID와 비밀번호 확인란은 비워도 됩니다. <br>
-서버는 로그인한 계정과 그 역할을 기준으로 수정 권한을 확인합니다.
+상세 화면의 **수정**을 누르면 기존 작품 정보가 표시됩니다. 서버는 로그인한 계정으로 등록 작품의 소유자를 정하고, 수정할 때는 작품 소유자 또는 관리자 권한을 확인합니다.
 
-| 작품 등록 (`/books/new`) | 작품 수정 (`/books/:id/edit`) |
+| 길동 계정으로 작품 등록 (`/books/new`) | 영희 계정으로 동백꽃 수정 (`/books/2/edit`) |
 | --- | --- |
-| ![작품 등록 폼과 AI 표지 생성 및 작품 분석 영역](docs/assets/readme-screenshots/book-create.png) | ![동백꽃의 기존 표지와 AI 작품 분석 예시가 표시된 수정 화면](docs/assets/readme-screenshots/book-edit.png) |
-
-작품 수정 화면의 AI 분석 결과는 기능을 보여 주기 위한 예시입니다.
+| ![제목, 작가명, 작품 소개, 본문을 입력하는 작품 등록 폼](docs/assets/readme-screenshots/book-create-signed-in.png) | ![동백꽃의 기존 작품 정보와 표지를 불러온 작품 수정 폼](docs/assets/readme-screenshots/book-edit-owner.png) |
 
 ### AI 작품 분석과 표지 생성
 
@@ -257,7 +256,7 @@ return (
 `SummaryBookCoverGenerator`를 별도 화면에서 사용할 때는 `title`, `author`, `genre`, `summary`, `userApiKey`를 전달하고 <br>
 표지 선택이 필요하면 `onSave`를 연결합니다.
 
-선택한 표지는 작품 저장 시 `coverImageUrl`에 PNG Data URL로 기록합니다.
+작품을 저장할 때 화면은 선택한 표지를 PNG Data URL로 보냅니다. 서버는 원본 PNG와 목록용 WebP 썸네일을 파일로 저장하고 작품 데이터에 두 이미지 주소를 기록합니다.
 
 ## 데이터와 API
 
@@ -267,7 +266,7 @@ return (
 | --- | --- | --- |
 | `books` | `id`, `title`, `author`, `description`, `content` | 작품 번호와 화면에 표시하는 정보. `author`는 수정 가능한 작가명입니다. |
 | `books` | `userId` | 소유자 계정의 로그인 아이디 |
-| `books` | `coverImageUrl`, `likes` | 표지 이미지와 누적 좋아요 수. 새 작품의 좋아요는 0에서 시작합니다. |
+| `books` | `coverImageUrl`, `coverThumbnailUrl`, `likes` | 표지 원본 주소, 썸네일 주소, 누적 좋아요 수. 새 작품의 좋아요는 0에서 시작합니다. |
 | `books` | `createdAt`, `updatedAt` | 등록 및 수정 시각 |
 | `users` | `id`, `userId`, `passwordHash`, `role`, `createdAt` | 계정 번호, 로그인 아이디, 비밀번호 해시, 역할, 가입 시각 |
 
@@ -278,22 +277,49 @@ return (
 서버는 요청할 때마다 역할을 조회하므로, `set-role`로 바꾼 역할은 DB가 다시 로드된 후 다음 요청에 반영됩니다. <br>
 화면의 버튼 표시는 현재 계정 정보를 다시 조회할 때 갱신됩니다. 같은 작품을 동시에 수정하면 같은 항목에는 마지막 저장 값이 남습니다.
 
-### 주요 엔드포인트
+### 전체 엔드포인트
 
-| 함수 | HTTP 요청 | 성공 응답 |
+#### 프로젝트 API 서버
+
+기본 주소는 `http://localhost:3000`입니다. 인증이 필요한 요청은 `Authorization: Bearer <token>` 헤더를 사용합니다. `HEAD` 응답은 상태 코드와 헤더만 보냅니다.
+
+| HTTP 요청 | 접근 권한 | 동작과 성공 응답 |
 | --- | --- | --- |
-| `signup(userId, password)` | `POST /auth/signup` | `201`과 가입 완료 메시지 |
-| `login(userId, password)` | `POST /auth/login` | `200`과 `{ token }` |
-| `getMe(token)` | `GET /auth/me` | `200`과 `{ user: { userId, role } }`. 클라이언트 함수는 내부 `user`를 반환합니다. |
-| `getBooks(query?)` | `GET /books` | `200`과 작품 배열. 클라이언트가 검색과 정렬 조건을 처리합니다. |
-| `getBook(id)` | `GET /books/:id` | `200`과 작품 한 편 |
-| `createBook(input, token)` | `POST /books` | `201`과 번호가 붙은 작품 |
-| `updateBook(id, changes, token)` | `PATCH /books/:id` | `200`과 수정된 작품 |
-| `saveCover(id, dataUrl, token)` | `PATCH /books/:id` | `200`과 표지가 바뀐 작품. 클라이언트에서 이미지 Data URL을 먼저 확인합니다. |
-| `deleteBook(id, token)` | `DELETE /books/:id` | `200`과 빈 객체 |
-| `incrementBookLikes(id)` | `POST /books/:id/likes` | `200`과 `{ likes }`. 값은 요청마다 1씩 늘어납니다. |
+| `POST /auth/signup` | 공개 | `signup(userId, password)`로 계정을 등록합니다. `201`과 가입 완료 메시지를 반환합니다. |
+| `POST /auth/login` | 공개 | `login(userId, password)`로 로그인합니다. `200`과 `{ token }`을 반환합니다. |
+| `GET /auth/me` | 로그인 계정 | `200`과 `{ user: { userId, role } }`을 반환합니다. `getMe(token)`은 응답의 `user`를 꺼내 반환합니다. |
+| `HEAD /auth/me` | 로그인 계정 | 동일한 토큰 검사를 거쳐 `200`과 응답 헤더를 반환합니다. |
+| `GET /books` | 공개 | `200`과 작품 배열을 반환합니다. `getBooks(query?)`는 받은 배열에 검색과 정렬 조건을 적용합니다. |
+| `HEAD /books` | 공개 | 작품 목록 요청의 `200` 상태와 응답 헤더를 반환합니다. |
+| `POST /books` | 로그인 계정 | `createBook(input, token)`으로 작품을 등록합니다. `201`과 번호가 붙은 작품을 반환합니다. |
+| `GET /books/:id` | 공개 | `getBook(id)`로 작품 한 편을 조회합니다. `200`과 해당 작품을 반환합니다. |
+| `HEAD /books/:id` | 공개 | 작품 상세 요청의 `200` 상태와 응답 헤더를 반환합니다. |
+| `PATCH /books/:id` | 작품 소유자 또는 관리자 | 바뀐 항목을 저장하고 `200`과 수정된 작품을 반환합니다. `updateBook(id, changes, token)`과 `saveCover(id, dataUrl, token)`이 이 요청을 사용합니다. |
+| `PUT /books/:id` | 작품 소유자 또는 관리자 | 작품 전체를 교체하고 `200`과 저장된 작품을 반환합니다. 소유자, 좋아요 수, 요청에 표지가 빠진 경우 기존 표지 주소를 유지합니다. |
+| `DELETE /books/:id` | 작품 소유자 또는 관리자 | `deleteBook(id, token)`으로 작품을 삭제합니다. `200`과 빈 객체를 반환합니다. |
+| `POST /books/:id/likes` | 공개 | `incrementBookLikes(id)`로 좋아요를 1 올립니다. `200`과 `{ likes }`를 반환합니다. |
+| `GET /covers/:uuid/original.png` | 공개 | 상세와 수정 화면에서 사용하는 원본 PNG를 반환합니다. |
+| `HEAD /covers/:uuid/original.png` | 공개 | 원본 PNG의 응답 헤더를 반환합니다. |
+| `GET /covers/:uuid/thumbnail.webp` | 공개 | 작품 카드에서 사용하는 WebP 썸네일을 반환합니다. |
+| `HEAD /covers/:uuid/thumbnail.webp` | 공개 | WebP 썸네일의 응답 헤더를 반환합니다. |
+| `GET /favicon.svg` | 공개 | `public/`에 있는 사이트 아이콘을 반환합니다. |
+| `HEAD /favicon.svg` | 공개 | 사이트 아이콘의 응답 헤더를 반환합니다. |
+| `GET /icons.svg` | 공개 | `public/`에 있는 SVG 아이콘 파일을 반환합니다. |
+| `HEAD /icons.svg` | 공개 | SVG 아이콘 파일의 응답 헤더를 반환합니다. |
+| `OPTIONS <요청 경로>` | 공개 | 브라우저의 CORS 사전 요청에 `204`와 CORS 헤더를 반환합니다. |
 
-토큰이 필요한 요청은 `Authorization: Bearer <token>` 헤더를 사용합니다. <br>
+
+#### OpenAI 요청
+
+등록 및 수정 화면은 사용자가 입력한 키로 `https://api.openai.com`에 직접 요청합니다.
+
+| HTTP 요청 | 동작과 응답 |
+| --- | --- |
+| `POST /v1/responses` | `gpt-4.1-mini`로 작품을 분석합니다. 화면에서 예상 장르, 독자용 소개글, 표지용 요약과 확인할 사항을 읽습니다. |
+| `POST /v1/images/generations` | `gpt-image-2`로 표지를 만듭니다. 본문 기반 생성과 장르 및 요약 기반 생성이 모두 이 요청을 쓰며, 응답의 `b64_json`을 PNG Data URL로 변환합니다. |
+
+#### 작품 요청 본문 예시
+
 등록 본문에는 작품 정보와 시각을 담고, 작품 번호와 소유자, 초기 좋아요 수는 서버가 채웁니다.
 
 ```json
