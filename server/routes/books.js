@@ -5,6 +5,7 @@ import express from 'express';
 
 import { forGuardedMethods, ownerOnCreate, requireOwner } from '../middlewares/owner.js';
 import { requireAuth } from '../middlewares/auth.js';
+import { coverOnSave } from '../middlewares/covers.js';
 
 
 /**
@@ -18,9 +19,10 @@ export function booksRoutes(router) {
   // 읽기 (GET) 는 여기서 손대지 않고 지나가 json-server router 가 처리 (로그인 없이 누구나)
   const auth = requireAuth(router);
 
-  books.post('/', auth, ownerOnCreate());                                  // 등록 : 로그인한 사람이 주인
+  books.post('/', auth, ownerOnCreate(), coverOnSave(router));             // 등록 : 로그인한 사람이 주인, 표지는 파일로
   books.post('/:id/likes', likeRoute(router));                             // 좋아요 +1 : 로그인 없이 (토글은 나중에)
-  books.use('/:id', forGuardedMethods(auth), requireOwner(router));        // 수정, 삭제 : 로그인 + 본인만
+  books.use('/:id', forGuardedMethods(auth), requireOwner(router),         // 수정, 삭제 : 로그인 + 본인만
+    forGuardedMethods(coverOnSave(router)));                               // 표지 저장, 바꾸기, 글 삭제 때 표지 폴더 삭제
 
   return books;
 }
