@@ -15,6 +15,7 @@
     "server:watch": "node --watch --env-file-if-exists=.env server/index.js",
     "server-with-delay": "node --env-file-if-exists=.env server/index.js --delay 1000",
     "set-role": "node server/scripts/setRole.js",
+    "extract-covers": "node server/scripts/extractCovers.js",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
