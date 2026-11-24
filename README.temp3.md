@@ -1,36 +1,117 @@
 # 작가의 산책 (author-walk)
 
-작품을 쓰고, 제목이나 작가명으로 다른 사람의 작품을 찾아 읽는 웹앱입니다.<br>
+누구나 글을 쓰고, AI 가 글에 어울리는 표지를 만들어 주는 도서 관리 시스템입니다. <br>
 등록과 수정 화면에서 AI로 작품을 분석하고 표지를 만들 수 있습니다.<br>
-화면은 React 19와 Vite로 실행하며, 커스텀 json-server가 작품과 계정을 `db.json`에 저장합니다.
+화면은 React 19와 Vite로 실행하며, 커스텀 json-server가 작품과 계정을 `db.json`에 저장합니다. <br>
+또한, 표지 생성에는 OpenAI GPT Image API 를 사용합니다.
 
-## 로컬에서 실행하기
+- [사용자 가이드](#사용자-가이드)
+- [개발자 가이드](#개발자-가이드)
+- [데이터와 API](#데이터와-api)
 
-Node.js **24.7 이상**이 필요합니다. 프로젝트 루트에서 의존성을 설치하고, `.env`가 없으면 `.env.example`을 복사합니다.
+## 사용자 가이드
+
+### 로컬에서 실행하기
+
+Node.js **24.7 이상**이 필요합니다. 아래의 `/path/to/author-walk`를 클론한 폴더 경로로 바꿉니다.
+
+Windows PowerShell에서는 `.env`가 없을 때 `Copy-Item .env.example .env`로 파일을 만듭니다.<br>
+PowerShell에서 `npm.ps1` 실행이 차단되면 명령의 `npm`을 `npm.cmd`로 바꿉니다.
+
+Bash에서 첫 번째 터미널을 열어 의존성을 설치하고 API 서버를 실행합니다.
 
 ```bash
+cd "/path/to/author-walk"
 npm ci
-cp .env.example .env
+if [ ! -f .env ]; then
+  cp .env.example .env
+fi
+npm run server
 ```
 
-Windows PowerShell에서는 `Copy-Item .env.example .env`를 사용합니다.<br>
-PowerShell에서 `npm.ps1` 실행이 차단되면 명령의 `npm`을 `npm.cmd`로 바꿉니다.
+API 서버를 켜 둔 채 두 번째 터미널을 열어 화면을 실행합니다.
+
+```bash
+cd "/path/to/author-walk"
+npm run dev
+```
 
 | 터미널 | 명령 | 주소 |
 | --- | --- | --- |
 | 1 | `npm run server` | `http://localhost:3000/books` |
 | 2 | `npm run dev` | [http://localhost:5173](http://localhost:5173) |
 
-화면을 열고 **작품 둘러보기**에서 예시 작품을 읽을 수 있습니다.<br>
-글을 쓰려면 회원가입 후 로그인하거나 아래 로컬 예시 계정으로 로그인합니다.<br>
-AI 표지 생성 기능은 해당 화면에 OpenAI API 키를 입력하면 사용할 수 있습니다.
+| 로그인 후 메인과 헤더 메뉴 | 전체 작품 목록 |
+| --- | --- |
+| ![로그인한 사용자의 인사말과 열린 헤더 메뉴](docs/assets/readme-screenshots/main-signed-in.png) | ![작품 목록의 검색창과 정렬 메뉴](docs/assets/readme-screenshots/books.png) |
+
+화면을 열고 **작품 둘러보기**에서 예시 작품을 읽을 수 있습니다.
+글을 쓰려면 [로그인과 회원가입](#로그인과-회원가입) 안내를 참고하세요.
+
+### 작품 찾아보기
+
+로컬 예시 데이터로 실행한 화면입니다.
+
+메인(`/main`)에서 최근 7일 안에 등록된 신작을 최대 5개 보여 줍니다.<br>
+제목이나 작가명으로 검색할 수 있고, 전체 작품 목록(`/books`)에서는 최신 등록순과 이름순으로 정렬할 수 있습니다.
+
+![메인 화면과 이번 주 신작](docs/assets/readme-screenshots/main.png)
+
+#### 작품 상세
+
+카드를 선택하면 작품 상세(`/books/:id`)가 열립니다. 소개와 본문을 읽고 좋아요를 누를 수 있습니다.<br>
+본문 페이지는 이전 및 다음 버튼, 방향키, 터치 스와이프로 넘깁니다. 작품 소유자와 관리자에게 **수정** 및 **삭제** 버튼이 표시됩니다.
+
+![작품 상세 화면의 소개와 본문 페이지 뷰어](docs/assets/readme-screenshots/book-detail.png)
+
+### 로그인과 회원가입
+
+회원가입이 끝나면 로그인 화면으로 이동합니다. 로그인에 성공하면 메인으로 돌아갑니다.
+
+| 로그인 (`/login`) | 회원가입 (`/signup`) |
+| --- | --- |
+| ![로그인 화면](docs/assets/readme-screenshots/login.png) | ![아이디, 비밀번호와 확인란이 있는 회원가입 화면](docs/assets/readme-screenshots/signup.png) |
+
+회원가입을 하거나 아래 로컬 예시 계정으로 로그인할 수 있습니다. 작품을 등록하려면 로그인하세요.
 
 | 예시 계정 | 로그인 비밀번호 | 등록된 작품 |
 | --- | --- | --- |
 | `gildong1234` | `1234` | 운수 좋은 날 |
 | `younghee5678` | `5678` | 동백꽃 |
 
-### 환경 변수
+로그인 후에도 주소는 `/main`입니다. 헤더에 **글쓰기**와 메뉴가 표시되고, 메뉴에서 로그아웃할 수 있습니다.<br>
+마이페이지, 내 작품, 구독 작품을 선택하면 준비 중 화면이 열립니다.
+
+### 작품 등록과 수정
+
+로그인 후 헤더의 **글쓰기**에서 제목, 작가명, 작품 소개, 본문을 입력합니다. <br>
+현재 등록 폼의 ID와 비밀번호 입력란도 형식 검사를 통과해야 합니다. <br>
+ID는 영문, 숫자, 밑줄로 2~15자이고, 비밀번호는 영문, 숫자, 특수문자를 모두 포함해 8~15자입니다. <br>
+
+상세 화면의 **수정**으로 기존 내용을 불러옵니다. 수정 폼에 남아 있는 ID와 비밀번호 확인란은 비워도 됩니다. <br>
+서버는 로그인한 계정과 그 역할을 기준으로 수정 권한을 확인합니다.
+
+| 작품 등록 (`/books/new`) | 작품 수정 (`/books/:id/edit`) |
+| --- | --- |
+| ![작품 등록 폼과 AI 표지 생성 및 작품 분석 영역](docs/assets/readme-screenshots/book-create.png) | ![동백꽃의 기존 표지와 AI 작품 분석 예시가 표시된 수정 화면](docs/assets/readme-screenshots/book-edit.png) |
+
+작품 수정 화면의 AI 분석 결과는 기능을 보여 주기 위한 예시입니다.
+
+### AI 작품 분석과 표지 생성
+
+등록 또는 수정 화면에서 OpenAI API 키를 입력하면 작품 분석과 표지 생성 기능을 사용할 수 있습니다.
+
+1. **AI 표지 생성**에서 제목, 작가명, 본문을 바탕으로 표지를 만들 수 있습니다.
+2. **AI 작품 분석**은 작품 전문에서 예상 장르, 독자용 소개글, 표지용 요약을 만듭니다. <br>
+화면에서 결과를 고친 뒤 장르와 요약을 바탕으로 표지를 생성할 수 있습니다. 독자용 소개글을 작품에 쓰려면 **작품 소개** 칸에 옮겨 적습니다.
+3. 미리보기에서 표지를 선택하고 **작품 등록** 또는 **수정 완료**를 누르면 작품과 함께 저장됩니다.
+
+AI 요청은 브라우저에서 OpenAI로 직접 전송되며 사용자 API 키로 요금이 발생합니다. <br>
+API 키와 분석 결과는 현재 화면에서만 유지됩니다.
+
+## 개발자 가이드
+
+### 환경 변수와 공유 API
 
 | 이름 | 설정 |
 | --- | --- |
@@ -60,131 +141,7 @@ Cloudflare 터널을 사용한다면 같은 컴퓨터에서 `cloudflared tunnel 
 | `npm run lint` | ESLint로 코드 검사 |
 | `npm run set-role -- my_user admin` | 가입된 계정을 관리자로 변경. 마지막 인자를 `user`로 바꾸면 일반 사용자로 변경 |
 
-## 주요 화면
-
-로컬 예시 데이터로 실행한 화면입니다.
-
-### 메인과 전체 작품 목록
-
-메인(`/main`)에서 최근 7일 안에 등록된 신작을 최대 5개 보여 줍니다.<br>
-제목이나 작가명으로 검색할 수 있고, 전체 작품 목록(`/books`)에서는 최신 등록순과 이름순으로 정렬할 수 있습니다.
-
-![메인 화면과 이번 주 신작](docs/assets/readme-screenshots/main.png)
-
-### 로그인과 회원가입
-
-회원가입이 끝나면 로그인 화면으로 이동합니다. 로그인에 성공하면 메인으로 돌아갑니다.
-
-| 로그인 (`/login`) | 회원가입 (`/signup`) |
-| --- | --- |
-| ![로그인 화면](docs/assets/readme-screenshots/login.png) | ![아이디, 비밀번호와 확인란이 있는 회원가입 화면](docs/assets/readme-screenshots/signup.png) |
-
-<details>
-<summary>로그인 후 메인과 헤더 메뉴</summary>
-
-로그인 후에도 주소는 `/main`입니다. 헤더에 **글쓰기**와 메뉴가 표시되고, 메뉴에서 로그아웃할 수 있습니다.<br>
-마이페이지, 내 작품, 구독 작품을 선택하면 준비 중 화면이 열립니다.
-
-![로그인한 사용자의 인사말과 열린 헤더 메뉴](docs/assets/readme-screenshots/main-signed-in.png)
-
-</details>
-
-<details>
-<summary>전체 작품 목록</summary>
-
-![작품 목록의 검색창과 정렬 메뉴](docs/assets/readme-screenshots/books.png)
-
-</details>
-
-### 작품 상세
-
-카드를 선택하면 작품 상세(`/books/:id`)가 열립니다. 소개와 본문을 읽고 좋아요를 누를 수 있습니다.<br>
-본문 페이지는 이전 및 다음 버튼, 방향키, 터치 스와이프로 넘깁니다. 작품 소유자와 관리자에게 **수정** 및 **삭제** 버튼이 표시됩니다.
-
-![작품 상세 화면의 소개와 본문 페이지 뷰어](docs/assets/readme-screenshots/book-detail.png)
-
-### 작품 등록과 수정
-
-로그인 후 헤더의 **글쓰기**에서 제목, 작가명, 작품 소개, 본문을 입력합니다. <br>
-현재 등록 폼의 ID와 비밀번호 입력란도 형식 검사를 통과해야 합니다. <br>
-ID는 영문, 숫자, 밑줄로 2~15자이고, 비밀번호는 영문, 숫자, 특수문자를 모두 포함해 8~15자입니다. <br>
-
-상세 화면의 **수정**으로 기존 내용을 불러옵니다. 수정 폼에 남아 있는 ID와 비밀번호 확인란은 비워도 됩니다. <br>
-서버는 로그인한 계정과 그 역할을 기준으로 수정 권한을 확인합니다.
-
-| 작품 등록 (`/books/new`) | 작품 수정 (`/books/:id/edit`) |
-| --- | --- |
-| ![작품 등록 폼과 AI 표지 생성 및 작품 분석 영역](docs/assets/readme-screenshots/book-create.png) | ![동백꽃의 기존 표지와 AI 작품 분석 예시가 표시된 수정 화면](docs/assets/readme-screenshots/book-edit.png) |
-
-작품 수정 화면의 AI 분석 결과는 기능을 보여 주기 위한 예시입니다.
-
-## 화면과 서버의 동작
-
-1. **회원가입과 로그인.** 가입할 때 서버가 비밀번호를 Argon2id로 해시해 `users`에 저장하고 일반 사용자 역할을 부여합니다.<br>
-로그인하면 1시간 유효한 JWT를 발급합니다. 화면은 토큰을 브라우저에 저장하고 `GET /auth/me`에서 로그인 아이디와 역할을 조회합니다. 유효한 토큰이 있으면 새로고침 후에도 로그인 상태를 복원합니다.
-2. **작품 조회와 검색.** `App.jsx`에서 `useBookList(token)`을 한 번 호출해 메인과 전체 목록에 데이터를 전달합니다. <br>
-두 화면은 각자의 검색어로 제목과 작가명을 브라우저에서 필터링합니다. <br>
-상세 화면과 수정 화면은 `useBookDetail(id)`로 작품 한 편을 조회합니다.
-3. **작품 등록, 수정, 삭제.** 세 작업에는 로그인 토큰을 보냅니다. <br>
-서버가 로그인 계정을 등록 작품의 소유자로 저장하고, 수정과 삭제는 해당 작품의 소유자 또는 관리자에게 허용합니다. <br>
-수정 화면은 바뀐 항목만 보냅니다. 저장에 성공하면 상세로 이동하고, 삭제에 성공하면 메인으로 돌아갑니다.
-4. **좋아요.** 메인, 전체 목록, 상세에서 하트를 누르면 서버가 작품의 좋아요 수를 1 올립니다. <br>
-화면은 서버가 반환한 수를 공유 상태에 반영합니다. 작품 조회와 좋아요는 로그인 없이 사용할 수 있습니다.
-
-### AI 작품 분석과 표지 생성
-
-1. **AI 표지 생성**에서 제목, 작가명, 본문을 바탕으로 표지를 만들 수 있습니다.
-2. **AI 작품 분석**은 작품 전문에서 예상 장르, 독자용 소개글, 표지용 요약을 만듭니다. <br>
-화면에서 결과를 고친 뒤 장르와 요약을 바탕으로 표지를 생성할 수 있습니다. 독자용 소개글을 작품에 쓰려면 **작품 소개** 칸에 옮겨 적습니다.
-3. 미리보기에서 표지를 선택하고 **작품 등록** 또는 **수정 완료**를 누르면 작품과 함께 저장됩니다.
-
-AI 요청은 브라우저에서 OpenAI로 직접 전송되며 사용자 API 키로 요금이 발생합니다. <br>
-키와 분석 결과는 화면 상태에 저장하고, 선택한 표지는 작품 저장 시 `coverImageUrl`에 PNG Data URL로 기록합니다.
-
-#### 컴포넌트 구성과 연결
-
-세 컴포넌트는 `src/features/OpenAI_Integration/components/`에 있습니다. <br>
-`hooks/`는 입력 상태와 요청 진행 상태를 관리하고, `api/`는 요청을 보내고 응답 형식을 검사합니다.
-
-| 컴포넌트 | 입력과 처리 | 결과 |
-| --- | --- | --- |
-| `BookCoverGenerator.jsx` | 제목, 작가명, 작품 전문을 받아 `gpt-image-2`로 표지 생성 | 품질을 선택하고 이미지를 미리 볼 수 있습니다. 표지를 선택하면 `onSave(dataUrl)`을 호출합니다. |
-| `BookAnalysis.jsx` | 제목과 작품 전문을 `gpt-4.1-mini`로 분석 | 예상 장르, 독자용 소개글, 표지용 요약을 편집하고 JSON으로 확인할 수 있습니다. 확인할 사항이 있으면 별도로 표시합니다. |
-| `SummaryBookCoverGenerator.jsx` | 제목, 작가명, 장르, 표지용 요약으로 `gpt-image-2`에 요청 | 분석 영역에서 입력한 키를 사용합니다. `BookAnalysis`에 `onSaveCover`를 넘기면 표지 저장 버튼이 표시됩니다. |
-
-두 표지 생성 방식 모두 세로형 1024×1536 PNG를 요청합니다. <br>
-이미지 품질은 `low`, `medium`, `high`, `auto` 중에서 선택할 수 있고 기본값은 `medium`입니다. <br>
-분석 응답의 필드와 JavaScript 문자열 길이는 다음 기준으로 검증합니다.
-
-| 분석 필드 | 내용 | 최대 길이 |
-| --- | --- | --- |
-| `genre` | 예상 장르 | 100자 |
-| `introduction` | 결말과 반전을 드러내지 않도록 작성한 독자용 소개글 | 500자 |
-| `summary` | 배경, 인물 관계, 분위기와 시각적 소재를 담은 표지 제작용 요약. 필요한 경우 결말의 소재도 포함합니다. | 2,000자 |
-| `warnings` | 분석할 때 확인할 사항 | 최대 5개, 각각 300자 |
-
-등록과 수정 화면은 `book`에 제목, 작가명, 본문이 담긴 폼 데이터를 넘깁니다. <br>
-두 생성 방식에는 선택한 이미지를 폼 상태로 받는 같은 콜백을 연결합니다.
-
-```jsx
-const handleSaveCover = async (dataUrl) => {
-  setCoverImageUrl(dataUrl);
-};
-
-return (
-  <>
-    <BookCoverGenerator book={aiBook} onSave={handleSaveCover} />
-    <BookAnalysis book={aiBook} onSaveCover={handleSaveCover} />
-  </>
-);
-```
-
-컴포넌트가 화면에서 제거되면 진행 중인 브라우저 요청을 취소합니다. <br>
-장르나 요약을 수정하면 요약 기반 표지의 미리보기가 초기화됩니다. <br>
-`SummaryBookCoverGenerator`를 별도 화면에서 사용할 때는 `title`, `author`, `genre`, `summary`, `userApiKey`를 전달하고 <br>
-표지 선택이 필요하면 `onSave`를 연결합니다.
-
-## 코드 구조
+### 코드 구조
 
 ```text
 src/
@@ -207,7 +164,7 @@ server/
 db.json                         작품과 계정 데이터
 ```
 
-### 코드 배치와 import 규칙
+#### 코드 배치와 import 규칙
 
 - 한 기능에서만 쓰는 코드는 `src/features/<기능>/` 아래에 둡니다. 서버 요청은 `api/`, React 상태는 `hooks/`, <br>
 화면 요소는 `components/`, 규칙과 계산은 `utils/`, JSDoc 타입은 `types.js`에 둡니다.
@@ -235,7 +192,7 @@ import { getBooks } from '../api/booksApi.js';
 호환 경로인 `features/books/booksApi.js`와 `features/books/useBooks.js`는 현재 구현을 다시 내보냅니다. <br>
 이전 훅 이름 `useBooks`와 `useBook`에 대응하는 현재 이름은 `useBookList`와 `useBookDetail`입니다.
 
-### 화면에서 사용하는 훅
+#### 화면에서 사용하는 훅
 
 | 훅 | 역할 |
 | --- | --- |
@@ -243,6 +200,64 @@ import { getBooks } from '../api/booksApi.js';
 | `useBookDetail(id)` | ID로 작품을 조회하고 `book`, `loading`, `error`, `setBook`을 제공합니다. |
 | `useBookLikes()` | 메인, 전체 목록, 상세에서 최신 좋아요 수와 요청 상태를 공유합니다. |
 | `useAuth()` | 로그인 계정, 토큰, 확인 중 상태와 로그인 및 로그아웃 함수를 제공합니다. |
+
+### 화면과 서버의 동작
+
+1. **회원가입과 로그인.** 가입할 때 서버가 비밀번호를 Argon2id로 해시해 `users`에 저장하고 일반 사용자 역할을 부여합니다.<br>
+로그인하면 1시간 유효한 JWT를 발급합니다. 화면은 토큰을 브라우저에 저장하고 `GET /auth/me`에서 로그인 아이디와 역할을 조회합니다. 유효한 토큰이 있으면 새로고침 후에도 로그인 상태를 복원합니다.
+2. **작품 조회와 검색.** `App.jsx`에서 `useBookList(token)`을 한 번 호출해 메인과 전체 목록에 데이터를 전달합니다. <br>
+두 화면은 각자의 검색어로 제목과 작가명을 브라우저에서 필터링합니다. <br>
+상세 화면과 수정 화면은 `useBookDetail(id)`로 작품 한 편을 조회합니다.
+3. **작품 등록, 수정, 삭제.** 세 작업에는 로그인 토큰을 보냅니다. <br>
+서버가 로그인 계정을 등록 작품의 소유자로 저장하고, 수정과 삭제는 해당 작품의 소유자 또는 관리자에게 허용합니다. <br>
+수정 화면은 바뀐 항목만 보냅니다. 저장에 성공하면 상세로 이동하고, 삭제에 성공하면 메인으로 돌아갑니다.
+4. **좋아요.** 메인, 전체 목록, 상세에서 하트를 누르면 서버가 작품의 좋아요 수를 1 올립니다. <br>
+화면은 서버가 반환한 수를 공유 상태에 반영합니다. 작품 조회와 좋아요는 로그인 없이 사용할 수 있습니다.
+
+### AI 컴포넌트 구성과 연결
+
+세 컴포넌트는 `src/features/OpenAI_Integration/components/`에 있습니다. <br>
+`hooks/`는 입력 상태와 요청 진행 상태를 관리하고, `api/`는 요청을 보내고 응답 형식을 검사합니다.
+
+| 컴포넌트 | 입력과 처리 | 결과 |
+| --- | --- | --- |
+| `BookCoverGenerator.jsx` | 제목, 작가명, 작품 전문을 받아 `gpt-image-2`로 표지 생성 | 품질을 선택하고 이미지를 미리 볼 수 있습니다. 표지를 선택하면 `onSave(dataUrl)`을 호출합니다. |
+| `BookAnalysis.jsx` | 제목과 작품 전문을 `gpt-4.1-mini`로 분석 | 예상 장르, 독자용 소개글, 표지용 요약을 편집하고 JSON으로 확인할 수 있습니다. 확인할 사항이 있으면 별도로 표시합니다. |
+| `SummaryBookCoverGenerator.jsx` | 제목, 작가명, 장르, 표지용 요약으로 `gpt-image-2`에 요청 | 분석 영역에서 입력한 키를 사용합니다. `BookAnalysis`에 `onSaveCover`를 넘기면 표지 저장 버튼이 표시됩니다. |
+
+두 표지 생성 방식 모두 세로형 1024×1536 PNG를 요청합니다. <br>
+이미지 품질은 `low`, `medium`, `high`, `auto` 중에서 선택할 수 있고 기본값은 `medium`입니다. <br>
+분석 응답의 필드와 JavaScript 문자열 길이는 다음 기준으로 검증합니다.
+
+| 분석 필드 | 내용 | 최대 길이 |
+| --- | --- | --- |
+| `genre` | 예상 장르 | 100자 |
+| `introduction` | 결말과 반전을 드러내지 않도록 작성한 독자용 소개글 | 500자 |
+| `summary` | 배경, 인물 관계, 분위기와 시각적 소재를 담은 표지 제작용 요약. 필요한 경우 결말의 소재도 포함 | 2,000자 |
+| `warnings` | 분석할 때 확인할 사항 | 최대 5개, 각각 300자 |
+
+등록과 수정 화면은 `book`에 제목, 작가명, 본문이 담긴 폼 데이터를 넘깁니다. <br>
+두 생성 방식에는 선택한 이미지를 폼 상태로 받는 같은 콜백을 연결합니다.
+
+```jsx
+const handleSaveCover = async (dataUrl) => {
+  setCoverImageUrl(dataUrl);
+};
+
+return (
+  <>
+    <BookCoverGenerator book={aiBook} onSave={handleSaveCover} />
+    <BookAnalysis book={aiBook} onSaveCover={handleSaveCover} />
+  </>
+);
+```
+
+컴포넌트가 화면에서 제거되면 진행 중인 브라우저 요청을 취소합니다. <br>
+장르나 요약을 수정하면 요약 기반 표지의 미리보기가 초기화됩니다. <br>
+`SummaryBookCoverGenerator`를 별도 화면에서 사용할 때는 `title`, `author`, `genre`, `summary`, `userApiKey`를 전달하고 <br>
+표지 선택이 필요하면 `onSave`를 연결합니다.
+
+선택한 표지는 작품 저장 시 `coverImageUrl`에 PNG Data URL로 기록합니다.
 
 ## 데이터와 API
 
@@ -308,4 +323,3 @@ import { getBooks } from '../api/booksApi.js';
 | 작품을 수정하거나 삭제할 권한이 없음 | `403`. 작품 API는 권한 오류 문구를 같은 `NOT_OWNER` 값으로 전달합니다. |
 | 작품이 없음 | `404`. 작품 API 오류의 `cause`는 숫자 `404`입니다. |
 | 공통 API 응답 30초 초과 또는 네트워크 연결 실패 | 브라우저에서 각각 `TimeoutError` 또는 `TypeError`가 발생합니다. |
-
