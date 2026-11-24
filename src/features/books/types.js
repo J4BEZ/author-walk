@@ -1,6 +1,9 @@
 // 도서 기능에서 쓰는 타입 모음 (JSDoc, 편집기 자동완성용입니다.)
 // Python의 타입 힌팅과 비슷한 기능으로 보시면 됩니다!
 
+
+/** @import { SEARCH_FIELDS, SORT_ORDERS } from './utils/bookQuery.js' */
+
 /**
  * json-server 에 저장되는 도서 한 권
  * @typedef {object} Book
@@ -10,17 +13,19 @@
  * @property {string} description           작품 소개 (목록, 상세에 보여 줄 짧은 소개)
  * @property {string} content               본문 (AI 표지 프롬프트에도 사용)
  * @property {string | null} userId         작성한 사용자 아이디 (수정, 삭제 때 본인 확인에 사용, 임시라 null 가능)
- * @property {string} passwordHash          비밀번호의 SHA-256 해시 (화면에는 넘기지 않음)
- * @property {string | null} coverImageUrl  표지 Data URL (`data:image/png;base64,...`), 아직 없으면 null
+ * @property {string} passwordHash          비밀번호 해시 "scrypt$<salt>$<hash>" (서버가 만들고, 응답에는 넘기지 않음)
+ * @property {string | null} coverImageUrl  표지 원본 주소 (`/covers/<uuid>/original.png`, 옮기기 전 데이터는 Data URL), 없으면 null
+ * @property {string | null} [coverThumbnailUrl]  목록용 썸네일 주소 (`/covers/<uuid>/thumbnail.webp`, 서버만 정함), 없으면 null
+ * @property {number} [likes]               좋아요 수 (이전 도서 데이터에는 없을 수 있음)
  * @property {string} createdAt             등록 시각 (ISO 문자열)
  * @property {string} updatedAt             수정 시각 (ISO 문자열)
  */
 
 /**
- * 화면에서 쓰는 도서 (passwordHash 를 뺀 모양)
+ * 화면에서 쓰는 도서 (passwordHash 를 뺀 모양, 서버가 응답에서 빼고 보냄)
  *
  * `Omit<원래 타입, '뺄 필드'>` 는 원래 타입에서 일부 필드만 뺀 새 타입을 만듭니다.
- * 여기서는 Book 에서 passwordHash 만 빼서, 화면 코드가 해시를 실수로 쓰지 못하게 합니다.
+ * 여기서는 Book 에서 passwordHash 만 빼서, 화면 코드가 해시를 쓰지 않는 모양임을 나타냅니다.
  * @typedef {Omit<Book, 'passwordHash'>} BookView
  */
 
@@ -31,8 +36,6 @@
  * @property {string} author                   작성자 (필수, 화면에 보여 줄 이름)
  * @property {string} content                  본문 (필수, AI 표지 프롬프트에 사용)
  * @property {string} [description]            작품 소개 (없으면 빈 문자열로 저장)
- * @property {string | null} [userId]          사용자 아이디 (없으면 null, 이 경우 수정과 삭제 불가)
- * @property {string} password                 평문 비밀번호 (booksApi 가 해시한 뒤 저장, 평문은 저장하지 않음)
  * @property {string | null} [coverImageUrl]   등록하면서 바로 만든 표지 Data URL (없으면 생략, null 로 저장)
  */
 
@@ -42,14 +45,24 @@
  * `Pick<Book, '필드' | '필드'>` 는 Book 에서 고른 필드만 남긴 타입,
  * `Partial<...>` 는 그 필드들을 모두 "있어도 되고 없어도 되는" 선택 필드로 바꾼 타입입니다.
  * `{ title }` 만 보내도, `{ coverImageUrl }` 만 보내도 됩니다 (PATCH 는 바뀐 필드만).
- * @typedef {Partial<Pick<Book, 'title' | 'description' | 'content' | 'coverImageUrl'>>} BookChanges
+ * @typedef {Partial<Pick<Book, 'title' | 'author' | 'description' | 'content' | 'coverImageUrl'>>} BookChanges
+ */
+
+/**
+ * 목록 검색 조건 (모두 선택, 없으면 각 기본값)
+ * @typedef {object} BookQuery
+ * @property {string} [q]                          검색어 (비우면 전체)
+ * @property {keyof typeof SEARCH_FIELDS} [field]  검색할 필드 ('titleAuthor' 기본)
+ * @property {keyof typeof SORT_ORDERS} [sort]     정렬 ('latest' 기본)
+ * @property {number} [days]                       최근 며칠 안에 등록된 책만 (예: NEW_BOOK_DAYS)
+ * @property {number} [limit]                      최대 몇 권까지 가져올지 (없으면 제한 없음)
  */
 
 /**
  * 수정, 삭제 전에 본인 확인용으로 입력받는 값
  * @typedef {object} Credentials
  * @property {string} userId    사용자 아이디 (글을 쓸 때 입력한 아이디)
- * @property {string} password  평문 비밀번호 (비교할 때만 해시, 저장하지 않음)
+ * @property {string} password  평문 비밀번호 (서버가 저장된 해시와 비교, 저장하지 않음)
  */
 
 export {};

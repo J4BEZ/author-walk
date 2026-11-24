@@ -1,9 +1,10 @@
 // booksApi 함수 확인용 한 페이지 (화면 디자인 아님, 팀원이 API 동작을 눈으로 확인하는 용도)
 // 쓰는 법 : src/App.jsx 에서 이 컴포넌트를 임시로 import 해 보여 주면 됩니다.
+// 주의 : 등록, 수정, 표지, 삭제는 이제 로그인 토큰이 필요해서 이 예제 그대로는 401 이 납니다 (토큰 입력 칸 추가 필요)
 import { useState } from 'react';
 import {
-  getBooks, getBook, createBook, checkOwner, updateBook, saveCover, deleteBook,
-} from '../features/books/booksApi.js';
+  getBooks, getBook, createBook, updateBook, saveCover, deleteBook,
+} from '../features/books/api/booksApi.js';
 
 // 1x1 픽셀 PNG Data URL (saveCover 시험용, 실제로는 OpenAI 응답으로 만든 값)
 const SAMPLE_COVER =
@@ -99,38 +100,30 @@ function BooksApiPlayground() {
         <div>작성자, 사용자 아이디, 비밀번호는 공통 입력 값을 씁니다</div>
       </ApiSection>
 
-      {/* 본인 확인 */}
-      <ApiSection
-        title="checkOwner(id, userId, password)"
-        request="GET /books/:id 후 브라우저에서 해시 비교"
-        onRun={() => checkOwner(bookId, userId, password)}
-      />
-
       {/* 수정 */}
       <ApiSection
-        title="updateBook(id, changes)"
-        request="PATCH /books/:id  { title, content, updatedAt }"
-        onRun={() => updateBook(bookId, { title, content })}
+        title="updateBook(id, changes, credentials)"
+        request="PATCH /books/:id  { title, content, userId, password, updatedAt }"
+        onRun={() => updateBook(bookId, { title, content }, { userId, password })}
       >
         <div>위 등록 상자의 제목과 본문으로 수정합니다</div>
       </ApiSection>
 
       <ApiSection
-        title="saveCover(id, dataUrl)"
-        request="PATCH /books/:id  { coverImageUrl, updatedAt }"
-        onRun={() => saveCover(bookId, SAMPLE_COVER)}
+        title="saveCover(id, dataUrl, credentials)"
+        request="PATCH /books/:id  { coverImageUrl, userId, password, updatedAt }"
+        onRun={() => saveCover(bookId, SAMPLE_COVER, { userId, password })}
       >
         <div>1x1 픽셀 시험용 이미지로 저장합니다</div>
       </ApiSection>
 
       {/* 삭제 */}
       <ApiSection
-        title="deleteBook(id)"
-        request="DELETE /books/:id"
+        title="deleteBook(id, credentials)"
+        request="DELETE /books/:id  { userId, password }"
         onRun={async () => {
           if (!confirm(`${bookId}번 도서를 삭제할까요?`)) return '취소함';
-          if (!(await checkOwner(bookId, userId, password))) return '사용자 아이디 또는 비밀번호가 맞지 않아 삭제하지 않음';
-          return deleteBook(bookId);
+          return deleteBook(bookId, { userId, password });
         }}
       />
     </main>

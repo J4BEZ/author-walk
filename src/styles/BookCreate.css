@@ -1,0 +1,284 @@
+/* ===== 페이지 ===== */
+.book-create-page {
+  width: 100%;
+  margin: 0 auto;
+  padding: 48px 40px 80px;
+  background-color: #f6f8f4;
+}
+
+.book-create-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  gap: 28px;
+  align-items: start;
+  width: 100%;
+  max-width: 1360px;
+  margin: 0 auto;
+}
+
+/* 왼쪽 / 오른쪽 카드 */
+.book-create-left,
+.book-create-right {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 36px;
+  border: 1px solid #e3e8e0;
+  border-radius: 18px;
+  background-color: #fff;
+  box-shadow: 0 8px 24px rgba(60, 80, 55, 0.06);
+}
+
+/* ===== 왼쪽: 작품 정보 ===== */
+.book-create-left h1 {
+  margin: 0 0 28px;
+  color: #111;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.book-create-left h1::after {
+  content: "새 작품의 정보를 입력해 주세요.";
+  display: block;
+  margin-top: 8px;
+  color: #6b7668;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.book-create-info {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.book-create-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.book-create-field label {
+  padding: 0;
+  color: #333;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.book-create-field input,
+.book-create-field textarea,
+.book-create-content {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #b4c1b2;
+  border-radius: 10px;
+  background-color: #fff;
+  color: #111;
+  font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.book-create-field input {
+  height: 46px;
+  padding: 0 14px;
+  font-size: 16px;
+}
+
+.book-create-field textarea {
+  height: 160px;
+  min-height: 120px;
+  padding: 12px 14px;
+  font-size: 16px;
+  line-height: 1.7;
+  resize: vertical;
+}
+
+.book-create-field input:focus,
+.book-create-field textarea:focus,
+.book-create-content:focus {
+  outline: none;
+  border-color: #809a78;
+  box-shadow: 0 0 0 3px rgba(128, 154, 120, 0.25);
+}
+
+/* ID / 비밀번호 */
+.book-create-account {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 14px;
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px dashed #d4dcd0;
+}
+
+.book-create-account::before {
+  content: "수정·삭제 시 필요한 정보";
+  grid-column: 1 / -1;
+  color: #6b7668;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ===== 오른쪽: 작품 내용 ===== */
+.book-create-right h2 {
+  margin: 0 0 20px;
+  color: #111;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.book-create-content {
+  height: 440px;
+  padding: 20px;
+  font-size: 17px;
+  line-height: 1.8;
+  resize: vertical;
+}
+
+.book-create-count {
+  margin: 10px 4px 0 0;
+  color: #8a9488;
+  font-size: 14px;
+  text-align: right;
+}
+
+/* AI 섹션 공통 (AI 표지 생성 / AI 작품 분석) */
+.book-create-right .book-create-ai-section {
+  margin-top: 36px;
+}
+
+.book-create-right .book-create-ai-section h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  color: #111;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.book-create-right .book-create-ai-section h2::before {
+  content: "";
+  width: 4px;
+  height: 18px;
+  border-radius: 2px;
+  background-color: #809a78;
+}
+
+/* 섹션 안에서는 카드 위쪽 여백을 섹션이 대신 가짐 */
+.book-create-ai-section .book-cover-generator {
+  margin-top: 0;
+}
+
+/* 작품 등록 버튼 */
+.book-create-submit {
+  width: 100%;
+  height: 54px;
+  margin-top: 32px;
+  border: none;
+  border-radius: 12px;
+  background-color: #809a78;
+  color: #fff;
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(95, 122, 87, 0.28);
+  transition: background-color 0.15s, transform 0.1s, box-shadow 0.15s;
+}
+
+.book-create-submit:hover:not(:disabled) {
+  background-color: #6d8765;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(95, 122, 87, 0.32);
+}
+
+.book-create-submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.book-create-submit:focus-visible {
+  outline: 3px solid rgba(128, 154, 120, 0.45);
+  outline-offset: 3px;
+}
+
+.book-create-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* BookEdit에서 쓰는 '현재 적용된 표지' */
+.book-create-cover-preview {
+  margin-top: 32px;
+}
+
+.book-create-cover-preview h3 {
+  margin: 0 0 12px;
+  color: #111;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.book-create-cover-image {
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+/* ===== 반응형 ===== */
+/* 화면이 충분히 클 때만 왼쪽 카드 고정 */
+@media (min-width: 901px) and (min-height: 860px) {
+  .book-create-left {
+    position: sticky;
+    top: 24px;
+  }
+}
+
+@media (max-width: 900px) {
+  .book-create-page {
+    padding: 28px 20px 60px;
+  }
+
+  .book-create-layout {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .book-create-left,
+  .book-create-right {
+    padding: 26px 22px;
+  }
+}
+
+@media (max-width: 520px) {
+  .book-create-page {
+    padding: 20px 12px 48px;
+  }
+
+  .book-create-left h1 {
+    font-size: 24px;
+  }
+
+  .book-create-right h2 {
+    font-size: 22px;
+  }
+
+  .book-create-account {
+    grid-template-columns: 1fr;
+  }
+
+  .book-create-content {
+    height: 360px;
+  }
+}
