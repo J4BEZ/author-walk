@@ -62,7 +62,7 @@ Cloudflare 터널을 사용한다면 같은 컴퓨터에서 `cloudflared tunnel 
 
 ## 주요 화면
 
-저장소의 예시 작품으로 실행한 화면입니다.
+로컬 예시 데이터로 실행한 화면입니다.
 
 ### 메인과 전체 작품 목록
 
@@ -103,19 +103,20 @@ Cloudflare 터널을 사용한다면 같은 컴퓨터에서 `cloudflared tunnel 
 
 ![작품 상세 화면의 소개와 본문 페이지 뷰어](docs/assets/readme-screenshots/book-detail.png)
 
-위 이미지에 보이는 상세 화면의 아이디와 비밀번호 칸은 이전 화면에 있던 항목입니다. 현재 상세 화면은 로그인한 계정의 권한을 확인합니다.
-
 ### 작품 등록과 수정
 
 로그인 후 헤더의 **글쓰기**에서 제목, 작가명, 작품 소개, 본문을 입력합니다. <br>
 현재 등록 폼의 ID와 비밀번호 입력란도 형식 검사를 통과해야 합니다. <br>
 ID는 영문, 숫자, 밑줄로 2~15자이고, 비밀번호는 영문, 숫자, 특수문자를 모두 포함해 8~15자입니다. <br>
 
-상세 화면의 **수정**으로 기존 내용을 불러옵니다. 수정 폼에 남아 있는 ID와 비밀번호 확인란은 비워도 됩니다. 서버는 로그인한 계정과 그 역할을 기준으로 수정 권한을 확인합니다.
+상세 화면의 **수정**으로 기존 내용을 불러옵니다. 수정 폼에 남아 있는 ID와 비밀번호 확인란은 비워도 됩니다. <br>
+서버는 로그인한 계정과 그 역할을 기준으로 수정 권한을 확인합니다.
 
 | 작품 등록 (`/books/new`) | 작품 수정 (`/books/:id/edit`) |
 | --- | --- |
-| ![작품 등록 폼과 AI 표지 생성 및 작품 분석 영역](docs/assets/readme-screenshots/book-create.png) | ![기존 작품 정보와 본문이 채워진 수정 폼](docs/assets/readme-screenshots/book-edit.png) |
+| ![작품 등록 폼과 AI 표지 생성 및 작품 분석 영역](docs/assets/readme-screenshots/book-create.png) | ![동백꽃의 기존 표지와 AI 작품 분석 예시가 표시된 수정 화면](docs/assets/readme-screenshots/book-edit.png) |
+
+작품 수정 화면의 AI 분석 결과는 기능을 보여 주기 위한 예시입니다.
 
 ## 화면과 서버의 동작
 
@@ -137,11 +138,13 @@ ID는 영문, 숫자, 밑줄로 2~15자이고, 비밀번호는 영문, 숫자, �
 화면에서 결과를 고친 뒤 장르와 요약을 바탕으로 표지를 생성할 수 있습니다. 독자용 소개글을 작품에 쓰려면 **작품 소개** 칸에 옮겨 적습니다.
 3. 미리보기에서 표지를 선택하고 **작품 등록** 또는 **수정 완료**를 누르면 작품과 함께 저장됩니다.
 
-AI 요청은 브라우저에서 OpenAI로 직접 전송되며 사용자 API 키로 요금이 발생합니다. 키와 분석 결과는 화면 상태에 저장하고, 선택한 표지는 작품 저장 시 `coverImageUrl`에 PNG Data URL로 기록합니다.
+AI 요청은 브라우저에서 OpenAI로 직접 전송되며 사용자 API 키로 요금이 발생합니다. <br>
+키와 분석 결과는 화면 상태에 저장하고, 선택한 표지는 작품 저장 시 `coverImageUrl`에 PNG Data URL로 기록합니다.
 
 #### 컴포넌트 구성과 연결
 
-세 컴포넌트는 `src/features/OpenAI_Integration/components/`에 있습니다. `hooks/`는 입력 상태와 요청 진행 상태를 관리하고, `api/`는 요청을 보내고 응답 형식을 검사합니다.
+세 컴포넌트는 `src/features/OpenAI_Integration/components/`에 있습니다. <br>
+`hooks/`는 입력 상태와 요청 진행 상태를 관리하고, `api/`는 요청을 보내고 응답 형식을 검사합니다.
 
 | 컴포넌트 | 입력과 처리 | 결과 |
 | --- | --- | --- |
@@ -149,7 +152,9 @@ AI 요청은 브라우저에서 OpenAI로 직접 전송되며 사용자 API 키�
 | `BookAnalysis.jsx` | 제목과 작품 전문을 `gpt-4.1-mini`로 분석 | 예상 장르, 독자용 소개글, 표지용 요약을 편집하고 JSON으로 확인할 수 있습니다. 확인할 사항이 있으면 별도로 표시합니다. |
 | `SummaryBookCoverGenerator.jsx` | 제목, 작가명, 장르, 표지용 요약으로 `gpt-image-2`에 요청 | 분석 영역에서 입력한 키를 사용합니다. `BookAnalysis`에 `onSaveCover`를 넘기면 표지 저장 버튼이 표시됩니다. |
 
-두 표지 생성 방식 모두 세로형 1024×1536 PNG를 요청합니다. 이미지 품질은 `low`, `medium`, `high`, `auto` 중에서 선택할 수 있고 기본값은 `medium`입니다. 분석 응답의 필드와 JavaScript 문자열 길이는 다음 기준으로 검증합니다.
+두 표지 생성 방식 모두 세로형 1024×1536 PNG를 요청합니다. <br>
+이미지 품질은 `low`, `medium`, `high`, `auto` 중에서 선택할 수 있고 기본값은 `medium`입니다. <br>
+분석 응답의 필드와 JavaScript 문자열 길이는 다음 기준으로 검증합니다.
 
 | 분석 필드 | 내용 | 최대 길이 |
 | --- | --- | --- |
@@ -158,7 +163,8 @@ AI 요청은 브라우저에서 OpenAI로 직접 전송되며 사용자 API 키�
 | `summary` | 배경, 인물 관계, 분위기와 시각적 소재를 담은 표지 제작용 요약. 필요한 경우 결말의 소재도 포함합니다. | 2,000자 |
 | `warnings` | 분석할 때 확인할 사항 | 최대 5개, 각각 300자 |
 
-등록과 수정 화면은 `book`에 제목, 작가명, 본문이 담긴 폼 데이터를 넘깁니다. 두 생성 방식에는 선택한 이미지를 폼 상태로 받는 같은 콜백을 연결합니다.
+등록과 수정 화면은 `book`에 제목, 작가명, 본문이 담긴 폼 데이터를 넘깁니다. <br>
+두 생성 방식에는 선택한 이미지를 폼 상태로 받는 같은 콜백을 연결합니다.
 
 ```jsx
 const handleSaveCover = async (dataUrl) => {
@@ -173,7 +179,10 @@ return (
 );
 ```
 
-컴포넌트가 화면에서 제거되면 진행 중인 브라우저 요청을 취소합니다. 장르나 요약을 수정하면 요약 기반 표지의 미리보기가 초기화됩니다. `SummaryBookCoverGenerator`를 별도 화면에서 사용할 때는 `title`, `author`, `genre`, `summary`, `userApiKey`를 전달하고 표지 선택이 필요하면 `onSave`를 연결합니다.
+컴포넌트가 화면에서 제거되면 진행 중인 브라우저 요청을 취소합니다. <br>
+장르나 요약을 수정하면 요약 기반 표지의 미리보기가 초기화됩니다. <br>
+`SummaryBookCoverGenerator`를 별도 화면에서 사용할 때는 `title`, `author`, `genre`, `summary`, `userApiKey`를 전달하고 <br>
+표지 선택이 필요하면 `onSave`를 연결합니다.
 
 ## 코드 구조
 
@@ -200,20 +209,31 @@ db.json                         작품과 계정 데이터
 
 ### 코드 배치와 import 규칙
 
-- 한 기능에서만 쓰는 코드는 `src/features/<기능>/` 아래에 둡니다. 서버 요청은 `api/`, React 상태는 `hooks/`, 화면 요소는 `components/`, 규칙과 계산은 `utils/`, JSDoc 타입은 `types.js`에 둡니다.
-- 여러 기능에서 쓰는 코드는 `src/api/`, `src/components/`, `src/utils/` 등 공용 위치에 둡니다. 예를 들어 `src/utils/roles.js`의 `canModifyBook`은 상세 화면의 버튼 표시와 서버 권한 검사에 함께 사용됩니다.
-- 같은 기능 내부에서는 상대 경로를 사용합니다. 공용 파일은 `src/`를 가리키는 `#src/` 별칭으로 가져올 수 있습니다. 필요한 파일을 직접 import합니다.
-- 여러 기능은 `App.jsx`나 각 페이지에서 조합합니다. `App.jsx`가 로그인 토큰을 `useBookList`에 넘기고, 등록 및 수정 페이지가 AI 컴포넌트에 표지 선택 콜백을 넘기는 방식입니다. 다른 기능의 JSDoc 타입은 주석에서 참조할 수 있습니다.
-- `utils/`에는 React 상태, 네트워크 요청, 환경 변수에 의존하지 않는 순수 함수를 둡니다. 예를 들어 입력 검사 함수는 브라우저와 Node 서버에서 함께 사용할 수 있습니다.
+- 한 기능에서만 쓰는 코드는 `src/features/<기능>/` 아래에 둡니다. 서버 요청은 `api/`, React 상태는 `hooks/`, <br>
+화면 요소는 `components/`, 규칙과 계산은 `utils/`, JSDoc 타입은 `types.js`에 둡니다.
+- 여러 기능에서 쓰는 코드는 `src/api/`, `src/components/`, `src/utils/` 등 공용 위치에 둡니다. <br>
+예를 들어 `src/utils/roles.js`의 `canModifyBook`은 상세 화면의 버튼 표시와 서버 권한 검사에 함께 사용됩니다.
+- 같은 기능 내부에서는 상대 경로를 사용합니다. 공용 파일은 `src/`를 가리키는 `#src/` 별칭으로 가져올 수 있습니다. <br>
+필요한 파일을 직접 import합니다.
+- 여러 기능은 `App.jsx`나 각 페이지에서 조합합니다. `App.jsx`가 로그인 토큰을 `useBookList`에 넘기고, <br>
+등록 및 수정 페이지가 AI 컴포넌트에 표지 선택 콜백을 넘기는 방식입니다. <br>
+다른 기능의 JSDoc 타입은 주석에서 참조할 수 있습니다.
+- `utils/`에는 React 상태, 네트워크 요청, 환경 변수에 의존하지 않는 순수 함수를 둡니다. <br>
+예를 들어 입력 검사 함수는 브라우저와 Node 서버에서 함께 사용할 수 있습니다.
 
 ```js
 import { isBlank } from '#src/utils/validation/text.js';
 import { getBooks } from '../api/booksApi.js';
 ```
 
-함수 이름은 불리언을 반환하면 `is` 또는 `has`, 입력을 검사하고 오류 문구를 반환하면 `validate`, 계산과 값 정리는 `count` 또는 `normalize`를 붙입니다. 서버 데이터를 다루는 함수는 `get`, `create`, `update`, `delete`로 시작하고, React 훅은 `use`로 시작합니다. 고정값은 `TIMEOUT_MS`처럼 대문자와 밑줄을 씁니다.
+함수 이름은 불리언을 반환하면 `is` 또는 `has`, 입력을 검사하고 오류 문구를 반환하면 <br>
+`validate`, 계산과 값 정리는 `count` 또는 `normalize`를 붙입니다. <br>
+서버 데이터를 다루는 함수는 `get`, `create`, `update`, `delete`로 시작하고, React 훅은 `use`로 시작합니다. <br>
+고정값은 `TIMEOUT_MS`처럼 대문자와 밑줄을 씁니다.
 
-새 코드의 작품 API는 `features/books/api/booksApi.js`에서, 작품 훅은 `features/books/hooks/useBooks.js`에서 가져옵니다. 호환 경로인 `features/books/booksApi.js`와 `features/books/useBooks.js`는 현재 구현을 다시 내보냅니다. 이전 훅 이름 `useBooks`와 `useBook`에 대응하는 현재 이름은 `useBookList`와 `useBookDetail`입니다.
+새 코드의 작품 API는 `features/books/api/booksApi.js`에서, 작품 훅은 `features/books/hooks/useBooks.js`에서 가져옵니다. <br>
+호환 경로인 `features/books/booksApi.js`와 `features/books/useBooks.js`는 현재 구현을 다시 내보냅니다. <br>
+이전 훅 이름 `useBooks`와 `useBook`에 대응하는 현재 이름은 `useBookList`와 `useBookDetail`입니다.
 
 ### 화면에서 사용하는 훅
 
