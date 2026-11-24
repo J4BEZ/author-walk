@@ -2,6 +2,7 @@ import {useParams, useNavigate} from "react-router-dom";
 import {useBookDetail, useBookLikes} from "../features/books/hooks/useBooks.js";
 import {useAuth} from "../features/auth/hooks/useAuth.js";
 import {canModifyBook} from "#src/utils/roles.js";
+import {toApiUrl} from "#src/api/client.js";
 
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
@@ -63,7 +64,7 @@ function BookDetail({removeBook}) {
           <section className="book-detail-left">
             <div className="book-detail-cover">
               {book.coverImageUrl ? (
-                <img src={book.coverImageUrl} alt={`${book.title} 표지`} />
+                <img src={toApiUrl(book.coverImageUrl)} alt={`${book.title} 표지`} />
               ) : (
                 <div className="book-detail-no-cover">표지 없음</div>
               )}

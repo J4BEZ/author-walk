@@ -1,4 +1,5 @@
 import "#src/styles/NewBooks.css";
+import {toApiUrl} from "#src/api/client.js";
 import BookLikeButton from "./BookLikeButton.jsx";
 
 function NewBooks({books, onSelect, likes}) {
@@ -27,8 +28,13 @@ function NewBooks({books, onSelect, likes}) {
                 className="new-book-card"
                 onClick={() => onSelect(book.id)}>
                 <div className="new-book-cover">
+                  {/* 목록은 썸네일 (없으면 원본, 옮기기 전 데이터 대비) */}
                   {book.coverImageUrl ? (
-                    <img src={book.coverImageUrl} alt={book.title} />
+                    <img
+                      src={toApiUrl(book.coverThumbnailUrl ?? book.coverImageUrl)}
+                      alt={book.title}
+                      loading="lazy"
+                    />
                   ) : (
                     <span>표지 없음</span>
                   )}

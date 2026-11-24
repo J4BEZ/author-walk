@@ -7,6 +7,21 @@ const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
 const TIMEOUT_MS = 30_000;
 
 /**
+ * 서버가 준 파일 주소를 화면의 `<img src>` 에 쓸 수 있는 주소로 바꿉니다 (표지 이미지)
+ * - `/covers/...` 처럼 `/` 로 시작하면 API 서버 주소를 앞에 붙임 (그냥 두면 화면 서버에서 찾아 깨짐)
+ * - data URL (방금 만든 미리보기, 옮기기 전 데이터), `http(s)://` 주소는 그대로
+ * - 비어 있거나 그 밖의 값이면 null
+ * @param {string | null | undefined} path
+ * @returns {string | null}
+ */
+export function toApiUrl(path) {
+  if (!path) return null;
+  if (path.startsWith('data:image/') || /^https?:\/\//.test(path)) return path;
+  if (path.startsWith('/')) return `${BASE_URL}${path}`;
+  return null;
+}
+
+/**
  * @typedef {object} RequestOptions request 옵션을 담은 객체
  * @property {string} [method]  기본 'GET',  |  'POST', 'PATCH', 'DELETE' 등 HTTP 메서드
  * @property {object} [body]  있으면 JSON 으로 바꿔 보냄

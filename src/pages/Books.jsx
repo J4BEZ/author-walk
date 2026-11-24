@@ -3,6 +3,7 @@ import {useNavigate} from "react-router-dom";
 
 import {useBookLikes} from "../features/books/hooks/useBooks.js";
 import {queryBooks} from "../features/books/utils/bookQuery.js";
+import {toApiUrl} from "#src/api/client.js";
 
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
@@ -61,8 +62,13 @@ function Books({booksState}) {
                   className="new-book-card"
                   onClick={() => navigate(`/books/${book.id}`)}>
                   <div className="books-cover">
+                    {/* 목록은 썸네일 (없으면 원본, 옮기기 전 데이터 대비) */}
                     {book.coverImageUrl ? (
-                      <img src={book.coverImageUrl} alt={`${book.title} 표지`} />
+                      <img
+                        src={toApiUrl(book.coverThumbnailUrl ?? book.coverImageUrl)}
+                        alt={`${book.title} 표지`}
+                        loading="lazy"
+                      />
                     ) : (
                       <span>표지 없음</span>
                     )}

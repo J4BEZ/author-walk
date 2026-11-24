@@ -13,6 +13,7 @@ import {
   validateBookChanges,
 } from "../features/books/utils/bookValidation.js";
 import {countChars} from "#src/utils/validation/text.js";
+import {toApiUrl} from "#src/api/client.js";
 
 /** @import { BookListState } from '../features/books/hooks/useBooks.js' */
 
@@ -240,7 +241,7 @@ function BookEditForm({book, editBook}) {
               <div className="book-create-cover-preview">
                 <h3>현재 적용된 표지</h3>
                 <img
-                  src={coverImageUrl}
+                  src={toApiUrl(coverImageUrl)}
                   alt={`${form.title} 표지`}
                   className="book-create-cover-image"
                 />
