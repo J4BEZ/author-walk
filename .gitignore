@@ -31,3 +31,6 @@ api_key.txt
 .env
 .env.*
 !.env.example
+
+# 표지 이미지 (서버가 저장하는 사용자 데이터, 서버 PC 에만 둠)
+server/covers/
