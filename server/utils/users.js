@@ -2,7 +2,7 @@
 // 책 주인 확인 (middlewares/owner.js) 과 로그인 (2단계 routes/auth.js) 이 함께 씁니다
 
 import { hashPassword, verifyPassword } from './password.js';
-import { USER_ROLE } from './roles.js';
+import { USER_ROLE } from '#src/utils/roles.js';
 
 
 /**

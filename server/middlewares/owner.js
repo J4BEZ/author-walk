@@ -3,7 +3,7 @@
 // 본문의 userId, password 는 읽지 않고 지웁니다 (누구인지는 오직 토큰으로)
 // 그래서 화면이 아이디, 비밀번호 칸을 보내든 안 보내든 결과가 같습니다 (칸을 빼도 아무 일 없음)
 
-import { ADMIN_ROLE } from '../utils/roles.js';
+import { canModifyBook } from '#src/utils/roles.js';
 
 // 보호가 필요한 HTTP 메서드 목록 (PATCH, PUT, DELETE)
 const GUARDED_METHODS = ['PATCH', 'PUT', 'DELETE'];
@@ -36,20 +36,6 @@ export function ownerOnCreate() {
 
 
 /**
- * 인가 : 이 user 가 이 책을 고칠 수 있는지 판단
- * @returns {boolean}
- */
-function canModify(user, book) {
-
-  // 관리자는 모든 책을 수정 또는 삭제할 수 있음
-  if (user.role === ADMIN_ROLE) return true;
-
-  // 책의 userId 와 user 의 userId 비교
-  return book.userId === user.userId;
-}
-
-
-/**
  * 책 한 권 원본을 꺼냅니다 (없으면 undefined)
  * json-server router 와 같은 방식 (id 를 문자열로 비교) 으로 찾아, 검사한 책과 실제로 바뀌는 책이 어긋나지 않게 합니다
  * @param {any} router
@@ -75,7 +61,7 @@ export function requireOwner(router) {
     if (!book) return next();
 
     // 토큰으로 확인된 user 가 이 책을 고칠 수 없으면 403 (비밀번호를 다시 확인하지 않음)
-    if (!canModify(req.user, book)) {
+    if (!canModifyBook(req.user, book)) {
       return res.status(403).json({ message: '권한이 없습니다.' });
     }
 

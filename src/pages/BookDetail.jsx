@@ -1,7 +1,7 @@
 import {useParams, useNavigate} from "react-router-dom";
 import {useBookDetail, useBookLikes} from "../features/books/hooks/useBooks.js";
 import {useAuth} from "../features/auth/hooks/useAuth.js";
-import {isAdmin} from "../features/auth/utils/roles.js";
+import {canModifyBook} from "#src/utils/roles.js";
 
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
@@ -38,8 +38,8 @@ function BookDetail({removeBook}) {
     return <p>{error || "작품을 찾을 수 없습니다."}</p>;
   }
 
-  // 수정, 삭제 버튼은 관리자이거나 책 주인일 때만 (서버 requireOwner 와 같은 규칙, 실제 막는 건 서버)
-  const canModify = Boolean(user) && (isAdmin(user) || user.userId === book.userId);
+  // 수정, 삭제 버튼은 관리자이거나 책 주인일 때만 (서버 requireOwner 와 같은 함수, 실제 막는 건 서버)
+  const canModify = canModifyBook(user, book);
 
   // 작품 삭제
   const handleDelete = async () => {
