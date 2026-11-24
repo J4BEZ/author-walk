@@ -1,6 +1,5 @@
 import {useState} from "react";
 import {useNavigate} from "react-router-dom";
-import {useBookList} from "../features/books/hooks/useBooks.js";
 
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
@@ -11,6 +10,9 @@ import {
   normalizeBookInput,
   validateNewBook,
 } from "../features/books/utils/bookValidation.js";
+import {countChars} from "#src/utils/validation/text.js";
+
+/** @import { BookListState } from '../features/books/hooks/useBooks.js' */
 
 import "../styles/BookCreate.css";
 
@@ -23,9 +25,12 @@ function joinErrors(errors) {
   return Object.values(errors).join("\n");
 }
 
-function BookCreate() {
+/**
+ * 작품 등록 페이지 : 등록은 App 의 목록 훅 addBook 으로 (등록한 책이 목록 페이지에 바로 보이도록)
+ * @param {{ addBook: BookListState['addBook'] }} props
+ */
+function BookCreate({addBook}) {
   const navigate = useNavigate();
-  const {addBook} = useBookList();
 
   const [form, setForm] = useState({
     title: "",
@@ -169,7 +174,7 @@ function BookCreate() {
               onChange={handleChange}
             />
 
-            <p className="book-create-count">글자수 {form.content.length}자</p>
+            <p className="book-create-count">글자수 {countChars(form.content)}자</p>
 
             {/* 1. 전문 기반 AI 표지 생성 */}
             <section className="book-create-ai-section">

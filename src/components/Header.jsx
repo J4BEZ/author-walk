@@ -1,8 +1,13 @@
 import {useState, useEffect, useRef} from "react";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
+import {useAuth} from "../features/auth/hooks/useAuth.js";
 import "../styles/Header.css";
 
-function Header({isLoggedIn = false}) {
+function Header() {
+  const navigate = useNavigate();
+  const {user, checking, logout} = useAuth();
+  const isLoggedIn = Boolean(user);
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -37,17 +42,20 @@ function Header({isLoggedIn = false}) {
     };
   }, []);
 
-  const handleLogout = () => {
+  // 로그아웃
+  const handleLogout = async () => {
     closeMenu();
-
-    // TODO: 로그아웃 API 연동
-    alert("로그아웃 기능은 추후 연결 예정입니다.");
+    await logout();
+    navigate("/main");
   };
 
   return (
     <header className="header">
       <Link to={isLoggedIn ? "/logged-in" : "/main"} className="header-logo">
-        <svg className="header-logo-mark" viewBox="0 0 48 48" aria-hidden="true">
+        <svg
+          className="header-logo-mark"
+          viewBox="0 0 48 48"
+          aria-hidden="true">
           <defs>
             <linearGradient id="logo-mark-grad" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0" stopColor="#63b88f" />
@@ -56,7 +64,11 @@ function Header({isLoggedIn = false}) {
           </defs>
           <rect width="48" height="48" rx="14" fill="url(#logo-mark-grad)" />
           <path d="M11 18c5-2.5 9-2 13 1.5v16c-4-3.5-8-4-13-1.5z" fill="#fff" />
-          <path d="M37 18c-5-2.5-9-2-13 1.5v16c4-3.5 8-4 13-1.5z" fill="#fff" fillOpacity=".85" />
+          <path
+            d="M37 18c-5-2.5-9-2-13 1.5v16c4-3.5 8-4 13-1.5z"
+            fill="#fff"
+            fillOpacity=".85"
+          />
           <circle cx="35" cy="11" r="3.5" fill="#ffd270" />
         </svg>
 
@@ -69,7 +81,8 @@ function Header({isLoggedIn = false}) {
       <nav className="header-nav">
         <Link to="/books">작품 둘러보기</Link>
 
-        {isLoggedIn ? (
+        {/* 확인 중 (새로고침 직후 저장된 토큰을 서버에 묻는 동안) 에는 로그인, 로그아웃 둘 다 그리지 않음 */}
+        {checking ? null : isLoggedIn ? (
           <>
             <Link to="/books/new">글쓰기</Link>
 

@@ -1,37 +1,16 @@
-import {useState} from "react";
 import {useNavigate} from "react-router-dom";
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
+import {useLoginForm} from "../features/auth/hooks/useLoginForm.js";
 import "../styles/Login.css";
 
+// 입력, 제출, 실패 메시지는 useLoginForm 이 맡고, 이 화면은 성공 후 어디로 갈지만 정합니다
 function Login() {
   const navigate = useNavigate();
-
-  const [form, setForm] = useState({
-    userId: "",
-    password: "",
+  const {form, error, submitting, handleChange, handleSubmit} = useLoginForm({
+    onSuccess: () => navigate("/main"),
   });
 
-  const handleChange = (e) => {
-    const {name, value} = e.target;
-
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (!form.userId.trim() || !form.password.trim()) {
-      alert("아이디와 비밀번호를 입력해 주세요.");
-      return;
-    }
-
-    // TODO: 로그인 API 연동
-    alert("로그인 기능은 추후 연결 예정입니다.");
-  };
   return (
     <>
       <Header />
@@ -69,8 +48,14 @@ function Login() {
               />
             </div>
 
-            <button type="submit" className="login-submit">
-              로그인
+            {error && (
+              <p className="login-error" role="alert">
+                {error}
+              </p>
+            )}
+
+            <button type="submit" className="login-submit" disabled={submitting}>
+              {submitting ? "로그인 중..." : "로그인"}
             </button>
 
             <div className="login-signup">

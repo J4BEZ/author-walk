@@ -11,8 +11,10 @@
   },
   "scripts": {
     "dev": "vite",
-    "server": "node server/index.js",
-    "server-with-delay": "node server/index.js --delay 1000",
+    "server": "node --env-file-if-exists=.env server/index.js",
+    "server:watch": "node --watch --env-file-if-exists=.env server/index.js",
+    "server-with-delay": "node --env-file-if-exists=.env server/index.js --delay 1000",
+    "set-role": "node server/scripts/setRole.js",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -30,7 +32,9 @@
     "eslint": "^10.14.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.7",
+    "express": "^4.22.3",
     "globals": "^17.13.0",
+    "jose": "^6.2.18",
     "json-server": "^0.17.4",
     "vite": "^8.3.6"
   }

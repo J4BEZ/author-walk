@@ -1,41 +1,25 @@
 // json-server 와 대화하는 모듈 입니다.
-/** @import { BookView, NewBookInput, BookChanges, BookQuery, Credentials } from '../types.js' */
+/** @import { BookView, NewBookInput, BookChanges, BookQuery } from '../types.js' */
+//
+// 쓰기 (등록, 수정, 표지, 삭제) 는 로그인 토큰으로 누구인지 알립니다 (Authorization: Bearer)
+// 화면이 아직 넘기는 아이디, 비밀번호 (credentials) 는 받지 않고 서버에도 보내지 않습니다
+// -> 등록, 수정 폼에서 아이디, 비밀번호 칸을 빼도 아무 일도 일어나지 않음
 
+import { createRequest } from '#src/api/client.js';
 import { isImageDataUrl } from '#src/utils/validation/image.js';
 import { queryBooks, toBookQuery } from '../utils/bookQuery.js';
 
 
-// 서버 주소 : .env 의 VITE_API_URL, 없으면 로컬 json-server
-const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
-// 도서 API 요청이 30초를 넘으면 TimeoutError로 중단합니다.
-const TIMEOUT_MS = 30_000; // 5초 -> 30초
-
-/**
- * 공통 요청 도우미 : 시간 제한, res.ok 확인, JSON 변환을 담당합니다.
- * @param {string} path  `/books` 처럼 BASE_URL 뒤에 붙는 경로
- * @param {{ method?: string, body?: object }} [options]
- * @returns {Promise<any>}
- */
-async function request(path, { method = 'GET', body } = {}) {
-  // 요청 보내기 : body 가 있을 때만 JSON 헤더와 문자열 변환
-  const res = await fetch(`${BASE_URL}${path}`, {
-    method,
-    headers: body ? { 'Content-Type': 'application/json' } : undefined,
-    body: body ? JSON.stringify(body) : undefined,
-    signal: AbortSignal.timeout(TIMEOUT_MS),
-  });
-
-  // 서버가 본인 확인에 실패 (403) : 화면이 이 문구를 그대로 보여 주도록 NOT_OWNER 로 처리
-  if (res.status === 403) {
-    throw new Error('사용자 아이디 또는 비밀번호가 맞지 않습니다', { cause: 'NOT_OWNER' });
-  }
-
-  // 404, 500 같은 실패는 fetch 가 에러로 안 던지므로 직접 확인
-  if (!res.ok) throw new Error(`요청 실패 (${res.status})`, { cause: res.status });
-
-  // 응답 본문을 객체로 (두 번째 await)
-  return res.json();
-}
+// 책 요청 : 화면이 cause 로 알아보는 경우를 예전 모양으로 바꿔 던짐
+// - 401, 403 : NOT_OWNER (BookCreate, BookDetail, BookEdit, Main, useSummaryBookCoverGenerator 가 확인하고 message 를 띄움)
+//   401 은 원래 "로그인 필요" 라 NOT_OWNER 와 뜻이 다르지만, 페이지를 바꾸지 않고 알맞은 안내를 띄우려고 임시로 함께 씀
+//   (등록, 수정 폼의 아이디, 비밀번호 칸을 정리할 때 페이지에서 401 과 403 을 나누기)
+// - 404 : cause 가 숫자 404 (useBooks, BookLikeButton 이 확인)
+const request = createRequest({
+  401: () => new Error('로그인이 필요합니다.', { cause: 'NOT_OWNER' }),
+  403: () => new Error('이 작품을 수정, 삭제할 권한이 없습니다.', { cause: 'NOT_OWNER' }),
+  404: () => new Error('요청 실패 (404)', { cause: 404 }),
+});
 
 
 /**
@@ -78,66 +62,52 @@ export async function incrementBookLikes(id) {
 }
 
 /**
- * 새 도서 등록. 비밀번호는 서버가 해시해서 저장합니다
+ * 새 도서 등록 : 주인은 서버가 토큰으로 정합니다 (로그인 필요, 아니면 NOT_OWNER 에러 '로그인이 필요합니다.')
+ * input 에 userId, password 가 있어도 보내지 않습니다
  * @param {NewBookInput} input
+ * @param {string | null} token  로그인 토큰 (useAuth 의 token)
  * @returns {Promise<BookView>}
  */
 export async function createBook({
-  title, author, content, password,
-  description = '', userId = null, coverImageUrl = null,
-}) {
+  title, author, content,
+  description = '', coverImageUrl = null,
+}, token) {
   // 등록일과 수정일은 같은 시각으로 시작
   const now = new Date().toISOString();
 
-  // POST /books : id 는 json-server 가 붙여 줌
+  // POST /books : id 는 json-server 가, 주인 (userId) 과 likes 는 서버가 붙여 줌
   const saved = await request('/books', {
     method: 'POST',
+    token,
     body: {
       title,
       author,
       description,                                // 작품 소개 (없으면 빈 문자열)
       content,
-      userId,                                     // 임시 사용자 아이디 (없으면 null)
-      password,                                   // 서버가 직접 scrypt + salt 로 해시한 뒤 저장 (평문은 저장되지 않음)
       coverImageUrl,                              // 등록 때 만든 표지가 없으면 null
-      likes: 0,
       createdAt: now,
       updatedAt: now,
     },
   });
 
-  // 서버가 돌려준 저장본 (id 포함, passwordHash 는 서버가 뺌)
+  // 서버가 돌려준 저장본 (id, userId 포함, passwordHash 는 서버가 뺌)
   return saved;
 }
 
 /**
- * 사용자 아이디와 비밀번호가 맞는지 서버에 확인합니다 (수정 화면을 열기 전 본인 확인 모달용)
- * @param {number} id
- * @param {string} userId
- * @param {string} password
- * @returns {Promise<boolean>}
- */
-export async function checkOwner(id, userId, password) {
-  // POST /books/:id/verify : 서버가 저장된 해시와 비교해 { ok } 로 답함
-  const { ok } = await request(`/books/${id}/verify`, {
-    method: 'POST',
-    body: { userId, password },
-  });
-  return ok;
-}
-
-/**
- * 바뀐 필드만 수정하고 updatedAt 을 갱신합니다 (서버가 본인 확인, 아니면 NOT_OWNER 에러)
+ * 바뀐 필드만 수정하고 updatedAt 을 갱신합니다    
+ * (서버가 토큰으로 주인 확인, 아니면 NOT_OWNER 에러)
  * @param {number} id
  * @param {BookChanges} changes
- * @param {Credentials} credentials
+ * @param {string | null} token  로그인 토큰
  * @returns {Promise<BookView>}
  */
-export async function updateBook(id, changes, credentials) {
-  // PATCH /books/:id : 바뀐 필드 + 수정 시각 + 본인 확인용 자격 정보 (서버가 확인 후 지우고 저장)
+export async function updateBook(id, changes, token) {
+  // PATCH /books/:id : 바뀐 필드 + 수정 시각
   const saved = await request(`/books/${id}`, {
     method: 'PATCH',
-    body: { ...changes, ...credentials, updatedAt: new Date().toISOString() },
+    token,
+    body: { ...changes, updatedAt: new Date().toISOString() },
   });
 
   // 수정된 도서 전체 (passwordHash 는 서버가 뺌)
@@ -145,28 +115,28 @@ export async function updateBook(id, changes, credentials) {
 }
 
 /**
- * AI 가 만든 표지 (Data URL) 를 저장합니다 (본인 확인 필요)
+ * AI 가 만든 표지 (Data URL) 를 저장합니다 (주인만)
  * @param {number} id
  * @param {string} coverImageUrl  `data:image/png;base64,...`
- * @param {Credentials} credentials
+ * @param {string | null} token  로그인 토큰
  * @returns {Promise<BookView>}
  */
-export async function saveCover(id, coverImageUrl, credentials) {
+export async function saveCover(id, coverImageUrl, token) {
   // 이미지 Data URL 이 아니면 서버에 보내지 않음
   if (!isImageDataUrl(coverImageUrl)) {
     throw new Error('표지 이미지 형식이 올바르지 않습니다', { cause: 'INVALID_IMAGE' });
   }
   // 표지 재생성도 같은 PATCH (coverImageUrl + updatedAt)
-  return updateBook(id, { coverImageUrl }, credentials);
+  return updateBook(id, { coverImageUrl }, token);
 }
 
 /**
- * 도서 삭제 (본인 확인 필요)
+ * 도서 삭제 (주인만)
  * @param {number} id
- * @param {Credentials} credentials
+ * @param {string | null} token  로그인 토큰
  * @returns {Promise<void>}
  */
-export async function deleteBook(id, credentials) {
-  // DELETE /books/:id : 본문에 자격 정보 (응답 본문은 빈 객체)
-  await request(`/books/${id}`, { method: 'DELETE', body: credentials });
+export async function deleteBook(id, token) {
+  // DELETE /books/:id (응답 본문은 빈 객체)
+  await request(`/books/${id}`, { method: 'DELETE', token });
 }

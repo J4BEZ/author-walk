@@ -1,6 +1,6 @@
 import {useState} from "react";
 import {useParams, useNavigate} from "react-router-dom";
-import {useBookList, useBookDetail, useBookLikes} from "../features/books/hooks/useBooks.js";
+import {useBookDetail, useBookLikes} from "../features/books/hooks/useBooks.js";
 
 import {
   normalizeBookInput,
@@ -11,6 +11,8 @@ import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
 import BookLikeButton from "../components/BookLikeButton.jsx";
 import BookContentPager from "../components/BookContentPager.jsx";
+
+/** @import { BookListState } from '../features/books/hooks/useBooks.js' */
 
 import "../styles/BookDetail.css";
 
@@ -23,17 +25,21 @@ function joinErrors(errors) {
   return Object.values(errors).join("\n");
 }
 
-function BookDetail() {
+/**
+ * 작품 상세 페이지 : 한 권은 useBookDetail 로 불러오고, 수정, 표지 저장, 삭제는 App 의 목록 훅 함수를 받아 씁니다
+ * (그래야 삭제 결과가 목록 페이지에 바로 반영됨)
+ * @param {{
+ *   editBook: BookListState['editBook'],
+ *   changeCover: BookListState['changeCover'],
+ *   removeBook: BookListState['removeBook'],
+ * }} props
+ */
+function BookDetail({editBook, changeCover, removeBook}) {
   const {id} = useParams();
   const navigate = useNavigate();
-  const booksState = useBookList();
   const likes = useBookLikes();
 
   const {book, loading, error, setBook} = useBookDetail(Number(id));
-
-  const editBook = booksState.editBook;
-  const changeCover = booksState.changeCover;
-  const removeBook = booksState.removeBook;
 
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
