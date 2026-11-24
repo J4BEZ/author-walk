@@ -54,3 +54,223 @@
   background-color: #6c8665;
   color: white;
 }
+
+/* ===== 로고 ===== */
+.header-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+/* 아이콘 */
+.header-logo-mark {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  filter: drop-shadow(0 4px 8px rgba(60, 154, 112, 0.28));
+  transition: transform 0.25s ease;
+}
+
+.header-logo:hover .header-logo-mark {
+  transform: rotate(-6deg) scale(1.05);
+}
+
+/* 텍스트 영역 */
+.header-logo-text {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 10px;
+}
+
+.header-logo .header-logo-sub {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: #3c9a70;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+}
+
+.header-logo .header-logo-sub::before {
+  content: "";
+  width: 22px;
+  height: 1.5px;
+  border-radius: 2px;
+  background-color: #3c9a70;
+}
+
+.header-logo .header-logo-title {
+  margin: 0;
+  font-size: 38px;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: #3c9a70; /* 그라데이션 미지원 브라우저용 */
+  background: linear-gradient(100deg, #2f7d59 0%, #3c9a70 50%, #7cc5a0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 하단 포인트 바 */
+.header-logo-text::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 44px;
+  height: 4px;
+  border-radius: 999px;
+  background-color: #ffd270;
+  transition: width 0.25s ease;
+}
+
+.header-logo:hover .header-logo-text::after {
+  width: 100%;
+}
+
+.header-logo:focus-visible {
+  outline: 3px solid #3c9a70;
+  outline-offset: 6px;
+  border-radius: 6px;
+}
+
+@media (max-width: 600px) {
+  .header-logo {
+    gap: 8px;
+  }
+
+  .header-logo-mark {
+    width: 36px;
+    height: 36px;
+  }
+
+  .header-logo .header-logo-sub {
+    font-size: 11px;
+    letter-spacing: 0.22em;
+  }
+
+  .header-logo .header-logo-title {
+    font-size: 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header-logo-mark,
+  .header-logo-text::after {
+    transition: none;
+  }
+}
+/* 햄버거 메뉴 영역 */
+.header-menu-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* 햄버거 버튼 */
+.hamburger-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  padding: 6px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.hamburger-button:hover {
+  background-color: #f2faf4;
+}
+
+.hamburger-button span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  border-radius: 2px;
+  background-color: #254d3c;
+  transition:
+    transform 0.2s,
+    opacity 0.2s;
+}
+
+/* 메뉴가 열리면 X 모양으로 변경 */
+.hamburger-button.active span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.hamburger-button.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-button.active span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* 드롭다운 메뉴 */
+.header-dropdown {
+  position: absolute;
+  top: calc(100% + 14px);
+  right: 0;
+  z-index: 1000;
+
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  width: 180px;
+  padding: 8px;
+  border: 1px solid #a8dbb5;
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: 0 8px 24px rgba(36, 61, 50, 0.1);
+}
+
+.header-dropdown a,
+.header-dropdown button {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+
+  color: #243d32;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.header-dropdown a:hover,
+.header-dropdown button:hover {
+  background-color: #f2faf4;
+}
+
+.header-dropdown-divider {
+  height: 1px;
+  margin: 4px 8px;
+  background-color: #e2eae4;
+}
+
+.header-dropdown .header-logout {
+  color: #d64545;
+}
+
+.header-dropdown .header-logout:hover {
+  background-color: #fff2f2;
+}

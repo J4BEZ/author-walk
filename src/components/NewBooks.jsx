@@ -21,7 +21,7 @@ function NewBooks({books, onSelect, likes}) {
       ) : (
         <div className="new-books-list">
           {newBooks.map((book) => (
-            <div key={book.id}>
+            <div key={book.id} className="new-book-item">
               <button
                 type="button"
                 className="new-book-card"
@@ -33,14 +33,24 @@ function NewBooks({books, onSelect, likes}) {
                     <span>표지 없음</span>
                   )}
                 </div>
-
-                <h3>{book.title}</h3>
-                <p>{book.author}</p>
-                <span className="new-book-date">
-                  {book.createdAt?.slice(0, 10)}
-                </span>
               </button>
-              <BookLikeButton book={book} likes={likes} />
+
+              <div className="new-book-bottom">
+                <button
+                  type="button"
+                  className="new-book-info"
+                  onClick={() => onSelect(book.id)}>
+                  <h3>{book.title}</h3>
+                  <p>{book.author}</p>
+                  <span className="new-book-date">
+                    {book.createdAt?.slice(0, 10)}
+                  </span>
+                </button>
+
+                <div className="new-book-like">
+                  <BookLikeButton book={book} likes={likes} />
+                </div>
+              </div>
             </div>
           ))}
         </div>
