@@ -94,8 +94,8 @@ export function authRoutes(router){
         return res.status(401).json({ message: "로그인이 필요합니다." });
       }
 
-      // 사용자 정보 반환 (userId 만 담아서 전달)
-      return res.status(200).json({ user: { userId: req.user.userId }});
+      // 사용자 정보 반환 (userId, role 만 골라 전달. role 은 화면이 수정, 삭제 버튼을 보일지 정할 때 씀)
+      return res.status(200).json({ user: { userId: req.user.userId, role: req.user.role }});
 
     } catch (error) {
       next(error);

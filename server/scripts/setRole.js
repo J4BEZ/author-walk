@@ -13,7 +13,7 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
-import { ROLES } from '../utils/roles.js';
+import { ROLES } from '#src/utils/roles.js';
 
 const DEFAULT_DB_FILE = fileURLToPath(new URL('../../db.json', import.meta.url));
 const USAGE = `사용법 : npm run set-role -- <아이디> <${ROLES.join(' | ')}>`;

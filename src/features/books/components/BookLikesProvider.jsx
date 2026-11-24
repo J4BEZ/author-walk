@@ -1,4 +1,4 @@
-import {BookLikesContext, useBookLikesState} from "../features/books/hooks/useBooks.js";
+import {BookLikesContext, useBookLikesState} from "../hooks/useBooks.js";
 
 /** @param {{ children: import('react').ReactNode }} props */
 function BookLikesProvider({children}) {

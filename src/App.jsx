@@ -10,6 +10,7 @@ import Books from "./pages/Books.jsx";
 import BookDetail from "./pages/BookDetail.jsx";
 import BookCreate from "./pages/BookCreate.jsx";
 import BookEdit from "./pages/BookEdit.jsx";
+import NotFound from "./pages/NotFound.jsx";
 
 function App() {
   // 전체 도서 목록은 여기서 한 번만 불러오고, 페이지에는 쓰는 값만 props 로 내려 줍니다
@@ -35,14 +36,10 @@ function App() {
       />
       <Route
         path="/books/:id"
-        element={
-          <BookDetail
-            editBook={booksState.editBook}
-            changeCover={booksState.changeCover}
-            removeBook={booksState.removeBook}
-          />
-        }
+        element={<BookDetail removeBook={booksState.removeBook} />}
       />
+      {/* 위 어느 주소에도 맞지 않으면 (아직 없는 메뉴 등) 준비 중 화면 */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

@@ -1,7 +1,7 @@
-/** @import { BookView } from '../features/books/types.js' */
-import "../styles/BookLikeButton.css";
+/** @import { BookView } from '../types.js' */
+import "#src/styles/BookLikeButton.css";
 
-/** @param {{ book: BookView, likes: ReturnType<typeof import('../features/books/hooks/useBooks.js').useBookLikesState> }} props */
+/** @param {{ book: BookView, likes: ReturnType<typeof import('../hooks/useBooks.js').useBookLikesState> }} props */
 function BookLikeButton({book, likes}) {
   const count = likes.getBookLikes(book);
 

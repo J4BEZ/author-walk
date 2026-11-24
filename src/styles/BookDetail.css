@@ -57,6 +57,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
+  margin-top: 12px; /* 표지와 버튼 사이 간격 */
 }
 
 .book-detail-actions button {

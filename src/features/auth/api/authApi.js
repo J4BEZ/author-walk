@@ -27,13 +27,13 @@ export async function login(userId, password) {
 }
 
 /**
- * 토큰의 주인 : 성공하면 { userId }
+ * 토큰의 주인 : 성공하면 { userId, role }
  * @param {string} token  인증 토큰 (로그인 시 발급된 JWT)
- * @returns {Promise<{ userId: string }>}  토큰이 유효하면 주인 정보 반환 (실패하면 에러)
+ * @returns {Promise<{ userId: string, role: string }>}  토큰이 유효하면 주인 정보 반환 (실패하면 에러)
  */
 export async function getMe(token) {
   const { user } = await request('/auth/me', {
     token,
   });
-  return user; // { userId } (응답의 { user: ... } 껍질은 벗겨서)
+  return user; // { userId, role } (응답의 { user: ... } 껍질은 벗겨서)
 }

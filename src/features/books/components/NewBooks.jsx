@@ -1,4 +1,4 @@
-import "../styles/NewBooks.css";
+import "#src/styles/NewBooks.css";
 import BookLikeButton from "./BookLikeButton.jsx";
 
 function NewBooks({books, onSelect, likes}) {

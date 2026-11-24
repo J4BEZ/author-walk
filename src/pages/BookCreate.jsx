@@ -100,7 +100,7 @@ function BookCreate({addBook}) {
 
   return (
     <>
-      <Header isLoggedIn={true} />
+      <Header />
 
       <main className="book-create-page">
         <div className="book-create-layout">
