@@ -36,8 +36,6 @@
  * @property {string} author                   작성자 (필수, 화면에 보여 줄 이름)
  * @property {string} content                  본문 (필수, AI 표지 프롬프트에 사용)
  * @property {string} [description]            작품 소개 (없으면 빈 문자열로 저장)
- * @property {string | null} [userId]          사용자 아이디 (없으면 null, 이 경우 수정과 삭제 불가)
- * @property {string} password                 평문 비밀번호 (서버가 scrypt + salt 로 해시한 뒤 저장, 평문은 저장하지 않음)
  * @property {string | null} [coverImageUrl]   등록하면서 바로 만든 표지 Data URL (없으면 생략, null 로 저장)
  */
 
