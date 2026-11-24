@@ -15,7 +15,7 @@ function Header() {
 
   return (
     <header className="header">
-      <Link to={isLoggedIn ? "/logged-in" : "/main"} className="header-logo">
+      <Link to="/main" className="header-logo">
         <p className="header-logo-sub">걷기가 서재</p>
         <h1 className="header-logo-title">작가의 산책</h1>
       </Link>
