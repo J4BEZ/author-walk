@@ -4,6 +4,32 @@
 
 import { CoverError, isCoverDataUrl, removeCover, saveCover } from '../utils/covers.js';
 
+/** 책 id -> 그 책의 마지막 요청이 끝나면 풀리는 Promise (책마다 한 줄로 세우기) */
+const turns = new Map();
+
+/**
+ * 같은 책의 앞 요청 응답이 끝날 때까지 기다립니다 (다른 책은 기다리지 않음)
+ * 동시에 표지를 바꿔도 뒤 요청이 앞 요청이 저장한 표지를 "이전 표지" 로 읽고 지우므로, 주인 없는 폴더가 남지 않습니다
+ * @param {string} bookId
+ * @param {import('express').Response} res  이 응답이 끝나면 (성공, 실패, 연결 끊김) 다음 차례로 넘김
+ * @returns {Promise<void>}
+ */
+function waitTurn(bookId, res) {
+  const previous = turns.get(bookId) ?? Promise.resolve();
+  let release;
+  const mine = new Promise((resolve) => (release = resolve));
+  const tail = previous.then(() => mine);
+  turns.set(bookId, tail);
+
+  const done = () => {
+    release();
+    if (turns.get(bookId) === tail) turns.delete(bookId); // 뒤에 기다리는 요청이 없으면 정리
+  };
+  res.once('finish', done);
+  res.once('close', done);
+  return previous;
+}
+
 /**
  * 응답이 성공 (2xx) 으로 끝나면 fn, 실패로 끝나면 onFail 을 부릅니다
  * json-server router 가 db.json 에 쓴 다음 응답하므로, 지우기는 저장이 끝난 뒤에 합니다
@@ -32,6 +58,9 @@ function afterResponse(res, fn, onFail) {
 export function coverOnSave(router) {
   return async (req, res, next) => {
     try {
+      // 수정, 삭제는 같은 책의 앞 요청이 끝난 뒤에 책을 읽음 (등록은 새 책이라 기다리지 않음)
+      if (req.params.id) await waitTurn(String(req.params.id), res);
+
       const book = req.params.id ? router.db.get('books').getById(req.params.id).value() : undefined;
       // 없는 책 수정, 삭제는 router 가 404 로 답하도록 그대로 넘김
       if (req.method !== 'POST' && !book) return next();
