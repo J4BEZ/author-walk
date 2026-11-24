@@ -65,7 +65,7 @@ function Main() {
       <main>
         {isLoggedIn ? (
           <section className="main-intro">
-            <h1>안녕하세요, 주홍님</h1>
+            <h1>안녕하세요, 에이블러님</h1>
             <p>오늘은 어떤 이야기를 만들어 볼까요?</p>
           </section>
         ) : (

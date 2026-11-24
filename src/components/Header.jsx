@@ -1,7 +1,49 @@
+import {useState, useEffect, useRef} from "react";
 import {Link} from "react-router-dom";
 import "../styles/Header.css";
 
 function Header({isLoggedIn = false}) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  const toggleMenu = () => {
+    setIsMenuOpen((prev) => !prev);
+  };
+
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+  };
+
+  // 메뉴 바깥을 클릭하면 닫기
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+  const handleLogout = () => {
+    closeMenu();
+
+    // TODO: 로그아웃 API 연동
+    alert("로그아웃 기능은 추후 연결 예정입니다.");
+  };
+
   return (
     <header className="header">
       <Link to={isLoggedIn ? "/logged-in" : "/main"} className="header-logo">
@@ -31,17 +73,46 @@ function Header({isLoggedIn = false}) {
           <>
             <Link to="/books/new">글쓰기</Link>
 
-            <button
-              type="button"
-              className="hamburger-button"
-              aria-label="메뉴">
-              <span />
-              <span />
-              <span />
-            </button>
+            <div className="header-menu-wrapper" ref={menuRef}>
+              <button
+                type="button"
+                className={`hamburger-button ${isMenuOpen ? "active" : ""}`}
+                aria-label={isMenuOpen ? "메뉴 닫기" : "메뉴 열기"}
+                aria-expanded={isMenuOpen}
+                onClick={toggleMenu}>
+                <span />
+                <span />
+                <span />
+              </button>
+
+              {isMenuOpen && (
+                <div className="header-dropdown">
+                  <Link to="/mypage" onClick={closeMenu}>
+                    마이페이지
+                  </Link>
+
+                  <Link to="/my-books" onClick={closeMenu}>
+                    내 작품
+                  </Link>
+
+                  <Link to="/subscriptions" onClick={closeMenu}>
+                    구독 작품
+                  </Link>
+
+                  <div className="header-dropdown-divider" />
+
+                  <button
+                    type="button"
+                    className="header-logout"
+                    onClick={handleLogout}>
+                    로그아웃
+                  </button>
+                </div>
+              )}
+            </div>
           </>
         ) : (
-          <Link to="/logged-in" className="header-login">
+          <Link to="/login" className="header-login">
             로그인
           </Link>
         )}
