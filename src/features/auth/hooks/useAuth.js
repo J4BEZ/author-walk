@@ -44,7 +44,7 @@ export function useAuthState() {
   const [token, setToken] = useState(readToken);
 
   // { userId } 또는 null, 현재 로그인된 User 정보
-  const [user, setUser] = useState(/** @type {{ userId: string } | null} */ (null));
+  const [user, setUser] = useState(/** @type {{ userId: string, role: string } | null} */ (null));
 
   // getMe 확인을 마친 토큰 : 지금 token 과 다르면 아직 응답을 기다리는 중
   const [checkedToken, setCheckedToken] = useState(/** @type {string | null} */ (null));
