@@ -6,6 +6,7 @@ import Footer from "../components/Footer.jsx";
 import BookCoverGenerator from "../features/OpenAI_Integration/components/BookCoverGenerator.jsx";
 import BookAnalysis from "../features/OpenAI_Integration/components/BookAnalysis.jsx";
 import {useBookDetail} from "../features/books/hooks/useBooks.js";
+import CoverImage from "../features/books/components/CoverImage.jsx";
 
 import {
   EDITABLE_FIELDS,
@@ -74,10 +75,8 @@ function BookEditForm({book, editBook}) {
   const [form, setForm] = useState(() => ({
     title: book.title ?? "",
     author: book.author ?? "",
-    userId: book.userId ?? "",
     description: book.description ?? "",
     content: book.content ?? "",
-    password: "",
   }));
 
   const [coverImageUrl, setCoverImageUrl] = useState(book.coverImageUrl ?? "");
@@ -129,11 +128,8 @@ function BookEditForm({book, editBook}) {
     setSubmitting(true);
 
     try {
-      // 서버에서 아이디와 비밀번호를 확인한 후 수정 (성공하면 App 의 목록에도 반영)
-      await editBook(book.id, changes, {
-        userId: clean.userId,
-        password: clean.password,
-      });
+      // 서버가 로그인 토큰으로 권한을 확인한 후 수정 (성공하면 App 의 목록에도 반영)
+      await editBook(book.id, changes);
 
       alert("작품이 수정되었습니다.");
       navigate(`/books/${book.id}`);
@@ -197,30 +193,6 @@ function BookEditForm({book, editBook}) {
                 />
               </div>
             </div>
-
-            <form className="book-create-account" onSubmit={handleSubmit}>
-              <div className="book-create-field">
-                <label htmlFor="userId">ID</label>
-                <input
-                  id="userId"
-                  name="userId"
-                  value={form.userId}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div className="book-create-field">
-                <label htmlFor="password">비밀번호 확인</label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  value={form.password}
-                  onChange={handleChange}
-                  autoComplete="current-password"
-                />
-              </div>
-            </form>
           </section>
 
           <section className="book-create-right">
@@ -239,10 +211,11 @@ function BookEditForm({book, editBook}) {
             {coverImageUrl && (
               <div className="book-create-cover-preview">
                 <h3>현재 적용된 표지</h3>
-                <img
-                  src={coverImageUrl}
+                <CoverImage
+                  sources={[coverImageUrl]}
                   alt={`${form.title} 표지`}
                   className="book-create-cover-image"
+                  fallback={<p>표지를 불러오지 못했습니다.</p>}
                 />
               </div>
             )}

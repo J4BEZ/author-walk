@@ -15,6 +15,7 @@
     "server:watch": "node --watch --env-file-if-exists=.env server/index.js",
     "server-with-delay": "node --env-file-if-exists=.env server/index.js --delay 1000",
     "set-role": "node server/scripts/setRole.js",
+    "extract-covers": "node server/scripts/extractCovers.js",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -22,7 +23,8 @@
   "dependencies": {
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "react-router-dom": "^7.18.6"
+    "react-router-dom": "^7.18.6",
+    "sharp": "^0.35.5"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

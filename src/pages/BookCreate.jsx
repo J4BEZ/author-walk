@@ -35,10 +35,8 @@ function BookCreate({addBook}) {
   const [form, setForm] = useState({
     title: "",
     author: "",
-    userId: "",
     description: "",
     content: "",
-    password: "",
   });
 
   const [coverImageUrl, setCoverImageUrl] = useState("");
@@ -76,10 +74,8 @@ function BookCreate({addBook}) {
       const saved = await addBook({
         title: clean.title,
         author: clean.author,
-        userId: clean.userId,
         description: clean.description,
         content: clean.content,
-        password: clean.password,
         coverImageUrl,
       });
 
@@ -138,30 +134,6 @@ function BookCreate({addBook}) {
                 />
               </div>
             </div>
-
-            <form className="book-create-account" onSubmit={handleSubmit}>
-              <div className="book-create-field">
-                <label htmlFor="userId">ID</label>
-                <input
-                  id="userId"
-                  name="userId"
-                  value={form.userId}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div className="book-create-field">
-                <label htmlFor="password">비밀번호</label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  value={form.password}
-                  onChange={handleChange}
-                  autoComplete="new-password"
-                />
-              </div>
-            </form>
           </section>
 
           <section className="book-create-right">

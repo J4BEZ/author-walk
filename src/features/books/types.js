@@ -14,7 +14,8 @@
  * @property {string} content               본문 (AI 표지 프롬프트에도 사용)
  * @property {string | null} userId         작성한 사용자 아이디 (수정, 삭제 때 본인 확인에 사용, 임시라 null 가능)
  * @property {string} passwordHash          비밀번호 해시 "scrypt$<salt>$<hash>" (서버가 만들고, 응답에는 넘기지 않음)
- * @property {string | null} coverImageUrl  표지 Data URL (`data:image/png;base64,...`), 아직 없으면 null
+ * @property {string | null} coverImageUrl  표지 원본 주소 (`/covers/<uuid>/original.png`, 옮기기 전 데이터는 Data URL), 없으면 null
+ * @property {string | null} [coverThumbnailUrl]  목록용 썸네일 주소 (`/covers/<uuid>/thumbnail.webp`, 서버만 정함), 없으면 null
  * @property {number} [likes]               좋아요 수 (이전 도서 데이터에는 없을 수 있음)
  * @property {string} createdAt             등록 시각 (ISO 문자열)
  * @property {string} updatedAt             수정 시각 (ISO 문자열)
@@ -35,8 +36,6 @@
  * @property {string} author                   작성자 (필수, 화면에 보여 줄 이름)
  * @property {string} content                  본문 (필수, AI 표지 프롬프트에 사용)
  * @property {string} [description]            작품 소개 (없으면 빈 문자열로 저장)
- * @property {string | null} [userId]          사용자 아이디 (없으면 null, 이 경우 수정과 삭제 불가)
- * @property {string} password                 평문 비밀번호 (서버가 scrypt + salt 로 해시한 뒤 저장, 평문은 저장하지 않음)
  * @property {string | null} [coverImageUrl]   등록하면서 바로 만든 표지 Data URL (없으면 생략, null 로 저장)
  */
 
