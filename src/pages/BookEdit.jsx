@@ -35,7 +35,7 @@ function BookEdit({editBook}) {
   if (loading || (!book && !error)) {
     return (
       <>
-        <Header isLoggedIn={true} />
+        <Header />
         <main className="book-create-page">
           <p>작품 정보를 불러오는 중...</p>
         </main>
@@ -47,7 +47,7 @@ function BookEdit({editBook}) {
   if (error || !book) {
     return (
       <>
-        <Header isLoggedIn={true} />
+        <Header />
         <main className="book-create-page">
           <p>{error || "작품을 찾을 수 없습니다."}</p>
         </main>
@@ -159,7 +159,7 @@ function BookEditForm({book, editBook}) {
 
   return (
     <>
-      <Header isLoggedIn={true} />
+      <Header />
 
       <main className="book-create-page">
         <div className="book-create-layout">

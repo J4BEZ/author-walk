@@ -49,7 +49,7 @@ function BookDetail({removeBook}) {
 
   return (
     <>
-      <Header isLoggedIn={true} />
+      <Header />
 
       <main className="book-detail-page">
         <div className="book-detail-layout">

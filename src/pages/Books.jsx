@@ -32,7 +32,7 @@ function Books({booksState}) {
 
   return (
     <>
-      <Header isLoggedIn={true} />
+      <Header />
 
       <main className="books-page">
         <h1>전체 작품</h1>
