@@ -1,11 +1,5 @@
-import {useState} from "react";
 import {useParams, useNavigate} from "react-router-dom";
 import {useBookDetail, useBookLikes} from "../features/books/hooks/useBooks.js";
-
-import {
-  normalizeBookInput,
-  validateBookChanges,
-} from "../features/books/utils/bookValidation.js";
 
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
@@ -21,30 +15,17 @@ function alertError(e, fallback) {
   alert(e instanceof Error && e.cause === "NOT_OWNER" ? e.message : fallback);
 }
 
-function joinErrors(errors) {
-  return Object.values(errors).join("\n");
-}
-
 /**
- * 작품 상세 페이지 : 한 권은 useBookDetail 로 불러오고, 수정, 표지 저장, 삭제는 App 의 목록 훅 함수를 받아 씁니다
- * (그래야 삭제 결과가 목록 페이지에 바로 반영됨)
- * @param {{
- *   editBook: BookListState['editBook'],
- *   changeCover: BookListState['changeCover'],
- *   removeBook: BookListState['removeBook'],
- * }} props
+ * 작품 상세 페이지 : 한 권은 useBookDetail 로 불러오고, 삭제는 App 의 목록 훅 함수를 받아 씁니다
+ * (그래야 삭제 결과가 목록 페이지에 바로 반영됨). 수정, 표지 변경은 수정 페이지 (/books/:id/edit) 에서
+ * @param {{ removeBook: BookListState['removeBook'] }} props
  */
-function BookDetail({editBook, changeCover, removeBook}) {
+function BookDetail({removeBook}) {
   const {id} = useParams();
   const navigate = useNavigate();
   const likes = useBookLikes();
 
-  const {book, loading, error, setBook} = useBookDetail(Number(id));
-
-  const [userId, setUserId] = useState("");
-  const [password, setPassword] = useState("");
-  const [newTitle, setNewTitle] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
+  const {book, loading, error} = useBookDetail(Number(id));
 
   if (loading || (!book && !error)) {
     return <p>작품을 불러오는 중입니다.</p>;
@@ -54,51 +35,12 @@ function BookDetail({editBook, changeCover, removeBook}) {
     return <p>{error || "작품을 찾을 수 없습니다."}</p>;
   }
 
-  const credentials = {userId, password};
-
-  // 수정 버튼 클릭
-  const openEdit = () => {
-    setNewTitle(book.title);
-    setIsEditing(true);
-  };
-
-  // 작품 수정
-  const handleEdit = async () => {
-    const clean = normalizeBookInput({title: newTitle});
-    const message = joinErrors(validateBookChanges(clean));
-
-    if (message) {
-      alert(message);
-      return;
-    }
-
-    try {
-      const updated = await editBook(book.id, clean, credentials);
-      setBook(updated);
-      setNewTitle("");
-      setIsEditing(false);
-      alert("작품이 수정되었습니다.");
-    } catch (e) {
-      alertError(e, "수정에 실패했어요");
-    }
-  };
-
-  // AI 표지 저장
-  const handleCover = async (dataUrl) => {
-    try {
-      const updated = await changeCover(book.id, dataUrl, credentials);
-      setBook(updated);
-    } catch (e) {
-      alertError(e, "표지 저장에 실패했어요");
-    }
-  };
-
   // 작품 삭제
   const handleDelete = async () => {
     if (!confirm(`"${book.title}"을(를) 삭제할까요?`)) return;
 
     try {
-      await removeBook(book.id, credentials);
+      await removeBook(book.id);
       navigate("/main");
     } catch (e) {
       alertError(e, "삭제에 실패했어요");
@@ -121,10 +63,6 @@ function BookDetail({editBook, changeCover, removeBook}) {
               )}
             </div>
 
-            <p className="book-detail-notice">
-              수정 및 삭제 시 등록한 비밀번호가 필요합니다.
-            </p>
-
             <div className="book-detail-actions">
               <button
                 type="button"
@@ -136,41 +74,6 @@ function BookDetail({editBook, changeCover, removeBook}) {
                 삭제
               </button>
             </div>
-
-            {/* 본인 확인 */}
-            <div className="book-detail-auth">
-              <input
-                value={userId}
-                onChange={(e) => setUserId(e.target.value)}
-                placeholder="사용자 아이디"
-              />
-
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="비밀번호"
-              />
-            </div>
-
-            {/* 제목 수정 */}
-            {isEditing && (
-              <div className="book-detail-edit">
-                <input
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                  placeholder="새 제목"
-                />
-
-                <button type="button" onClick={handleEdit}>
-                  수정 완료
-                </button>
-
-                <button type="button" onClick={() => setIsEditing(false)}>
-                  취소
-                </button>
-              </div>
-            )}
           </section>
 
           {/* 오른쪽: 작품 상세 정보 */}

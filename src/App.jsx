@@ -35,13 +35,7 @@ function App() {
       />
       <Route
         path="/books/:id"
-        element={
-          <BookDetail
-            editBook={booksState.editBook}
-            changeCover={booksState.changeCover}
-            removeBook={booksState.removeBook}
-          />
-        }
+        element={<BookDetail removeBook={booksState.removeBook} />}
       />
     </Routes>
   );
