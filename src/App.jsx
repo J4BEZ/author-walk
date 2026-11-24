@@ -22,12 +22,17 @@ function App() {
     <Routes>
       <Route path="/" element={<Navigate to="/main" replace />} />
       <Route path="/main" element={<Main booksState={booksState} />} />
-      <Route path="/logged-in" element={<Main booksState={booksState} />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/login" element={<Login />} />
       <Route path="/books" element={<Books booksState={booksState} />} />
-      <Route path="/books/new" element={<BookCreate addBook={booksState.addBook} />} />
-      <Route path="/books/:id/edit" element={<BookEdit editBook={booksState.editBook} />} />
+      <Route
+        path="/books/new"
+        element={<BookCreate addBook={booksState.addBook} />}
+      />
+      <Route
+        path="/books/:id/edit"
+        element={<BookEdit editBook={booksState.editBook} />}
+      />
       <Route
         path="/books/:id"
         element={

@@ -51,7 +51,7 @@ function Header() {
 
   return (
     <header className="header">
-      <Link to={isLoggedIn ? "/logged-in" : "/main"} className="header-logo">
+      <Link to="/main" className="header-logo">
         <svg
           className="header-logo-mark"
           viewBox="0 0 48 48"
